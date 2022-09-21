@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/go-chi/chi/v5"
+
 	"iseage/bank/config"
 	"iseage/bank/internal/controller/http/api"
 	"iseage/bank/internal/controller/http/www"
@@ -16,8 +18,6 @@ import (
 	"iseage/bank/pkg/httpserver"
 	"iseage/bank/pkg/logger"
 	"iseage/bank/pkg/postgres"
-
-	"github.com/go-chi/chi/v5"
 )
 
 // Run creates objects via constructors.

@@ -8,8 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	entity "iseage/bank/internal/entity"
 	gomock "github.com/golang/mock/gomock"
+
+	entity "iseage/bank/internal/entity"
 )
 
 // MockTranslation is a mock of Translation interface.

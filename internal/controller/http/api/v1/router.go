@@ -6,8 +6,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	// Swagger docs.
-	// _ "iseage/bank/docs"
 	"iseage/bank/internal/usecase"
 	"iseage/bank/pkg/logger"
 )
