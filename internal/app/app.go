@@ -7,16 +7,17 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gin-gonic/gin"
-
 	"iseage/bank/config"
-	v1 "iseage/bank/internal/controller/http/v1"
+	"iseage/bank/internal/controller/http/api"
+	"iseage/bank/internal/controller/http/www"
 	"iseage/bank/internal/usecase"
 	"iseage/bank/internal/usecase/repo"
 	"iseage/bank/internal/usecase/webapi"
 	"iseage/bank/pkg/httpserver"
 	"iseage/bank/pkg/logger"
 	"iseage/bank/pkg/postgres"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // Run creates objects via constructors.
@@ -37,8 +38,9 @@ func Run(cfg *config.Config) {
 	)
 
 	// HTTP Server
-	handler := gin.New()
-	v1.NewRouter(handler, l, translationUseCase)
+	handler := chi.NewRouter()
+	www.NewRouter(handler, l)
+	api.NewRouter(handler, l, translationUseCase)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
