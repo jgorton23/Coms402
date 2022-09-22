@@ -27,7 +27,7 @@ compose-down: ### Down docker-compose
 
 run: #swag-v1 ### swag run
 	go mod tidy && go mod download && \
-	DISABLE_SWAGGER_HTTP_HANDLER='' GIN_MODE=debug CGO_ENABLED=0 go run -tags migrate ./cmd/app
+	CGO_ENABLED=0 go run ./cmd/app
 .PHONY: run
 
 docker-rm-volume: ### remove docker volume
@@ -45,6 +45,10 @@ linter-hadolint: ### check by hadolint linter
 linter-dotenv: ### check by dotenv linter
 	dotenv-linter
 .PHONY: linter-dotenv
+
+linter-imports: ## sort imports
+	~/go/bin/goimports-reviser	./...
+.PHONY: linter-imports
 
 test: ### run test
 	go test -v -cover -race ./internal/...

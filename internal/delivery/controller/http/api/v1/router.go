@@ -7,7 +7,6 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"iseage/bank/internal/usecase"
-	"iseage/bank/pkg/logger"
 )
 
 // NewRouter -.
@@ -17,7 +16,7 @@ import (
 // @version     1.0
 // @host        localhost:8080
 // @BasePath    /v1
-func NewRouter(handler *chi.Mux, l logger.Interface, t usecase.Translation) {
+func NewRouter(handler *chi.Mux, l usecase.Logger, t usecase.Translation) {
 
 	handler.Route("/v1", func(r chi.Router) {
 		// newTranslationRoutes(r, t, l)

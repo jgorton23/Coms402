@@ -1,17 +1,13 @@
 app:
-  name: 'go-clean-template'
+  name: 'cdc-bank'
   version: '1.0.0'
 
 http:
-  port: '8080'
+  port: '8081'
 
 logger:
   log_level: 'debug'
-  rollbar_env: 'go-clean-template'
 
 postgres:
   pool_max: 2
-
-rabbitmq:
-  rpc_server_exchange: 'rpc_server'
-  rpc_client_exchange: 'rpc_client'
+  

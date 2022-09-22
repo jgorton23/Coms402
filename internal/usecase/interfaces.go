@@ -10,6 +10,18 @@ import (
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 
 type (
+	// Logger -.
+	Logger interface {
+		Trace(msg string, fields ...map[string]interface{})
+		Debug(msg string, fields ...map[string]interface{})
+		Info(msg string, fields ...map[string]interface{})
+		Warn(msg string, fields ...map[string]interface{})
+		Error(msg string, fields ...map[string]interface{})
+
+		// WithFields annotates a logger with some context and it as a new instance.
+		WithFields(fields map[string]interface{}) Logger
+	}
+
 	// Translation -.
 	Translation interface {
 		Translate(context.Context, entity.Translation) (entity.Translation, error)

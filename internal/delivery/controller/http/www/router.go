@@ -2,17 +2,15 @@
 package www
 
 import (
+	"iseage/bank/internal/usecase"
 	"net/http"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
-
-	"iseage/bank/pkg/logger"
 )
 
-func NewRouter(handler *chi.Mux, l logger.Interface) {
+func NewRouter(handler *chi.Mux, l usecase.Logger) {
 	// Options
-	handler.Use(middleware.Logger)
 	handler.Use(middleware.Recoverer)
 
 	handler.Get("/", func(w http.ResponseWriter, r *http.Request) {
