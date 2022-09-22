@@ -8,17 +8,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	v1 "iseage/bank/internal/delivery/controller/http/api/v1"
-	"iseage/bank/internal/usecase"
 )
 
-func NewRouter(handler *chi.Mux, l usecase.Logger, t usecase.Translation) {
-	// Options
+func NewRouter(r chi.Router) {
 
-	handler.Route("/api", func(r chi.Router) {
+	r.Get("/metrics", promhttp.Handler().(http.HandlerFunc))
 
-		r.Get("/metrics", promhttp.Handler().(http.HandlerFunc))
-
-		v1.NewRouter(r.(*chi.Mux), l, t)
-
-	})
+	r.Route("/v1", v1.NewRouter)
 }

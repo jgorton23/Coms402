@@ -22,6 +22,15 @@ type (
 		WithFields(fields map[string]interface{}) Logger
 	}
 
+	User interface {
+		Create(context.Context, entity.User) (entity.User, error)
+	}
+
+	UserRepo interface {
+		Exists(context.Context, entity.User) (bool, error)
+		Create(context.Context, entity.User) (entity.User, error)
+	}
+
 	// Translation -.
 	Translation interface {
 		Translate(context.Context, entity.Translation) (entity.Translation, error)

@@ -9,19 +9,16 @@ import (
 	"iseage/bank/internal/usecase"
 )
 
-// NewRouter -.
-// Swagger spec:
-// @title       Go Clean Template API
-// @description Using a translation service as an example
-// @version     1.0
-// @host        localhost:8080
-// @BasePath    /v1
-func NewRouter(handler *chi.Mux, l usecase.Logger, t usecase.Translation) {
+func NewRouter(r chi.Router) {
 
-	handler.Route("/v1", func(r chi.Router) {
-		// newTranslationRoutes(r, t, l)
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("Hello"))
-		})
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		logger, ok := r.Context().Value("logger").(usecase.LoggerAdapter)
+		if !ok {
+			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
+		}
+
+		logger.Warn("Errors")
+
+		w.Write([]byte("Hello"))
 	})
 }

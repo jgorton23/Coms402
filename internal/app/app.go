@@ -2,6 +2,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -18,11 +19,11 @@ import (
 	"iseage/bank/internal/delivery/controller/http/api"
 	"iseage/bank/internal/delivery/controller/http/www"
 	"iseage/bank/internal/delivery/middleware"
+	"iseage/bank/internal/entity"
 	"iseage/bank/internal/usecase"
 	"iseage/bank/internal/usecase/repo"
-	"iseage/bank/internal/usecase/webapi"
+	"iseage/bank/pkg/database"
 	"iseage/bank/pkg/httpserver"
-	"iseage/bank/pkg/postgres"
 )
 
 // Run creates objects via constructors.
@@ -37,18 +38,32 @@ func Run(cfg *config.Config) {
 	// Override the global standard library logger to make sure everything uses our logger
 	log.SetOutput(logur.NewLevelWriter(&l, logur.Info))
 
-	// Repository
-	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
+	// Database repository
+	db, err := database.NewClient(cfg.PG.URL, database.MaxPoolSize(cfg.PG.PoolMax))
+
 	if err != nil {
 		l.Error(fmt.Errorf("app - Run - postgres.New: %w", err).Error())
 	}
-	defer pg.Close()
+
+	defer db.Client.Close()
+
+	userUseCase := usecase.NewUserUseCase(repo.NewUserRepo(db))
+
+	_, err = userUseCase.Create(context.Background(), entity.User{
+		Email:                "test@test.com",
+		Password:             "test",
+		PasswordConfirmation: "test",
+	})
+
+	if err != nil {
+		l.Error(err.Error())
+	}
 
 	// Use case
-	translationUseCase := usecase.New(
-		repo.New(pg),
-		webapi.New(),
-	)
+	// translationUseCase := usecase.New(
+	// 	repo.New(db),
+	// 	webapi.New(),
+	// )
 
 	// HTTP Server
 	handler := chi.NewRouter()
@@ -56,8 +71,17 @@ func Run(cfg *config.Config) {
 	handler.Use(chimiddleware.RealIP)
 	handler.Use(chimiddleware.Recoverer)
 	handler.Use(middleware.NewStructuredLogger(l))
-	www.NewRouter(handler, &l)
-	api.NewRouter(handler, &l, translationUseCase)
+
+	// loading usecase's onto context
+	handler.Use(middleware.LoggerCtx(l))
+	// handler.Use(middleware.TranslationCtx(translationUseCase))
+
+	// Mounting the backend
+	handler.Route("/api", api.NewRouter)
+
+	// Mounting the frontend
+	handler.Route("/", www.NewRouter)
+
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

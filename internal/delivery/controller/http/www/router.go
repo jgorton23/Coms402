@@ -2,19 +2,15 @@
 package www
 
 import (
-	"iseage/bank/internal/usecase"
 	"net/http"
 
-	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
-func NewRouter(handler *chi.Mux, l usecase.Logger) {
-	// Options
-	handler.Use(middleware.Recoverer)
+func NewRouter(r chi.Router) {
 
-	handler.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Hello world"))
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello world"))
 	})
+
 }
