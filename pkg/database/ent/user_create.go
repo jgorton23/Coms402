@@ -60,6 +60,140 @@ func (uc *UserCreate) SetPasswordHash(s string) *UserCreate {
 	return uc
 }
 
+// SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
+func (uc *UserCreate) SetNillablePasswordHash(s *string) *UserCreate {
+	if s != nil {
+		uc.SetPasswordHash(*s)
+	}
+	return uc
+}
+
+// SetConfirmSelector sets the "confirm_selector" field.
+func (uc *UserCreate) SetConfirmSelector(s string) *UserCreate {
+	uc.mutation.SetConfirmSelector(s)
+	return uc
+}
+
+// SetNillableConfirmSelector sets the "confirm_selector" field if the given value is not nil.
+func (uc *UserCreate) SetNillableConfirmSelector(s *string) *UserCreate {
+	if s != nil {
+		uc.SetConfirmSelector(*s)
+	}
+	return uc
+}
+
+// SetConfirmVerifier sets the "confirm_verifier" field.
+func (uc *UserCreate) SetConfirmVerifier(s string) *UserCreate {
+	uc.mutation.SetConfirmVerifier(s)
+	return uc
+}
+
+// SetNillableConfirmVerifier sets the "confirm_verifier" field if the given value is not nil.
+func (uc *UserCreate) SetNillableConfirmVerifier(s *string) *UserCreate {
+	if s != nil {
+		uc.SetConfirmVerifier(*s)
+	}
+	return uc
+}
+
+// SetConfirmed sets the "confirmed" field.
+func (uc *UserCreate) SetConfirmed(b bool) *UserCreate {
+	uc.mutation.SetConfirmed(b)
+	return uc
+}
+
+// SetNillableConfirmed sets the "confirmed" field if the given value is not nil.
+func (uc *UserCreate) SetNillableConfirmed(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetConfirmed(*b)
+	}
+	return uc
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (uc *UserCreate) SetAttemptCount(i int) *UserCreate {
+	uc.mutation.SetAttemptCount(i)
+	return uc
+}
+
+// SetNillableAttemptCount sets the "attempt_count" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAttemptCount(i *int) *UserCreate {
+	if i != nil {
+		uc.SetAttemptCount(*i)
+	}
+	return uc
+}
+
+// SetLastAttempt sets the "last_attempt" field.
+func (uc *UserCreate) SetLastAttempt(t time.Time) *UserCreate {
+	uc.mutation.SetLastAttempt(t)
+	return uc
+}
+
+// SetNillableLastAttempt sets the "last_attempt" field if the given value is not nil.
+func (uc *UserCreate) SetNillableLastAttempt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetLastAttempt(*t)
+	}
+	return uc
+}
+
+// SetLocked sets the "locked" field.
+func (uc *UserCreate) SetLocked(t time.Time) *UserCreate {
+	uc.mutation.SetLocked(t)
+	return uc
+}
+
+// SetNillableLocked sets the "locked" field if the given value is not nil.
+func (uc *UserCreate) SetNillableLocked(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetLocked(*t)
+	}
+	return uc
+}
+
+// SetRecoverSelector sets the "recover_selector" field.
+func (uc *UserCreate) SetRecoverSelector(s string) *UserCreate {
+	uc.mutation.SetRecoverSelector(s)
+	return uc
+}
+
+// SetNillableRecoverSelector sets the "recover_selector" field if the given value is not nil.
+func (uc *UserCreate) SetNillableRecoverSelector(s *string) *UserCreate {
+	if s != nil {
+		uc.SetRecoverSelector(*s)
+	}
+	return uc
+}
+
+// SetRecoverVerifier sets the "recover_verifier" field.
+func (uc *UserCreate) SetRecoverVerifier(s string) *UserCreate {
+	uc.mutation.SetRecoverVerifier(s)
+	return uc
+}
+
+// SetNillableRecoverVerifier sets the "recover_verifier" field if the given value is not nil.
+func (uc *UserCreate) SetNillableRecoverVerifier(s *string) *UserCreate {
+	if s != nil {
+		uc.SetRecoverVerifier(*s)
+	}
+	return uc
+}
+
+// SetRecoverTokenExpiry sets the "recover_token_expiry" field.
+func (uc *UserCreate) SetRecoverTokenExpiry(t time.Time) *UserCreate {
+	uc.mutation.SetRecoverTokenExpiry(t)
+	return uc
+}
+
+// SetNillableRecoverTokenExpiry sets the "recover_token_expiry" field if the given value is not nil.
+func (uc *UserCreate) SetNillableRecoverTokenExpiry(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetRecoverTokenExpiry(*t)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -164,9 +298,6 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
 	}
-	if _, ok := uc.mutation.PasswordHash(); !ok {
-		return &ValidationError{Name: "password_hash", err: errors.New(`ent: missing required field "User.password_hash"`)}
-	}
 	if v, ok := uc.mutation.ID(); ok {
 		if err := user.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "User.id": %w`, err)}
@@ -236,6 +367,78 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldPasswordHash,
 		})
 		_node.PasswordHash = value
+	}
+	if value, ok := uc.mutation.ConfirmSelector(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldConfirmSelector,
+		})
+		_node.ConfirmSelector = value
+	}
+	if value, ok := uc.mutation.ConfirmVerifier(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldConfirmVerifier,
+		})
+		_node.ConfirmVerifier = value
+	}
+	if value, ok := uc.mutation.Confirmed(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldConfirmed,
+		})
+		_node.Confirmed = value
+	}
+	if value, ok := uc.mutation.AttemptCount(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAttemptCount,
+		})
+		_node.AttemptCount = value
+	}
+	if value, ok := uc.mutation.LastAttempt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldLastAttempt,
+		})
+		_node.LastAttempt = value
+	}
+	if value, ok := uc.mutation.Locked(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldLocked,
+		})
+		_node.Locked = value
+	}
+	if value, ok := uc.mutation.RecoverSelector(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldRecoverSelector,
+		})
+		_node.RecoverSelector = value
+	}
+	if value, ok := uc.mutation.RecoverVerifier(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldRecoverVerifier,
+		})
+		_node.RecoverVerifier = value
+	}
+	if value, ok := uc.mutation.RecoverTokenExpiry(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldRecoverTokenExpiry,
+		})
+		_node.RecoverTokenExpiry = value
 	}
 	return _node, _spec
 }

@@ -54,6 +54,207 @@ func (uu *UserUpdate) SetPasswordHash(s string) *UserUpdate {
 	return uu
 }
 
+// SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePasswordHash(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetPasswordHash(*s)
+	}
+	return uu
+}
+
+// ClearPasswordHash clears the value of the "password_hash" field.
+func (uu *UserUpdate) ClearPasswordHash() *UserUpdate {
+	uu.mutation.ClearPasswordHash()
+	return uu
+}
+
+// SetConfirmSelector sets the "confirm_selector" field.
+func (uu *UserUpdate) SetConfirmSelector(s string) *UserUpdate {
+	uu.mutation.SetConfirmSelector(s)
+	return uu
+}
+
+// SetNillableConfirmSelector sets the "confirm_selector" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableConfirmSelector(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetConfirmSelector(*s)
+	}
+	return uu
+}
+
+// ClearConfirmSelector clears the value of the "confirm_selector" field.
+func (uu *UserUpdate) ClearConfirmSelector() *UserUpdate {
+	uu.mutation.ClearConfirmSelector()
+	return uu
+}
+
+// SetConfirmVerifier sets the "confirm_verifier" field.
+func (uu *UserUpdate) SetConfirmVerifier(s string) *UserUpdate {
+	uu.mutation.SetConfirmVerifier(s)
+	return uu
+}
+
+// SetNillableConfirmVerifier sets the "confirm_verifier" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableConfirmVerifier(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetConfirmVerifier(*s)
+	}
+	return uu
+}
+
+// ClearConfirmVerifier clears the value of the "confirm_verifier" field.
+func (uu *UserUpdate) ClearConfirmVerifier() *UserUpdate {
+	uu.mutation.ClearConfirmVerifier()
+	return uu
+}
+
+// SetConfirmed sets the "confirmed" field.
+func (uu *UserUpdate) SetConfirmed(b bool) *UserUpdate {
+	uu.mutation.SetConfirmed(b)
+	return uu
+}
+
+// SetNillableConfirmed sets the "confirmed" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableConfirmed(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetConfirmed(*b)
+	}
+	return uu
+}
+
+// ClearConfirmed clears the value of the "confirmed" field.
+func (uu *UserUpdate) ClearConfirmed() *UserUpdate {
+	uu.mutation.ClearConfirmed()
+	return uu
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (uu *UserUpdate) SetAttemptCount(i int) *UserUpdate {
+	uu.mutation.ResetAttemptCount()
+	uu.mutation.SetAttemptCount(i)
+	return uu
+}
+
+// SetNillableAttemptCount sets the "attempt_count" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAttemptCount(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetAttemptCount(*i)
+	}
+	return uu
+}
+
+// AddAttemptCount adds i to the "attempt_count" field.
+func (uu *UserUpdate) AddAttemptCount(i int) *UserUpdate {
+	uu.mutation.AddAttemptCount(i)
+	return uu
+}
+
+// ClearAttemptCount clears the value of the "attempt_count" field.
+func (uu *UserUpdate) ClearAttemptCount() *UserUpdate {
+	uu.mutation.ClearAttemptCount()
+	return uu
+}
+
+// SetLastAttempt sets the "last_attempt" field.
+func (uu *UserUpdate) SetLastAttempt(t time.Time) *UserUpdate {
+	uu.mutation.SetLastAttempt(t)
+	return uu
+}
+
+// SetNillableLastAttempt sets the "last_attempt" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableLastAttempt(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetLastAttempt(*t)
+	}
+	return uu
+}
+
+// ClearLastAttempt clears the value of the "last_attempt" field.
+func (uu *UserUpdate) ClearLastAttempt() *UserUpdate {
+	uu.mutation.ClearLastAttempt()
+	return uu
+}
+
+// SetLocked sets the "locked" field.
+func (uu *UserUpdate) SetLocked(t time.Time) *UserUpdate {
+	uu.mutation.SetLocked(t)
+	return uu
+}
+
+// SetNillableLocked sets the "locked" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableLocked(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetLocked(*t)
+	}
+	return uu
+}
+
+// ClearLocked clears the value of the "locked" field.
+func (uu *UserUpdate) ClearLocked() *UserUpdate {
+	uu.mutation.ClearLocked()
+	return uu
+}
+
+// SetRecoverSelector sets the "recover_selector" field.
+func (uu *UserUpdate) SetRecoverSelector(s string) *UserUpdate {
+	uu.mutation.SetRecoverSelector(s)
+	return uu
+}
+
+// SetNillableRecoverSelector sets the "recover_selector" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRecoverSelector(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetRecoverSelector(*s)
+	}
+	return uu
+}
+
+// ClearRecoverSelector clears the value of the "recover_selector" field.
+func (uu *UserUpdate) ClearRecoverSelector() *UserUpdate {
+	uu.mutation.ClearRecoverSelector()
+	return uu
+}
+
+// SetRecoverVerifier sets the "recover_verifier" field.
+func (uu *UserUpdate) SetRecoverVerifier(s string) *UserUpdate {
+	uu.mutation.SetRecoverVerifier(s)
+	return uu
+}
+
+// SetNillableRecoverVerifier sets the "recover_verifier" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRecoverVerifier(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetRecoverVerifier(*s)
+	}
+	return uu
+}
+
+// ClearRecoverVerifier clears the value of the "recover_verifier" field.
+func (uu *UserUpdate) ClearRecoverVerifier() *UserUpdate {
+	uu.mutation.ClearRecoverVerifier()
+	return uu
+}
+
+// SetRecoverTokenExpiry sets the "recover_token_expiry" field.
+func (uu *UserUpdate) SetRecoverTokenExpiry(t time.Time) *UserUpdate {
+	uu.mutation.SetRecoverTokenExpiry(t)
+	return uu
+}
+
+// SetNillableRecoverTokenExpiry sets the "recover_token_expiry" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableRecoverTokenExpiry(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetRecoverTokenExpiry(*t)
+	}
+	return uu
+}
+
+// ClearRecoverTokenExpiry clears the value of the "recover_token_expiry" field.
+func (uu *UserUpdate) ClearRecoverTokenExpiry() *UserUpdate {
+	uu.mutation.ClearRecoverTokenExpiry()
+	return uu
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -152,6 +353,136 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldPasswordHash,
 		})
 	}
+	if uu.mutation.PasswordHashCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldPasswordHash,
+		})
+	}
+	if value, ok := uu.mutation.ConfirmSelector(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldConfirmSelector,
+		})
+	}
+	if uu.mutation.ConfirmSelectorCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldConfirmSelector,
+		})
+	}
+	if value, ok := uu.mutation.ConfirmVerifier(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldConfirmVerifier,
+		})
+	}
+	if uu.mutation.ConfirmVerifierCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldConfirmVerifier,
+		})
+	}
+	if value, ok := uu.mutation.Confirmed(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldConfirmed,
+		})
+	}
+	if uu.mutation.ConfirmedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: user.FieldConfirmed,
+		})
+	}
+	if value, ok := uu.mutation.AttemptCount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAttemptCount,
+		})
+	}
+	if value, ok := uu.mutation.AddedAttemptCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAttemptCount,
+		})
+	}
+	if uu.mutation.AttemptCountCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: user.FieldAttemptCount,
+		})
+	}
+	if value, ok := uu.mutation.LastAttempt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldLastAttempt,
+		})
+	}
+	if uu.mutation.LastAttemptCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: user.FieldLastAttempt,
+		})
+	}
+	if value, ok := uu.mutation.Locked(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldLocked,
+		})
+	}
+	if uu.mutation.LockedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: user.FieldLocked,
+		})
+	}
+	if value, ok := uu.mutation.RecoverSelector(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldRecoverSelector,
+		})
+	}
+	if uu.mutation.RecoverSelectorCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldRecoverSelector,
+		})
+	}
+	if value, ok := uu.mutation.RecoverVerifier(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldRecoverVerifier,
+		})
+	}
+	if uu.mutation.RecoverVerifierCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldRecoverVerifier,
+		})
+	}
+	if value, ok := uu.mutation.RecoverTokenExpiry(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldRecoverTokenExpiry,
+		})
+	}
+	if uu.mutation.RecoverTokenExpiryCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: user.FieldRecoverTokenExpiry,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -194,6 +525,207 @@ func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
 // SetPasswordHash sets the "password_hash" field.
 func (uuo *UserUpdateOne) SetPasswordHash(s string) *UserUpdateOne {
 	uuo.mutation.SetPasswordHash(s)
+	return uuo
+}
+
+// SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePasswordHash(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetPasswordHash(*s)
+	}
+	return uuo
+}
+
+// ClearPasswordHash clears the value of the "password_hash" field.
+func (uuo *UserUpdateOne) ClearPasswordHash() *UserUpdateOne {
+	uuo.mutation.ClearPasswordHash()
+	return uuo
+}
+
+// SetConfirmSelector sets the "confirm_selector" field.
+func (uuo *UserUpdateOne) SetConfirmSelector(s string) *UserUpdateOne {
+	uuo.mutation.SetConfirmSelector(s)
+	return uuo
+}
+
+// SetNillableConfirmSelector sets the "confirm_selector" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableConfirmSelector(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetConfirmSelector(*s)
+	}
+	return uuo
+}
+
+// ClearConfirmSelector clears the value of the "confirm_selector" field.
+func (uuo *UserUpdateOne) ClearConfirmSelector() *UserUpdateOne {
+	uuo.mutation.ClearConfirmSelector()
+	return uuo
+}
+
+// SetConfirmVerifier sets the "confirm_verifier" field.
+func (uuo *UserUpdateOne) SetConfirmVerifier(s string) *UserUpdateOne {
+	uuo.mutation.SetConfirmVerifier(s)
+	return uuo
+}
+
+// SetNillableConfirmVerifier sets the "confirm_verifier" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableConfirmVerifier(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetConfirmVerifier(*s)
+	}
+	return uuo
+}
+
+// ClearConfirmVerifier clears the value of the "confirm_verifier" field.
+func (uuo *UserUpdateOne) ClearConfirmVerifier() *UserUpdateOne {
+	uuo.mutation.ClearConfirmVerifier()
+	return uuo
+}
+
+// SetConfirmed sets the "confirmed" field.
+func (uuo *UserUpdateOne) SetConfirmed(b bool) *UserUpdateOne {
+	uuo.mutation.SetConfirmed(b)
+	return uuo
+}
+
+// SetNillableConfirmed sets the "confirmed" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableConfirmed(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetConfirmed(*b)
+	}
+	return uuo
+}
+
+// ClearConfirmed clears the value of the "confirmed" field.
+func (uuo *UserUpdateOne) ClearConfirmed() *UserUpdateOne {
+	uuo.mutation.ClearConfirmed()
+	return uuo
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (uuo *UserUpdateOne) SetAttemptCount(i int) *UserUpdateOne {
+	uuo.mutation.ResetAttemptCount()
+	uuo.mutation.SetAttemptCount(i)
+	return uuo
+}
+
+// SetNillableAttemptCount sets the "attempt_count" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAttemptCount(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetAttemptCount(*i)
+	}
+	return uuo
+}
+
+// AddAttemptCount adds i to the "attempt_count" field.
+func (uuo *UserUpdateOne) AddAttemptCount(i int) *UserUpdateOne {
+	uuo.mutation.AddAttemptCount(i)
+	return uuo
+}
+
+// ClearAttemptCount clears the value of the "attempt_count" field.
+func (uuo *UserUpdateOne) ClearAttemptCount() *UserUpdateOne {
+	uuo.mutation.ClearAttemptCount()
+	return uuo
+}
+
+// SetLastAttempt sets the "last_attempt" field.
+func (uuo *UserUpdateOne) SetLastAttempt(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetLastAttempt(t)
+	return uuo
+}
+
+// SetNillableLastAttempt sets the "last_attempt" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableLastAttempt(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetLastAttempt(*t)
+	}
+	return uuo
+}
+
+// ClearLastAttempt clears the value of the "last_attempt" field.
+func (uuo *UserUpdateOne) ClearLastAttempt() *UserUpdateOne {
+	uuo.mutation.ClearLastAttempt()
+	return uuo
+}
+
+// SetLocked sets the "locked" field.
+func (uuo *UserUpdateOne) SetLocked(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetLocked(t)
+	return uuo
+}
+
+// SetNillableLocked sets the "locked" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableLocked(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetLocked(*t)
+	}
+	return uuo
+}
+
+// ClearLocked clears the value of the "locked" field.
+func (uuo *UserUpdateOne) ClearLocked() *UserUpdateOne {
+	uuo.mutation.ClearLocked()
+	return uuo
+}
+
+// SetRecoverSelector sets the "recover_selector" field.
+func (uuo *UserUpdateOne) SetRecoverSelector(s string) *UserUpdateOne {
+	uuo.mutation.SetRecoverSelector(s)
+	return uuo
+}
+
+// SetNillableRecoverSelector sets the "recover_selector" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRecoverSelector(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetRecoverSelector(*s)
+	}
+	return uuo
+}
+
+// ClearRecoverSelector clears the value of the "recover_selector" field.
+func (uuo *UserUpdateOne) ClearRecoverSelector() *UserUpdateOne {
+	uuo.mutation.ClearRecoverSelector()
+	return uuo
+}
+
+// SetRecoverVerifier sets the "recover_verifier" field.
+func (uuo *UserUpdateOne) SetRecoverVerifier(s string) *UserUpdateOne {
+	uuo.mutation.SetRecoverVerifier(s)
+	return uuo
+}
+
+// SetNillableRecoverVerifier sets the "recover_verifier" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRecoverVerifier(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetRecoverVerifier(*s)
+	}
+	return uuo
+}
+
+// ClearRecoverVerifier clears the value of the "recover_verifier" field.
+func (uuo *UserUpdateOne) ClearRecoverVerifier() *UserUpdateOne {
+	uuo.mutation.ClearRecoverVerifier()
+	return uuo
+}
+
+// SetRecoverTokenExpiry sets the "recover_token_expiry" field.
+func (uuo *UserUpdateOne) SetRecoverTokenExpiry(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetRecoverTokenExpiry(t)
+	return uuo
+}
+
+// SetNillableRecoverTokenExpiry sets the "recover_token_expiry" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableRecoverTokenExpiry(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetRecoverTokenExpiry(*t)
+	}
+	return uuo
+}
+
+// ClearRecoverTokenExpiry clears the value of the "recover_token_expiry" field.
+func (uuo *UserUpdateOne) ClearRecoverTokenExpiry() *UserUpdateOne {
+	uuo.mutation.ClearRecoverTokenExpiry()
 	return uuo
 }
 
@@ -323,6 +855,136 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldPasswordHash,
+		})
+	}
+	if uuo.mutation.PasswordHashCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldPasswordHash,
+		})
+	}
+	if value, ok := uuo.mutation.ConfirmSelector(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldConfirmSelector,
+		})
+	}
+	if uuo.mutation.ConfirmSelectorCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldConfirmSelector,
+		})
+	}
+	if value, ok := uuo.mutation.ConfirmVerifier(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldConfirmVerifier,
+		})
+	}
+	if uuo.mutation.ConfirmVerifierCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldConfirmVerifier,
+		})
+	}
+	if value, ok := uuo.mutation.Confirmed(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: user.FieldConfirmed,
+		})
+	}
+	if uuo.mutation.ConfirmedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: user.FieldConfirmed,
+		})
+	}
+	if value, ok := uuo.mutation.AttemptCount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAttemptCount,
+		})
+	}
+	if value, ok := uuo.mutation.AddedAttemptCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldAttemptCount,
+		})
+	}
+	if uuo.mutation.AttemptCountCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: user.FieldAttemptCount,
+		})
+	}
+	if value, ok := uuo.mutation.LastAttempt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldLastAttempt,
+		})
+	}
+	if uuo.mutation.LastAttemptCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: user.FieldLastAttempt,
+		})
+	}
+	if value, ok := uuo.mutation.Locked(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldLocked,
+		})
+	}
+	if uuo.mutation.LockedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: user.FieldLocked,
+		})
+	}
+	if value, ok := uuo.mutation.RecoverSelector(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldRecoverSelector,
+		})
+	}
+	if uuo.mutation.RecoverSelectorCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldRecoverSelector,
+		})
+	}
+	if value, ok := uuo.mutation.RecoverVerifier(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldRecoverVerifier,
+		})
+	}
+	if uuo.mutation.RecoverVerifierCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldRecoverVerifier,
+		})
+	}
+	if value, ok := uuo.mutation.RecoverTokenExpiry(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldRecoverTokenExpiry,
+		})
+	}
+	if uuo.mutation.RecoverTokenExpiryCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: user.FieldRecoverTokenExpiry,
 		})
 	}
 	_node = &User{config: uuo.config}

@@ -2,7 +2,6 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -19,7 +18,6 @@ import (
 	"iseage/bank/internal/delivery/controller/http/api"
 	"iseage/bank/internal/delivery/controller/http/www"
 	"iseage/bank/internal/delivery/middleware"
-	"iseage/bank/internal/entity"
 	"iseage/bank/internal/usecase"
 	"iseage/bank/internal/usecase/repo"
 	"iseage/bank/pkg/database"
@@ -47,24 +45,11 @@ func Run(cfg *config.Config) {
 
 	defer db.Client.Close()
 
-	userUseCase := usecase.NewUserUseCase(repo.NewUserRepo(db))
-
-	_, err = userUseCase.Create(context.Background(), entity.User{
-		Email:                "test@test.com",
-		Password:             "test",
-		PasswordConfirmation: "test",
-	})
+	userUseCase := usecase.NewUserUseCase(repo.NewUserRepo(db), l)
 
 	if err != nil {
 		l.Error(err.Error())
 	}
-
-	// Use case
-	// translationUseCase := usecase.New(
-	// 	repo.New(db),
-	// 	webapi.New(),
-	// )
-
 	// HTTP Server
 	handler := chi.NewRouter()
 	handler.Use(chimiddleware.RequestID)
@@ -77,7 +62,7 @@ func Run(cfg *config.Config) {
 	// handler.Use(middleware.TranslationCtx(translationUseCase))
 
 	// Mounting the backend
-	handler.Route("/api", api.NewRouter)
+	handler.Route("/api", api.NewRouter(cfg, handler, l, *userUseCase))
 
 	// Mounting the frontend
 	handler.Route("/", www.NewRouter)

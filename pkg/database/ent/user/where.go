@@ -108,6 +108,69 @@ func PasswordHash(v string) predicate.User {
 	})
 }
 
+// ConfirmSelector applies equality check predicate on the "confirm_selector" field. It's identical to ConfirmSelectorEQ.
+func ConfirmSelector(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmVerifier applies equality check predicate on the "confirm_verifier" field. It's identical to ConfirmVerifierEQ.
+func ConfirmVerifier(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// Confirmed applies equality check predicate on the "confirmed" field. It's identical to ConfirmedEQ.
+func Confirmed(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldConfirmed), v))
+	})
+}
+
+// AttemptCount applies equality check predicate on the "attempt_count" field. It's identical to AttemptCountEQ.
+func AttemptCount(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAttemptCount), v))
+	})
+}
+
+// LastAttempt applies equality check predicate on the "last_attempt" field. It's identical to LastAttemptEQ.
+func LastAttempt(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastAttempt), v))
+	})
+}
+
+// Locked applies equality check predicate on the "locked" field. It's identical to LockedEQ.
+func Locked(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLocked), v))
+	})
+}
+
+// RecoverSelector applies equality check predicate on the "recover_selector" field. It's identical to RecoverSelectorEQ.
+func RecoverSelector(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverVerifier applies equality check predicate on the "recover_verifier" field. It's identical to RecoverVerifierEQ.
+func RecoverVerifier(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverTokenExpiry applies equality check predicate on the "recover_token_expiry" field. It's identical to RecoverTokenExpiryEQ.
+func RecoverTokenExpiry(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecoverTokenExpiry), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -420,6 +483,20 @@ func PasswordHashHasSuffix(v string) predicate.User {
 	})
 }
 
+// PasswordHashIsNil applies the IsNil predicate on the "password_hash" field.
+func PasswordHashIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPasswordHash)))
+	})
+}
+
+// PasswordHashNotNil applies the NotNil predicate on the "password_hash" field.
+func PasswordHashNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPasswordHash)))
+	})
+}
+
 // PasswordHashEqualFold applies the EqualFold predicate on the "password_hash" field.
 func PasswordHashEqualFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -431,6 +508,798 @@ func PasswordHashEqualFold(v string) predicate.User {
 func PasswordHashContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldPasswordHash), v))
+	})
+}
+
+// ConfirmSelectorEQ applies the EQ predicate on the "confirm_selector" field.
+func ConfirmSelectorEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorNEQ applies the NEQ predicate on the "confirm_selector" field.
+func ConfirmSelectorNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorIn applies the In predicate on the "confirm_selector" field.
+func ConfirmSelectorIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldConfirmSelector), v...))
+	})
+}
+
+// ConfirmSelectorNotIn applies the NotIn predicate on the "confirm_selector" field.
+func ConfirmSelectorNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldConfirmSelector), v...))
+	})
+}
+
+// ConfirmSelectorGT applies the GT predicate on the "confirm_selector" field.
+func ConfirmSelectorGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorGTE applies the GTE predicate on the "confirm_selector" field.
+func ConfirmSelectorGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorLT applies the LT predicate on the "confirm_selector" field.
+func ConfirmSelectorLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorLTE applies the LTE predicate on the "confirm_selector" field.
+func ConfirmSelectorLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorContains applies the Contains predicate on the "confirm_selector" field.
+func ConfirmSelectorContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorHasPrefix applies the HasPrefix predicate on the "confirm_selector" field.
+func ConfirmSelectorHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorHasSuffix applies the HasSuffix predicate on the "confirm_selector" field.
+func ConfirmSelectorHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorIsNil applies the IsNil predicate on the "confirm_selector" field.
+func ConfirmSelectorIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldConfirmSelector)))
+	})
+}
+
+// ConfirmSelectorNotNil applies the NotNil predicate on the "confirm_selector" field.
+func ConfirmSelectorNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldConfirmSelector)))
+	})
+}
+
+// ConfirmSelectorEqualFold applies the EqualFold predicate on the "confirm_selector" field.
+func ConfirmSelectorEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmSelectorContainsFold applies the ContainsFold predicate on the "confirm_selector" field.
+func ConfirmSelectorContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldConfirmSelector), v))
+	})
+}
+
+// ConfirmVerifierEQ applies the EQ predicate on the "confirm_verifier" field.
+func ConfirmVerifierEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierNEQ applies the NEQ predicate on the "confirm_verifier" field.
+func ConfirmVerifierNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierIn applies the In predicate on the "confirm_verifier" field.
+func ConfirmVerifierIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldConfirmVerifier), v...))
+	})
+}
+
+// ConfirmVerifierNotIn applies the NotIn predicate on the "confirm_verifier" field.
+func ConfirmVerifierNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldConfirmVerifier), v...))
+	})
+}
+
+// ConfirmVerifierGT applies the GT predicate on the "confirm_verifier" field.
+func ConfirmVerifierGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierGTE applies the GTE predicate on the "confirm_verifier" field.
+func ConfirmVerifierGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierLT applies the LT predicate on the "confirm_verifier" field.
+func ConfirmVerifierLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierLTE applies the LTE predicate on the "confirm_verifier" field.
+func ConfirmVerifierLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierContains applies the Contains predicate on the "confirm_verifier" field.
+func ConfirmVerifierContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierHasPrefix applies the HasPrefix predicate on the "confirm_verifier" field.
+func ConfirmVerifierHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierHasSuffix applies the HasSuffix predicate on the "confirm_verifier" field.
+func ConfirmVerifierHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierIsNil applies the IsNil predicate on the "confirm_verifier" field.
+func ConfirmVerifierIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldConfirmVerifier)))
+	})
+}
+
+// ConfirmVerifierNotNil applies the NotNil predicate on the "confirm_verifier" field.
+func ConfirmVerifierNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldConfirmVerifier)))
+	})
+}
+
+// ConfirmVerifierEqualFold applies the EqualFold predicate on the "confirm_verifier" field.
+func ConfirmVerifierEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmVerifierContainsFold applies the ContainsFold predicate on the "confirm_verifier" field.
+func ConfirmVerifierContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldConfirmVerifier), v))
+	})
+}
+
+// ConfirmedEQ applies the EQ predicate on the "confirmed" field.
+func ConfirmedEQ(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldConfirmed), v))
+	})
+}
+
+// ConfirmedNEQ applies the NEQ predicate on the "confirmed" field.
+func ConfirmedNEQ(v bool) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldConfirmed), v))
+	})
+}
+
+// ConfirmedIsNil applies the IsNil predicate on the "confirmed" field.
+func ConfirmedIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldConfirmed)))
+	})
+}
+
+// ConfirmedNotNil applies the NotNil predicate on the "confirmed" field.
+func ConfirmedNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldConfirmed)))
+	})
+}
+
+// AttemptCountEQ applies the EQ predicate on the "attempt_count" field.
+func AttemptCountEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAttemptCount), v))
+	})
+}
+
+// AttemptCountNEQ applies the NEQ predicate on the "attempt_count" field.
+func AttemptCountNEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAttemptCount), v))
+	})
+}
+
+// AttemptCountIn applies the In predicate on the "attempt_count" field.
+func AttemptCountIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldAttemptCount), v...))
+	})
+}
+
+// AttemptCountNotIn applies the NotIn predicate on the "attempt_count" field.
+func AttemptCountNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldAttemptCount), v...))
+	})
+}
+
+// AttemptCountGT applies the GT predicate on the "attempt_count" field.
+func AttemptCountGT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAttemptCount), v))
+	})
+}
+
+// AttemptCountGTE applies the GTE predicate on the "attempt_count" field.
+func AttemptCountGTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAttemptCount), v))
+	})
+}
+
+// AttemptCountLT applies the LT predicate on the "attempt_count" field.
+func AttemptCountLT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAttemptCount), v))
+	})
+}
+
+// AttemptCountLTE applies the LTE predicate on the "attempt_count" field.
+func AttemptCountLTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAttemptCount), v))
+	})
+}
+
+// AttemptCountIsNil applies the IsNil predicate on the "attempt_count" field.
+func AttemptCountIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAttemptCount)))
+	})
+}
+
+// AttemptCountNotNil applies the NotNil predicate on the "attempt_count" field.
+func AttemptCountNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAttemptCount)))
+	})
+}
+
+// LastAttemptEQ applies the EQ predicate on the "last_attempt" field.
+func LastAttemptEQ(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastAttempt), v))
+	})
+}
+
+// LastAttemptNEQ applies the NEQ predicate on the "last_attempt" field.
+func LastAttemptNEQ(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLastAttempt), v))
+	})
+}
+
+// LastAttemptIn applies the In predicate on the "last_attempt" field.
+func LastAttemptIn(vs ...time.Time) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldLastAttempt), v...))
+	})
+}
+
+// LastAttemptNotIn applies the NotIn predicate on the "last_attempt" field.
+func LastAttemptNotIn(vs ...time.Time) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldLastAttempt), v...))
+	})
+}
+
+// LastAttemptGT applies the GT predicate on the "last_attempt" field.
+func LastAttemptGT(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLastAttempt), v))
+	})
+}
+
+// LastAttemptGTE applies the GTE predicate on the "last_attempt" field.
+func LastAttemptGTE(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLastAttempt), v))
+	})
+}
+
+// LastAttemptLT applies the LT predicate on the "last_attempt" field.
+func LastAttemptLT(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLastAttempt), v))
+	})
+}
+
+// LastAttemptLTE applies the LTE predicate on the "last_attempt" field.
+func LastAttemptLTE(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLastAttempt), v))
+	})
+}
+
+// LastAttemptIsNil applies the IsNil predicate on the "last_attempt" field.
+func LastAttemptIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLastAttempt)))
+	})
+}
+
+// LastAttemptNotNil applies the NotNil predicate on the "last_attempt" field.
+func LastAttemptNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLastAttempt)))
+	})
+}
+
+// LockedEQ applies the EQ predicate on the "locked" field.
+func LockedEQ(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLocked), v))
+	})
+}
+
+// LockedNEQ applies the NEQ predicate on the "locked" field.
+func LockedNEQ(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLocked), v))
+	})
+}
+
+// LockedIn applies the In predicate on the "locked" field.
+func LockedIn(vs ...time.Time) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldLocked), v...))
+	})
+}
+
+// LockedNotIn applies the NotIn predicate on the "locked" field.
+func LockedNotIn(vs ...time.Time) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldLocked), v...))
+	})
+}
+
+// LockedGT applies the GT predicate on the "locked" field.
+func LockedGT(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLocked), v))
+	})
+}
+
+// LockedGTE applies the GTE predicate on the "locked" field.
+func LockedGTE(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLocked), v))
+	})
+}
+
+// LockedLT applies the LT predicate on the "locked" field.
+func LockedLT(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLocked), v))
+	})
+}
+
+// LockedLTE applies the LTE predicate on the "locked" field.
+func LockedLTE(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLocked), v))
+	})
+}
+
+// LockedIsNil applies the IsNil predicate on the "locked" field.
+func LockedIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLocked)))
+	})
+}
+
+// LockedNotNil applies the NotNil predicate on the "locked" field.
+func LockedNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLocked)))
+	})
+}
+
+// RecoverSelectorEQ applies the EQ predicate on the "recover_selector" field.
+func RecoverSelectorEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorNEQ applies the NEQ predicate on the "recover_selector" field.
+func RecoverSelectorNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorIn applies the In predicate on the "recover_selector" field.
+func RecoverSelectorIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldRecoverSelector), v...))
+	})
+}
+
+// RecoverSelectorNotIn applies the NotIn predicate on the "recover_selector" field.
+func RecoverSelectorNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldRecoverSelector), v...))
+	})
+}
+
+// RecoverSelectorGT applies the GT predicate on the "recover_selector" field.
+func RecoverSelectorGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorGTE applies the GTE predicate on the "recover_selector" field.
+func RecoverSelectorGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorLT applies the LT predicate on the "recover_selector" field.
+func RecoverSelectorLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorLTE applies the LTE predicate on the "recover_selector" field.
+func RecoverSelectorLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorContains applies the Contains predicate on the "recover_selector" field.
+func RecoverSelectorContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorHasPrefix applies the HasPrefix predicate on the "recover_selector" field.
+func RecoverSelectorHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorHasSuffix applies the HasSuffix predicate on the "recover_selector" field.
+func RecoverSelectorHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorIsNil applies the IsNil predicate on the "recover_selector" field.
+func RecoverSelectorIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRecoverSelector)))
+	})
+}
+
+// RecoverSelectorNotNil applies the NotNil predicate on the "recover_selector" field.
+func RecoverSelectorNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRecoverSelector)))
+	})
+}
+
+// RecoverSelectorEqualFold applies the EqualFold predicate on the "recover_selector" field.
+func RecoverSelectorEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverSelectorContainsFold applies the ContainsFold predicate on the "recover_selector" field.
+func RecoverSelectorContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRecoverSelector), v))
+	})
+}
+
+// RecoverVerifierEQ applies the EQ predicate on the "recover_verifier" field.
+func RecoverVerifierEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierNEQ applies the NEQ predicate on the "recover_verifier" field.
+func RecoverVerifierNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierIn applies the In predicate on the "recover_verifier" field.
+func RecoverVerifierIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldRecoverVerifier), v...))
+	})
+}
+
+// RecoverVerifierNotIn applies the NotIn predicate on the "recover_verifier" field.
+func RecoverVerifierNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldRecoverVerifier), v...))
+	})
+}
+
+// RecoverVerifierGT applies the GT predicate on the "recover_verifier" field.
+func RecoverVerifierGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierGTE applies the GTE predicate on the "recover_verifier" field.
+func RecoverVerifierGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierLT applies the LT predicate on the "recover_verifier" field.
+func RecoverVerifierLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierLTE applies the LTE predicate on the "recover_verifier" field.
+func RecoverVerifierLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierContains applies the Contains predicate on the "recover_verifier" field.
+func RecoverVerifierContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierHasPrefix applies the HasPrefix predicate on the "recover_verifier" field.
+func RecoverVerifierHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierHasSuffix applies the HasSuffix predicate on the "recover_verifier" field.
+func RecoverVerifierHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierIsNil applies the IsNil predicate on the "recover_verifier" field.
+func RecoverVerifierIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRecoverVerifier)))
+	})
+}
+
+// RecoverVerifierNotNil applies the NotNil predicate on the "recover_verifier" field.
+func RecoverVerifierNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRecoverVerifier)))
+	})
+}
+
+// RecoverVerifierEqualFold applies the EqualFold predicate on the "recover_verifier" field.
+func RecoverVerifierEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverVerifierContainsFold applies the ContainsFold predicate on the "recover_verifier" field.
+func RecoverVerifierContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRecoverVerifier), v))
+	})
+}
+
+// RecoverTokenExpiryEQ applies the EQ predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryEQ(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRecoverTokenExpiry), v))
+	})
+}
+
+// RecoverTokenExpiryNEQ applies the NEQ predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryNEQ(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRecoverTokenExpiry), v))
+	})
+}
+
+// RecoverTokenExpiryIn applies the In predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryIn(vs ...time.Time) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldRecoverTokenExpiry), v...))
+	})
+}
+
+// RecoverTokenExpiryNotIn applies the NotIn predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryNotIn(vs ...time.Time) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldRecoverTokenExpiry), v...))
+	})
+}
+
+// RecoverTokenExpiryGT applies the GT predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryGT(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRecoverTokenExpiry), v))
+	})
+}
+
+// RecoverTokenExpiryGTE applies the GTE predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryGTE(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRecoverTokenExpiry), v))
+	})
+}
+
+// RecoverTokenExpiryLT applies the LT predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryLT(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRecoverTokenExpiry), v))
+	})
+}
+
+// RecoverTokenExpiryLTE applies the LTE predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryLTE(v time.Time) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRecoverTokenExpiry), v))
+	})
+}
+
+// RecoverTokenExpiryIsNil applies the IsNil predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRecoverTokenExpiry)))
+	})
+}
+
+// RecoverTokenExpiryNotNil applies the NotNil predicate on the "recover_token_expiry" field.
+func RecoverTokenExpiryNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRecoverTokenExpiry)))
 	})
 }
 

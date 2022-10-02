@@ -5,6 +5,8 @@ import (
 	"context"
 
 	"iseage/bank/internal/entity"
+
+	"github.com/volatiletech/authboss/v3"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
@@ -23,28 +25,16 @@ type (
 	}
 
 	User interface {
-		Create(context.Context, entity.User) (entity.User, error)
+		Load(context.Context, string) (authboss.User, error)
+		Save(context.Context, authboss.User) error
+		New(context.Context) authboss.User
+		Create(context.Context, authboss.User) error
 	}
 
 	UserRepo interface {
-		Exists(context.Context, entity.User) (bool, error)
-		Create(context.Context, entity.User) (entity.User, error)
-	}
-
-	// Translation -.
-	Translation interface {
-		Translate(context.Context, entity.Translation) (entity.Translation, error)
-		History(context.Context) ([]entity.Translation, error)
-	}
-
-	// TranslationRepo -.
-	TranslationRepo interface {
-		Store(context.Context, entity.Translation) error
-		GetHistory(context.Context) ([]entity.Translation, error)
-	}
-
-	// TranslationWebAPI -.
-	TranslationWebAPI interface {
-		Translate(entity.Translation) (entity.Translation, error)
+		GetById(context.Context, int) (entity.User, error)
+		GetByEmail(context.Context, string) (entity.User, error)
+		Exists(context.Context, string) (bool, error)
+		CreateFromEmail(context.Context, string) (entity.User, error)
 	}
 )

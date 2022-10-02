@@ -13,8 +13,17 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "email", Type: field.TypeString},
-		{Name: "password_hash", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "password_hash", Type: field.TypeString, Nullable: true},
+		{Name: "confirm_selector", Type: field.TypeString, Nullable: true},
+		{Name: "confirm_verifier", Type: field.TypeString, Nullable: true},
+		{Name: "confirmed", Type: field.TypeBool, Nullable: true},
+		{Name: "attempt_count", Type: field.TypeInt, Nullable: true},
+		{Name: "last_attempt", Type: field.TypeTime, Nullable: true},
+		{Name: "locked", Type: field.TypeTime, Nullable: true},
+		{Name: "recover_selector", Type: field.TypeString, Nullable: true},
+		{Name: "recover_verifier", Type: field.TypeString, Nullable: true},
+		{Name: "recover_token_expiry", Type: field.TypeTime, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

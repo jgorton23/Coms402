@@ -29,17 +29,27 @@ const (
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	email         *string
-	password_hash *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op                   Op
+	typ                  string
+	id                   *int
+	created_at           *time.Time
+	updated_at           *time.Time
+	email                *string
+	password_hash        *string
+	confirm_selector     *string
+	confirm_verifier     *string
+	confirmed            *bool
+	attempt_count        *int
+	addattempt_count     *int
+	last_attempt         *time.Time
+	locked               *time.Time
+	recover_selector     *string
+	recover_verifier     *string
+	recover_token_expiry *time.Time
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*User, error)
+	predicates           []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -285,9 +295,484 @@ func (m *UserMutation) OldPasswordHash(ctx context.Context) (v string, err error
 	return oldValue.PasswordHash, nil
 }
 
+// ClearPasswordHash clears the value of the "password_hash" field.
+func (m *UserMutation) ClearPasswordHash() {
+	m.password_hash = nil
+	m.clearedFields[user.FieldPasswordHash] = struct{}{}
+}
+
+// PasswordHashCleared returns if the "password_hash" field was cleared in this mutation.
+func (m *UserMutation) PasswordHashCleared() bool {
+	_, ok := m.clearedFields[user.FieldPasswordHash]
+	return ok
+}
+
 // ResetPasswordHash resets all changes to the "password_hash" field.
 func (m *UserMutation) ResetPasswordHash() {
 	m.password_hash = nil
+	delete(m.clearedFields, user.FieldPasswordHash)
+}
+
+// SetConfirmSelector sets the "confirm_selector" field.
+func (m *UserMutation) SetConfirmSelector(s string) {
+	m.confirm_selector = &s
+}
+
+// ConfirmSelector returns the value of the "confirm_selector" field in the mutation.
+func (m *UserMutation) ConfirmSelector() (r string, exists bool) {
+	v := m.confirm_selector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfirmSelector returns the old "confirm_selector" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldConfirmSelector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfirmSelector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfirmSelector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfirmSelector: %w", err)
+	}
+	return oldValue.ConfirmSelector, nil
+}
+
+// ClearConfirmSelector clears the value of the "confirm_selector" field.
+func (m *UserMutation) ClearConfirmSelector() {
+	m.confirm_selector = nil
+	m.clearedFields[user.FieldConfirmSelector] = struct{}{}
+}
+
+// ConfirmSelectorCleared returns if the "confirm_selector" field was cleared in this mutation.
+func (m *UserMutation) ConfirmSelectorCleared() bool {
+	_, ok := m.clearedFields[user.FieldConfirmSelector]
+	return ok
+}
+
+// ResetConfirmSelector resets all changes to the "confirm_selector" field.
+func (m *UserMutation) ResetConfirmSelector() {
+	m.confirm_selector = nil
+	delete(m.clearedFields, user.FieldConfirmSelector)
+}
+
+// SetConfirmVerifier sets the "confirm_verifier" field.
+func (m *UserMutation) SetConfirmVerifier(s string) {
+	m.confirm_verifier = &s
+}
+
+// ConfirmVerifier returns the value of the "confirm_verifier" field in the mutation.
+func (m *UserMutation) ConfirmVerifier() (r string, exists bool) {
+	v := m.confirm_verifier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfirmVerifier returns the old "confirm_verifier" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldConfirmVerifier(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfirmVerifier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfirmVerifier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfirmVerifier: %w", err)
+	}
+	return oldValue.ConfirmVerifier, nil
+}
+
+// ClearConfirmVerifier clears the value of the "confirm_verifier" field.
+func (m *UserMutation) ClearConfirmVerifier() {
+	m.confirm_verifier = nil
+	m.clearedFields[user.FieldConfirmVerifier] = struct{}{}
+}
+
+// ConfirmVerifierCleared returns if the "confirm_verifier" field was cleared in this mutation.
+func (m *UserMutation) ConfirmVerifierCleared() bool {
+	_, ok := m.clearedFields[user.FieldConfirmVerifier]
+	return ok
+}
+
+// ResetConfirmVerifier resets all changes to the "confirm_verifier" field.
+func (m *UserMutation) ResetConfirmVerifier() {
+	m.confirm_verifier = nil
+	delete(m.clearedFields, user.FieldConfirmVerifier)
+}
+
+// SetConfirmed sets the "confirmed" field.
+func (m *UserMutation) SetConfirmed(b bool) {
+	m.confirmed = &b
+}
+
+// Confirmed returns the value of the "confirmed" field in the mutation.
+func (m *UserMutation) Confirmed() (r bool, exists bool) {
+	v := m.confirmed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfirmed returns the old "confirmed" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldConfirmed(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfirmed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfirmed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfirmed: %w", err)
+	}
+	return oldValue.Confirmed, nil
+}
+
+// ClearConfirmed clears the value of the "confirmed" field.
+func (m *UserMutation) ClearConfirmed() {
+	m.confirmed = nil
+	m.clearedFields[user.FieldConfirmed] = struct{}{}
+}
+
+// ConfirmedCleared returns if the "confirmed" field was cleared in this mutation.
+func (m *UserMutation) ConfirmedCleared() bool {
+	_, ok := m.clearedFields[user.FieldConfirmed]
+	return ok
+}
+
+// ResetConfirmed resets all changes to the "confirmed" field.
+func (m *UserMutation) ResetConfirmed() {
+	m.confirmed = nil
+	delete(m.clearedFields, user.FieldConfirmed)
+}
+
+// SetAttemptCount sets the "attempt_count" field.
+func (m *UserMutation) SetAttemptCount(i int) {
+	m.attempt_count = &i
+	m.addattempt_count = nil
+}
+
+// AttemptCount returns the value of the "attempt_count" field in the mutation.
+func (m *UserMutation) AttemptCount() (r int, exists bool) {
+	v := m.attempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttemptCount returns the old "attempt_count" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldAttemptCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttemptCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttemptCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttemptCount: %w", err)
+	}
+	return oldValue.AttemptCount, nil
+}
+
+// AddAttemptCount adds i to the "attempt_count" field.
+func (m *UserMutation) AddAttemptCount(i int) {
+	if m.addattempt_count != nil {
+		*m.addattempt_count += i
+	} else {
+		m.addattempt_count = &i
+	}
+}
+
+// AddedAttemptCount returns the value that was added to the "attempt_count" field in this mutation.
+func (m *UserMutation) AddedAttemptCount() (r int, exists bool) {
+	v := m.addattempt_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAttemptCount clears the value of the "attempt_count" field.
+func (m *UserMutation) ClearAttemptCount() {
+	m.attempt_count = nil
+	m.addattempt_count = nil
+	m.clearedFields[user.FieldAttemptCount] = struct{}{}
+}
+
+// AttemptCountCleared returns if the "attempt_count" field was cleared in this mutation.
+func (m *UserMutation) AttemptCountCleared() bool {
+	_, ok := m.clearedFields[user.FieldAttemptCount]
+	return ok
+}
+
+// ResetAttemptCount resets all changes to the "attempt_count" field.
+func (m *UserMutation) ResetAttemptCount() {
+	m.attempt_count = nil
+	m.addattempt_count = nil
+	delete(m.clearedFields, user.FieldAttemptCount)
+}
+
+// SetLastAttempt sets the "last_attempt" field.
+func (m *UserMutation) SetLastAttempt(t time.Time) {
+	m.last_attempt = &t
+}
+
+// LastAttempt returns the value of the "last_attempt" field in the mutation.
+func (m *UserMutation) LastAttempt() (r time.Time, exists bool) {
+	v := m.last_attempt
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastAttempt returns the old "last_attempt" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldLastAttempt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastAttempt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastAttempt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastAttempt: %w", err)
+	}
+	return oldValue.LastAttempt, nil
+}
+
+// ClearLastAttempt clears the value of the "last_attempt" field.
+func (m *UserMutation) ClearLastAttempt() {
+	m.last_attempt = nil
+	m.clearedFields[user.FieldLastAttempt] = struct{}{}
+}
+
+// LastAttemptCleared returns if the "last_attempt" field was cleared in this mutation.
+func (m *UserMutation) LastAttemptCleared() bool {
+	_, ok := m.clearedFields[user.FieldLastAttempt]
+	return ok
+}
+
+// ResetLastAttempt resets all changes to the "last_attempt" field.
+func (m *UserMutation) ResetLastAttempt() {
+	m.last_attempt = nil
+	delete(m.clearedFields, user.FieldLastAttempt)
+}
+
+// SetLocked sets the "locked" field.
+func (m *UserMutation) SetLocked(t time.Time) {
+	m.locked = &t
+}
+
+// Locked returns the value of the "locked" field in the mutation.
+func (m *UserMutation) Locked() (r time.Time, exists bool) {
+	v := m.locked
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocked returns the old "locked" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldLocked(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocked is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocked requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocked: %w", err)
+	}
+	return oldValue.Locked, nil
+}
+
+// ClearLocked clears the value of the "locked" field.
+func (m *UserMutation) ClearLocked() {
+	m.locked = nil
+	m.clearedFields[user.FieldLocked] = struct{}{}
+}
+
+// LockedCleared returns if the "locked" field was cleared in this mutation.
+func (m *UserMutation) LockedCleared() bool {
+	_, ok := m.clearedFields[user.FieldLocked]
+	return ok
+}
+
+// ResetLocked resets all changes to the "locked" field.
+func (m *UserMutation) ResetLocked() {
+	m.locked = nil
+	delete(m.clearedFields, user.FieldLocked)
+}
+
+// SetRecoverSelector sets the "recover_selector" field.
+func (m *UserMutation) SetRecoverSelector(s string) {
+	m.recover_selector = &s
+}
+
+// RecoverSelector returns the value of the "recover_selector" field in the mutation.
+func (m *UserMutation) RecoverSelector() (r string, exists bool) {
+	v := m.recover_selector
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecoverSelector returns the old "recover_selector" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldRecoverSelector(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecoverSelector is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecoverSelector requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecoverSelector: %w", err)
+	}
+	return oldValue.RecoverSelector, nil
+}
+
+// ClearRecoverSelector clears the value of the "recover_selector" field.
+func (m *UserMutation) ClearRecoverSelector() {
+	m.recover_selector = nil
+	m.clearedFields[user.FieldRecoverSelector] = struct{}{}
+}
+
+// RecoverSelectorCleared returns if the "recover_selector" field was cleared in this mutation.
+func (m *UserMutation) RecoverSelectorCleared() bool {
+	_, ok := m.clearedFields[user.FieldRecoverSelector]
+	return ok
+}
+
+// ResetRecoverSelector resets all changes to the "recover_selector" field.
+func (m *UserMutation) ResetRecoverSelector() {
+	m.recover_selector = nil
+	delete(m.clearedFields, user.FieldRecoverSelector)
+}
+
+// SetRecoverVerifier sets the "recover_verifier" field.
+func (m *UserMutation) SetRecoverVerifier(s string) {
+	m.recover_verifier = &s
+}
+
+// RecoverVerifier returns the value of the "recover_verifier" field in the mutation.
+func (m *UserMutation) RecoverVerifier() (r string, exists bool) {
+	v := m.recover_verifier
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecoverVerifier returns the old "recover_verifier" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldRecoverVerifier(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecoverVerifier is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecoverVerifier requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecoverVerifier: %w", err)
+	}
+	return oldValue.RecoverVerifier, nil
+}
+
+// ClearRecoverVerifier clears the value of the "recover_verifier" field.
+func (m *UserMutation) ClearRecoverVerifier() {
+	m.recover_verifier = nil
+	m.clearedFields[user.FieldRecoverVerifier] = struct{}{}
+}
+
+// RecoverVerifierCleared returns if the "recover_verifier" field was cleared in this mutation.
+func (m *UserMutation) RecoverVerifierCleared() bool {
+	_, ok := m.clearedFields[user.FieldRecoverVerifier]
+	return ok
+}
+
+// ResetRecoverVerifier resets all changes to the "recover_verifier" field.
+func (m *UserMutation) ResetRecoverVerifier() {
+	m.recover_verifier = nil
+	delete(m.clearedFields, user.FieldRecoverVerifier)
+}
+
+// SetRecoverTokenExpiry sets the "recover_token_expiry" field.
+func (m *UserMutation) SetRecoverTokenExpiry(t time.Time) {
+	m.recover_token_expiry = &t
+}
+
+// RecoverTokenExpiry returns the value of the "recover_token_expiry" field in the mutation.
+func (m *UserMutation) RecoverTokenExpiry() (r time.Time, exists bool) {
+	v := m.recover_token_expiry
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRecoverTokenExpiry returns the old "recover_token_expiry" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldRecoverTokenExpiry(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRecoverTokenExpiry is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRecoverTokenExpiry requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRecoverTokenExpiry: %w", err)
+	}
+	return oldValue.RecoverTokenExpiry, nil
+}
+
+// ClearRecoverTokenExpiry clears the value of the "recover_token_expiry" field.
+func (m *UserMutation) ClearRecoverTokenExpiry() {
+	m.recover_token_expiry = nil
+	m.clearedFields[user.FieldRecoverTokenExpiry] = struct{}{}
+}
+
+// RecoverTokenExpiryCleared returns if the "recover_token_expiry" field was cleared in this mutation.
+func (m *UserMutation) RecoverTokenExpiryCleared() bool {
+	_, ok := m.clearedFields[user.FieldRecoverTokenExpiry]
+	return ok
+}
+
+// ResetRecoverTokenExpiry resets all changes to the "recover_token_expiry" field.
+func (m *UserMutation) ResetRecoverTokenExpiry() {
+	m.recover_token_expiry = nil
+	delete(m.clearedFields, user.FieldRecoverTokenExpiry)
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -309,7 +794,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -321,6 +806,33 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.password_hash != nil {
 		fields = append(fields, user.FieldPasswordHash)
+	}
+	if m.confirm_selector != nil {
+		fields = append(fields, user.FieldConfirmSelector)
+	}
+	if m.confirm_verifier != nil {
+		fields = append(fields, user.FieldConfirmVerifier)
+	}
+	if m.confirmed != nil {
+		fields = append(fields, user.FieldConfirmed)
+	}
+	if m.attempt_count != nil {
+		fields = append(fields, user.FieldAttemptCount)
+	}
+	if m.last_attempt != nil {
+		fields = append(fields, user.FieldLastAttempt)
+	}
+	if m.locked != nil {
+		fields = append(fields, user.FieldLocked)
+	}
+	if m.recover_selector != nil {
+		fields = append(fields, user.FieldRecoverSelector)
+	}
+	if m.recover_verifier != nil {
+		fields = append(fields, user.FieldRecoverVerifier)
+	}
+	if m.recover_token_expiry != nil {
+		fields = append(fields, user.FieldRecoverTokenExpiry)
 	}
 	return fields
 }
@@ -338,6 +850,24 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Email()
 	case user.FieldPasswordHash:
 		return m.PasswordHash()
+	case user.FieldConfirmSelector:
+		return m.ConfirmSelector()
+	case user.FieldConfirmVerifier:
+		return m.ConfirmVerifier()
+	case user.FieldConfirmed:
+		return m.Confirmed()
+	case user.FieldAttemptCount:
+		return m.AttemptCount()
+	case user.FieldLastAttempt:
+		return m.LastAttempt()
+	case user.FieldLocked:
+		return m.Locked()
+	case user.FieldRecoverSelector:
+		return m.RecoverSelector()
+	case user.FieldRecoverVerifier:
+		return m.RecoverVerifier()
+	case user.FieldRecoverTokenExpiry:
+		return m.RecoverTokenExpiry()
 	}
 	return nil, false
 }
@@ -355,6 +885,24 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldEmail(ctx)
 	case user.FieldPasswordHash:
 		return m.OldPasswordHash(ctx)
+	case user.FieldConfirmSelector:
+		return m.OldConfirmSelector(ctx)
+	case user.FieldConfirmVerifier:
+		return m.OldConfirmVerifier(ctx)
+	case user.FieldConfirmed:
+		return m.OldConfirmed(ctx)
+	case user.FieldAttemptCount:
+		return m.OldAttemptCount(ctx)
+	case user.FieldLastAttempt:
+		return m.OldLastAttempt(ctx)
+	case user.FieldLocked:
+		return m.OldLocked(ctx)
+	case user.FieldRecoverSelector:
+		return m.OldRecoverSelector(ctx)
+	case user.FieldRecoverVerifier:
+		return m.OldRecoverVerifier(ctx)
+	case user.FieldRecoverTokenExpiry:
+		return m.OldRecoverTokenExpiry(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -392,6 +940,69 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPasswordHash(v)
 		return nil
+	case user.FieldConfirmSelector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfirmSelector(v)
+		return nil
+	case user.FieldConfirmVerifier:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfirmVerifier(v)
+		return nil
+	case user.FieldConfirmed:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfirmed(v)
+		return nil
+	case user.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttemptCount(v)
+		return nil
+	case user.FieldLastAttempt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastAttempt(v)
+		return nil
+	case user.FieldLocked:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocked(v)
+		return nil
+	case user.FieldRecoverSelector:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecoverSelector(v)
+		return nil
+	case user.FieldRecoverVerifier:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecoverVerifier(v)
+		return nil
+	case user.FieldRecoverTokenExpiry:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRecoverTokenExpiry(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -399,13 +1010,21 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addattempt_count != nil {
+		fields = append(fields, user.FieldAttemptCount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldAttemptCount:
+		return m.AddedAttemptCount()
+	}
 	return nil, false
 }
 
@@ -414,6 +1033,13 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldAttemptCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttemptCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -421,7 +1047,38 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldPasswordHash) {
+		fields = append(fields, user.FieldPasswordHash)
+	}
+	if m.FieldCleared(user.FieldConfirmSelector) {
+		fields = append(fields, user.FieldConfirmSelector)
+	}
+	if m.FieldCleared(user.FieldConfirmVerifier) {
+		fields = append(fields, user.FieldConfirmVerifier)
+	}
+	if m.FieldCleared(user.FieldConfirmed) {
+		fields = append(fields, user.FieldConfirmed)
+	}
+	if m.FieldCleared(user.FieldAttemptCount) {
+		fields = append(fields, user.FieldAttemptCount)
+	}
+	if m.FieldCleared(user.FieldLastAttempt) {
+		fields = append(fields, user.FieldLastAttempt)
+	}
+	if m.FieldCleared(user.FieldLocked) {
+		fields = append(fields, user.FieldLocked)
+	}
+	if m.FieldCleared(user.FieldRecoverSelector) {
+		fields = append(fields, user.FieldRecoverSelector)
+	}
+	if m.FieldCleared(user.FieldRecoverVerifier) {
+		fields = append(fields, user.FieldRecoverVerifier)
+	}
+	if m.FieldCleared(user.FieldRecoverTokenExpiry) {
+		fields = append(fields, user.FieldRecoverTokenExpiry)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -434,6 +1091,38 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldPasswordHash:
+		m.ClearPasswordHash()
+		return nil
+	case user.FieldConfirmSelector:
+		m.ClearConfirmSelector()
+		return nil
+	case user.FieldConfirmVerifier:
+		m.ClearConfirmVerifier()
+		return nil
+	case user.FieldConfirmed:
+		m.ClearConfirmed()
+		return nil
+	case user.FieldAttemptCount:
+		m.ClearAttemptCount()
+		return nil
+	case user.FieldLastAttempt:
+		m.ClearLastAttempt()
+		return nil
+	case user.FieldLocked:
+		m.ClearLocked()
+		return nil
+	case user.FieldRecoverSelector:
+		m.ClearRecoverSelector()
+		return nil
+	case user.FieldRecoverVerifier:
+		m.ClearRecoverVerifier()
+		return nil
+	case user.FieldRecoverTokenExpiry:
+		m.ClearRecoverTokenExpiry()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
@@ -452,6 +1141,33 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPasswordHash:
 		m.ResetPasswordHash()
+		return nil
+	case user.FieldConfirmSelector:
+		m.ResetConfirmSelector()
+		return nil
+	case user.FieldConfirmVerifier:
+		m.ResetConfirmVerifier()
+		return nil
+	case user.FieldConfirmed:
+		m.ResetConfirmed()
+		return nil
+	case user.FieldAttemptCount:
+		m.ResetAttemptCount()
+		return nil
+	case user.FieldLastAttempt:
+		m.ResetLastAttempt()
+		return nil
+	case user.FieldLocked:
+		m.ResetLocked()
+		return nil
+	case user.FieldRecoverSelector:
+		m.ResetRecoverSelector()
+		return nil
+	case user.FieldRecoverVerifier:
+		m.ResetRecoverVerifier()
+		return nil
+	case user.FieldRecoverTokenExpiry:
+		m.ResetRecoverTokenExpiry()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

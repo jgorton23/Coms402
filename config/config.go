@@ -23,7 +23,9 @@ type (
 
 	// HTTP -.
 	HTTP struct {
-		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
+		Port            string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
+		CookieStoreKey  string `env-required:"true" yaml:"cookie_store_key" env:"COOKIE_STORE_KEY"`
+		SessionStoreKey string `env-required:"true" yaml:"session_store_key" env:"SESSION_STORE_KEY"`
 	}
 
 	// Log -.
@@ -47,10 +49,10 @@ func NewConfig() (*Config, error) {
 		return nil, fmt.Errorf("config error: %w", err)
 	}
 
-	// err = cleanenv.ReadEnv(cfg)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	err = cleanenv.ReadEnv(cfg)
+	if err != nil {
+		return nil, err
+	}
 
 	return cfg, nil
 }
