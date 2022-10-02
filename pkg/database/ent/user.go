@@ -24,24 +24,12 @@ type User struct {
 	Email string `json:"email,omitempty"`
 	// PasswordHash holds the value of the "password_hash" field.
 	PasswordHash string `json:"password_hash,omitempty"`
-	// ConfirmSelector holds the value of the "confirm_selector" field.
-	ConfirmSelector string `json:"confirm_selector,omitempty"`
-	// ConfirmVerifier holds the value of the "confirm_verifier" field.
-	ConfirmVerifier string `json:"confirm_verifier,omitempty"`
-	// Confirmed holds the value of the "confirmed" field.
-	Confirmed bool `json:"confirmed,omitempty"`
 	// AttemptCount holds the value of the "attempt_count" field.
 	AttemptCount int `json:"attempt_count,omitempty"`
 	// LastAttempt holds the value of the "last_attempt" field.
 	LastAttempt time.Time `json:"last_attempt,omitempty"`
 	// Locked holds the value of the "locked" field.
 	Locked time.Time `json:"locked,omitempty"`
-	// RecoverSelector holds the value of the "recover_selector" field.
-	RecoverSelector string `json:"recover_selector,omitempty"`
-	// RecoverVerifier holds the value of the "recover_verifier" field.
-	RecoverVerifier string `json:"recover_verifier,omitempty"`
-	// RecoverTokenExpiry holds the value of the "recover_token_expiry" field.
-	RecoverTokenExpiry time.Time `json:"recover_token_expiry,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,13 +37,11 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldConfirmed:
-			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldAttemptCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldEmail, user.FieldPasswordHash, user.FieldConfirmSelector, user.FieldConfirmVerifier, user.FieldRecoverSelector, user.FieldRecoverVerifier:
+		case user.FieldEmail, user.FieldPasswordHash:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldLastAttempt, user.FieldLocked, user.FieldRecoverTokenExpiry:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldLastAttempt, user.FieldLocked:
 			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -102,24 +88,6 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.PasswordHash = value.String
 			}
-		case user.FieldConfirmSelector:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field confirm_selector", values[i])
-			} else if value.Valid {
-				u.ConfirmSelector = value.String
-			}
-		case user.FieldConfirmVerifier:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field confirm_verifier", values[i])
-			} else if value.Valid {
-				u.ConfirmVerifier = value.String
-			}
-		case user.FieldConfirmed:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field confirmed", values[i])
-			} else if value.Valid {
-				u.Confirmed = value.Bool
-			}
 		case user.FieldAttemptCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field attempt_count", values[i])
@@ -137,24 +105,6 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field locked", values[i])
 			} else if value.Valid {
 				u.Locked = value.Time
-			}
-		case user.FieldRecoverSelector:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field recover_selector", values[i])
-			} else if value.Valid {
-				u.RecoverSelector = value.String
-			}
-		case user.FieldRecoverVerifier:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field recover_verifier", values[i])
-			} else if value.Valid {
-				u.RecoverVerifier = value.String
-			}
-		case user.FieldRecoverTokenExpiry:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field recover_token_expiry", values[i])
-			} else if value.Valid {
-				u.RecoverTokenExpiry = value.Time
 			}
 		}
 	}
@@ -196,15 +146,6 @@ func (u *User) String() string {
 	builder.WriteString("password_hash=")
 	builder.WriteString(u.PasswordHash)
 	builder.WriteString(", ")
-	builder.WriteString("confirm_selector=")
-	builder.WriteString(u.ConfirmSelector)
-	builder.WriteString(", ")
-	builder.WriteString("confirm_verifier=")
-	builder.WriteString(u.ConfirmVerifier)
-	builder.WriteString(", ")
-	builder.WriteString("confirmed=")
-	builder.WriteString(fmt.Sprintf("%v", u.Confirmed))
-	builder.WriteString(", ")
 	builder.WriteString("attempt_count=")
 	builder.WriteString(fmt.Sprintf("%v", u.AttemptCount))
 	builder.WriteString(", ")
@@ -213,15 +154,6 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("locked=")
 	builder.WriteString(u.Locked.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("recover_selector=")
-	builder.WriteString(u.RecoverSelector)
-	builder.WriteString(", ")
-	builder.WriteString("recover_verifier=")
-	builder.WriteString(u.RecoverVerifier)
-	builder.WriteString(", ")
-	builder.WriteString("recover_token_expiry=")
-	builder.WriteString(u.RecoverTokenExpiry.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

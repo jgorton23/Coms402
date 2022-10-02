@@ -58,10 +58,17 @@ func (ur *UserRepo) Exists(ctx context.Context, u string) (bool, error) {
 }
 
 // Create -.
-func (ur *UserRepo) CreateFromEmail(ctx context.Context, u string) (entity.User, error) {
+func (ur *UserRepo) Create(ctx context.Context, u entity.User) (entity.User, error) {
 	user, err := ur.Client.User.
 		Create().
-		SetEmail(u).
+		SetEmail(u.Email).
+		SetPasswordHash(u.PasswordHash).
+		// SetConfirmSelector(u.ConfirmSelector).
+		// SetConfirmVerifier(u.ConfirmVerifier).
+		// SetConfirmed(u.Confirmed).
+		SetAttemptCount(u.AttemptCount).
+		SetLastAttempt(u.LastAttempt).
+		SetLocked(u.Locked).
 		Save(ctx)
 
 	if err != nil {
@@ -69,6 +76,27 @@ func (ur *UserRepo) CreateFromEmail(ctx context.Context, u string) (entity.User,
 	}
 
 	return ur.databaseUserToEntityUser(user), nil
+}
+
+// Create -.
+func (ur *UserRepo) Update(ctx context.Context, u entity.User) error {
+	_, err := ur.Client.User.
+		Update().
+		SetEmail(u.Email).
+		SetPasswordHash(u.PasswordHash).
+		// SetConfirmSelector(u.ConfirmSelector).
+		// SetConfirmVerifier(u.ConfirmVerifier).
+		// SetConfirmed(u.Confirmed).
+		SetAttemptCount(u.AttemptCount).
+		SetLastAttempt(u.LastAttempt).
+		SetLocked(u.Locked).
+		Save(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (ur *UserRepo) databaseUserToEntityUser(u *ent.User) entity.User {

@@ -33,7 +33,10 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 )
 
-require github.com/justinas/nosurf v1.1.1
+require (
+	github.com/justinas/nosurf v1.1.1
+	github.com/volatiletech/authboss-renderer v0.0.0-20210622044114-b32bb7a1387f
+)
 
 require (
 	ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e // indirect

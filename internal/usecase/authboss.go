@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	assertUserUseCase                               = &UserUseCase{}
+	assertUserUseCase                               = &AuthBossUseCase{}
 	_                 authboss.CreatingServerStorer = assertUserUseCase
 	// _                 authboss.ConfirmingServerStorer = assertUserUseCase
 
@@ -19,21 +19,34 @@ var (
 // 	_                 authboss.RememberingServerStorer = assertUserUseCase
 )
 
-type UserUseCase struct {
+type AuthBossUseCase struct {
 	repo UserRepo
 	log  LoggerAdapter
 }
 
-func NewUserUseCase(r UserRepo, l LoggerAdapter) *UserUseCase {
-	return &UserUseCase{
+func NewAuthBossUseCase(r UserRepo, l LoggerAdapter) *AuthBossUseCase {
+	return &AuthBossUseCase{
 		repo: r,
 		log:  l,
 	}
 }
 
-func (uuc *UserUseCase) Save(ctx context.Context, user authboss.User) error {
+func (uuc AuthBossUseCase) Save(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
-	_, err := uuc.repo.CreateFromEmail(ctx, u.Email)
+
+	exists, err := uuc.repo.Exists(ctx, u.Email)
+
+	if err != nil {
+		return err
+	}
+
+	// The user already exists
+	if !exists {
+		uuc.log.Info(fmt.Sprintf("User %v does not exists in database", u.Email))
+		return authboss.ErrUserNotFound
+	}
+
+	err = uuc.repo.Update(ctx, *u)
 
 	if err != nil {
 		return err
@@ -42,21 +55,23 @@ func (uuc *UserUseCase) Save(ctx context.Context, user authboss.User) error {
 	return nil
 }
 
-func (uuc *UserUseCase) Load(ctx context.Context, key string) (user authboss.User, err error) {
+func (uuc AuthBossUseCase) Load(ctx context.Context, key string) (user authboss.User, err error) {
 
 	exists, err := uuc.repo.Exists(ctx, key)
 
 	if err != nil {
-		return entity.User{}, err
+		return &entity.User{}, err
 	}
 
 	// The user already exists
 	if !exists {
 		uuc.log.Info(fmt.Sprintf("User %v not found in database", key))
-		return entity.User{}, authboss.ErrUserNotFound
+		return &entity.User{}, authboss.ErrUserNotFound
 	}
 
-	user, err = uuc.repo.GetByEmail(ctx, key)
+	u, err := uuc.repo.GetByEmail(ctx, key)
+
+	user = &u
 
 	if err != nil {
 		return
@@ -65,11 +80,11 @@ func (uuc *UserUseCase) Load(ctx context.Context, key string) (user authboss.Use
 	return user, nil
 }
 
-func (uuc *UserUseCase) New(_ context.Context) authboss.User {
+func (uuc AuthBossUseCase) New(_ context.Context) authboss.User {
 	return &entity.User{}
 }
 
-func (uuc *UserUseCase) Create(ctx context.Context, user authboss.User) error {
+func (uuc AuthBossUseCase) Create(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
 
 	u.Email = strings.ToLower(u.Email)
@@ -94,7 +109,7 @@ func (uuc *UserUseCase) Create(ctx context.Context, user authboss.User) error {
 	}
 
 	// Insert into database
-	_, err = uuc.repo.CreateFromEmail(ctx, u.Email)
+	_, err = uuc.repo.Create(ctx, *u)
 
 	uuc.log.Info(fmt.Sprintf("User %v created in database", u.Email))
 

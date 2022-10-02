@@ -27,24 +27,24 @@ func (User) Fields() []ent.Field {
 			Unique(),
 		field.String("password_hash").
 			Optional(),
-		field.String("confirm_selector").
-			Optional(),
-		field.String("confirm_verifier").
-			Optional(),
-		field.Bool("confirmed").
-			Optional(),
+		// field.String("confirm_selector").
+		// 	Optional(),
+		// field.String("confirm_verifier").
+		// 	Optional(),
+		// field.Bool("confirmed").
+		// 	Optional(),
 		field.Int("attempt_count").
 			Optional(),
 		field.Time("last_attempt").
 			Optional(),
 		field.Time("locked").
 			Optional(),
-		field.String("recover_selector").
-			Optional(),
-		field.String("recover_verifier").
-			Optional(),
-		field.Time("recover_token_expiry").
-			Optional(),
+		// field.String("recover_selector").
+		// 	Optional(),
+		// field.String("recover_verifier").
+		// 	Optional(),
+		// field.Time("recover_token_expiry").
+		// 	Optional(),
 	}
 }
 
