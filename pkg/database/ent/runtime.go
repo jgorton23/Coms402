@@ -3,9 +3,10 @@
 package ent
 
 import (
+	"time"
+
 	"iseage/bank/pkg/database/ent/user"
 	"iseage/bank/pkg/database/models"
-	"time"
 )
 
 // The init function reads all schema descriptors with runtime code

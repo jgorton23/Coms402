@@ -6,13 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"iseage/bank/pkg/database/ent/predicate"
-	"iseage/bank/pkg/database/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	"iseage/bank/pkg/database/ent/predicate"
+	"iseage/bank/pkg/database/ent/user"
 )
 
 // UserUpdate is the builder for updating User entities.

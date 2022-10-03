@@ -5,13 +5,14 @@ package ent
 import (
 	"context"
 	"fmt"
-	"iseage/bank/pkg/database/ent/predicate"
-	"iseage/bank/pkg/database/ent/user"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	"iseage/bank/pkg/database/ent/predicate"
+	"iseage/bank/pkg/database/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.

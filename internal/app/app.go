@@ -12,6 +12,7 @@ import (
 
 	"iseage/bank/config"
 	"iseage/bank/internal/delivery/controller"
+	"iseage/bank/internal/delivery/controller/http/api"
 	"iseage/bank/internal/usecase"
 	"iseage/bank/internal/usecase/repo"
 	"iseage/bank/pkg/database"
@@ -38,13 +39,17 @@ func Run(cfg *config.Config) {
 
 	defer db.Client.Close()
 
-	authBossUseCase := usecase.NewAuthBossUseCase(repo.NewUserRepo(db), l)
+	userRepo := repo.NewUserRepo(db)
+
+	authBossUseCase := usecase.NewAuthBossUseCase(userRepo, l)
+
+	httpV1UseCase := api.NewHttpV1(userRepo, l)
 
 	if err != nil {
 		l.Error(err.Error())
 	}
 
-	controller.New(cfg, l, *authBossUseCase)
+	controller.New(cfg, l, *authBossUseCase, *httpV1UseCase)
 }
 
 // NewLogger creates a new logger.

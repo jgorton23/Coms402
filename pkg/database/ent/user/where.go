@@ -3,10 +3,11 @@
 package user
 
 import (
-	"iseage/bank/pkg/database/ent/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+
+	"iseage/bank/pkg/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

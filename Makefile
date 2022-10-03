@@ -21,11 +21,7 @@ compose-down: ### Down docker-compose
 	docker-compose down --remove-orphans
 .PHONY: compose-down
 
-# swag-v1: ### swag init
-# 	swag init -g internal/controller/http/v1/router.go
-# .PHONY: swag-v1
-
-run: #swag-v1 ### swag run
+run: #swag-v1 
 	go mod tidy && go mod download && \
 	CGO_ENABLED=0 go run ./cmd/app
 .PHONY: run
@@ -62,10 +58,17 @@ mock: ### run mockery
 	mockery --all -r --case snake
 .PHONY: mock
 
-migrate-create:  ### create new migration
-	migrate create -ext sql -dir migrations 'migrate_name'
-.PHONY: migrate-create
+gen-db: ### gen database from models 
+	go run -mod=mod entgo.io/ent/cmd/ent generate ./pkg/database/models --target ./pkg/database/ent
+.PHONY: gen-db
 
-migrate-up: ### migration up
-	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
-.PHONY: migrate-up
+gen-api-spec: ### gen http openapi spec 
+	cd api/v1 && npm run build
+.PHONY: gen-api-spec
+
+gen-http:  gen-api-spec ### gen http interface from openapi spec 
+	oapi-codegen --config oapi-codegen-config.yaml api/v1/_build/openapi.yaml > internal/delivery/controller/http/api/v1.gen.go
+.PHONY: gen-http
+
+
+# go run -mod=mod entgo.io/ent/cmd/ent init --target ./pkg/database/models {User}

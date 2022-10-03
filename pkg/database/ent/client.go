@@ -8,12 +8,11 @@ import (
 	"fmt"
 	"log"
 
-	"iseage/bank/pkg/database/ent/migrate"
-
-	"iseage/bank/pkg/database/ent/user"
-
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+
+	"iseage/bank/pkg/database/ent/migrate"
+	"iseage/bank/pkg/database/ent/user"
 )
 
 // Client is the client that holds all ent builders.

@@ -4,13 +4,12 @@ package enttest
 
 import (
 	"context"
-	"iseage/bank/pkg/database/ent"
-	// required by schema hooks.
-	_ "iseage/bank/pkg/database/ent/runtime"
-
-	"iseage/bank/pkg/database/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
+
+	"iseage/bank/pkg/database/ent"
+	"iseage/bank/pkg/database/ent/migrate"
+	_ "iseage/bank/pkg/database/ent/runtime"
 )
 
 type (

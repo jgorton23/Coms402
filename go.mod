@@ -6,7 +6,6 @@ require (
 	entgo.io/ent v0.11.2
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.7
-	github.com/golang-migrate/migrate/v4 v4.15.1
 	github.com/ilyakaznacheev/cleanenv v1.2.6
 	github.com/lib/pq v1.10.5
 	github.com/prometheus/client_golang v1.11.0
@@ -19,14 +18,9 @@ require (
 require (
 	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/gorilla/sessions v1.2.1
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
-	github.com/kr/pretty v0.3.0 // indirect
-	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/volatiletech/authboss-clientstate v0.0.0-20200826024349-8d4e74078241
 	github.com/volatiletech/authboss/v3 v3.2.0
-	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/net v0.0.0-20220921203646-d300de134e69 // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
@@ -34,6 +28,7 @@ require (
 )
 
 require (
+	github.com/deepmap/oapi-codegen v1.11.0
 	github.com/justinas/nosurf v1.1.1
 	github.com/volatiletech/authboss-renderer v0.0.0-20210622044114-b32bb7a1387f
 )
@@ -61,8 +56,6 @@ require (
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220616135557-88e70c0c3a90 // indirect
-	google.golang.org/grpc v1.47.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )

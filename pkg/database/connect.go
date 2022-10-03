@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"iseage/bank/pkg/database/ent"
 	"log"
 
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq"
+
+	"iseage/bank/pkg/database/ent"
 )
 
 const (

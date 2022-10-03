@@ -5,12 +5,13 @@ package ent
 import (
 	"context"
 	"fmt"
-	"iseage/bank/pkg/database/ent/predicate"
-	"iseage/bank/pkg/database/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	"iseage/bank/pkg/database/ent/predicate"
+	"iseage/bank/pkg/database/ent/user"
 )
 
 // UserDelete is the builder for deleting a User entity.

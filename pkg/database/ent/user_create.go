@@ -6,11 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"iseage/bank/pkg/database/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
+	"iseage/bank/pkg/database/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.

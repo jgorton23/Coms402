@@ -3,11 +3,12 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"iseage/bank/internal/entity"
 	"net/mail"
 	"strings"
 
 	"github.com/volatiletech/authboss/v3"
+
+	"iseage/bank/internal/entity"
 )
 
 var (
