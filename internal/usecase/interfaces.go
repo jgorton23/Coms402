@@ -12,6 +12,11 @@ import (
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 
 type (
+	Service interface {
+		HealthCheck() error
+		Shutdown() error
+	}
+
 	// Logger -.
 	Logger interface {
 		Trace(msg string, fields ...map[string]interface{})
@@ -22,13 +27,12 @@ type (
 
 		// WithFields annotates a logger with some context and it as a new instance.
 		WithFields(fields map[string]interface{}) Logger
+		WithSubsystem(subsystem string) Logger
 	}
 
 	Config interface {
-		Load(string) error
-		Get() (entity.Config, error)
-		HealthCheck() error
-		Shutdown() error
+		Get() *entity.Config
+		Service
 	}
 
 	// Conforms to the authboss interfaces

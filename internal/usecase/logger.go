@@ -47,3 +47,8 @@ func (l *LoggerAdapter) Error(msg string, fields ...map[string]interface{}) {
 func (l *LoggerAdapter) WithFields(fields map[string]interface{}) Logger {
 	return &LoggerAdapter{logger: logur.WithFields(l.logger, fields)}
 }
+
+// WithFields annotates a logger with some context and it as a new instance.
+func (l *LoggerAdapter) WithSubsystem(subsystem string) Logger {
+	return &LoggerAdapter{logger: logur.WithFields(l.logger, map[string]interface{}{"subsystem": subsystem})}
+}

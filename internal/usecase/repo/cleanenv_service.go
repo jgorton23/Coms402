@@ -22,15 +22,13 @@ func (c *CleanEnvService) Load(path string) error {
 	if err != nil {
 		return fmt.Errorf("CleanEnv error: %w", err)
 	}
-
 	err = cleanenv.ReadEnv(c.cfg)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (c *CleanEnvService) Get() (*entity.Config) {
+func (c *CleanEnvService) Get() *entity.Config {
 	return c.cfg
 }

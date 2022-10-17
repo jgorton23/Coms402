@@ -20,22 +20,22 @@ import (
 
 // Run creates objects via constructors.
 func Run() {
+	l := NewLogger(LogConfig{
+		Format:  "json", //logfmt or json
+		Level:   "info",
+		NoColor: true,
+	})
+
+	log.SetFlags(0) // Remove all flags
+	// Override the global standard library logger to make sure everything uses our logger
+	log.SetOutput(logur.NewLevelWriter(&l, logur.Info))
 
 	injector := do.New()
 
 	do.Provide(injector, repo.NewCleanEnvService)
+	do.Provide(injector, usecase.NewConfigUseCase("./config.yml", l.WithSubsystem("config")))
 
-	config := do.MustInvoke[*repo.CleanEnvService](injector)
-
-	config.Load("./config.yml")
-
-	l := NewLogger(LogConfig{
-		Format:  "logfmt", //logfmt or json
-		Level:   "info",
-		NoColor: true,
-	})
-	// Override the global standard library logger to make sure everything uses our logger
-	log.SetOutput(logur.NewLevelWriter(&l, logur.Info))
+	config := do.MustInvoke[*usecase.ConfigUseCase](injector)
 
 	// Database repository
 	db, err := database.NewClient(config.Get().PG.URL, database.MaxPoolSize(config.Get().PG.PoolMax))
@@ -57,6 +57,8 @@ func Run() {
 	}
 
 	controller.New(config.Get(), l, *authBossUseCase, *httpV1UseCase)
+
+	injector.Shutdown()
 }
 
 // NewLogger creates a new logger.
