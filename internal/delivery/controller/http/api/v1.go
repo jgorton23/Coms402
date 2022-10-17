@@ -41,9 +41,17 @@ func (v1 HttpV1) ShowUserById(w http.ResponseWriter, r *http.Request, userId Use
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusFound)
 	json.NewEncoder(w).Encode(u)
-
 }
 
 func (v1 HttpV1) ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams) {
+	users, err := v1.repo.Get(r.Context())
 
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusFound)
+	json.NewEncoder(w).Encode(users)
 }

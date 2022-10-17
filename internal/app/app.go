@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/samber/do"
 	"github.com/sirupsen/logrus"
 	logrusadapter "logur.dev/adapter/logrus"
 	"logur.dev/logur"
@@ -26,7 +27,6 @@ func Run(cfg *config.Config) {
 		Level:   "info",
 		NoColor: true,
 	})
-
 	// Override the global standard library logger to make sure everything uses our logger
 	log.SetOutput(logur.NewLevelWriter(&l, logur.Info))
 

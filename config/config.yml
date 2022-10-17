@@ -1,5 +1,5 @@
 app:
-  name: 'cdc-bank'
+  name: 'cdc_bank'
   version: '1.0.0'
 
 http:

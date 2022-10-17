@@ -14,10 +14,6 @@ import (
 	"iseage/bank/internal/usecase"
 )
 
-const (
-	sessionCookieName = "bank_app"
-)
-
 func newAuthentication(cfg *config.Config, abuc usecase.AuthBossUseCase, logger usecase.LoggerAdapter) *authboss.Authboss {
 	ab := authboss.New()
 
@@ -28,7 +24,7 @@ func newAuthentication(cfg *config.Config, abuc usecase.AuthBossUseCase, logger 
 	cookieStore.HTTPOnly = false
 	cookieStore.Secure = false
 
-	sessionStore := abclientstate.NewSessionStorer(sessionCookieName, sessionStoreKey, nil)
+	sessionStore := abclientstate.NewSessionStorer(cfg.App.Name, sessionStoreKey, nil)
 	cstore := sessionStore.Store.(*sessions.CookieStore)
 	cstore.Options.HttpOnly = false
 	cstore.Options.Secure = false

@@ -33,6 +33,7 @@ type (
 	}
 
 	UserRepo interface {
+		Get(context.Context) ([]entity.User, error)
 		GetById(context.Context, int) (entity.User, error)
 		GetByEmail(context.Context, string) (entity.User, error)
 		Exists(context.Context, string) (bool, error)

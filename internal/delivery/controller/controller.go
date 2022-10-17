@@ -25,7 +25,6 @@ import (
 	"iseage/bank/pkg/httpserver"
 )
 
-
 func New(cfg *config.Config, logger usecase.LoggerAdapter, abuc usecase.AuthBossUseCase, httpV1 api.HttpV1) {
 	// HTTP Server
 	mux := chi.NewRouter()

@@ -60,6 +60,7 @@ mock: ### run mockery
 
 gen-db: ### gen database from models 
 	go run -mod=mod entgo.io/ent/cmd/ent generate ./pkg/database/models --target ./pkg/database/ent
+	make linter-imports
 .PHONY: gen-db
 
 gen-api-spec: ### gen http openapi spec 
@@ -70,5 +71,5 @@ gen-http:  gen-api-spec ### gen http interface from openapi spec
 	oapi-codegen --config oapi-codegen-config.yaml api/v1/_build/openapi.yaml > internal/delivery/controller/http/api/v1.gen.go
 .PHONY: gen-http
 
-
+# TODO convert to command
 # go run -mod=mod entgo.io/ent/cmd/ent init --target ./pkg/database/models {User}

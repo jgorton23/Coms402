@@ -18,6 +18,24 @@ func NewUserRepo(db *database.Database) *UserRepo {
 	return &UserRepo{db}
 }
 
+func (ur *UserRepo) Get(ctx context.Context) ([]entity.User, error) {
+	us, err := ur.Client.User.
+		Query().
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]entity.User, len(us))
+
+	for i := 0; i < len(us); i++ {
+		users[i] = ur.databaseUserToEntityUser(us[i])
+	}
+
+	return users, nil
+}
+
 func (ur *UserRepo) GetById(ctx context.Context, id int) (entity.User, error) {
 	user, err := ur.Client.User.
 		Query().
