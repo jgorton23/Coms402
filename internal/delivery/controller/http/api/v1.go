@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"iseage/bank/internal/usecase"
-	"iseage/bank/pkg/database/ent"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
 // Pattern used to verify UseCase conforms to required interfaces

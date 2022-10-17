@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"iseage/bank/config"
-	"iseage/bank/internal/app"
+	"github.com/MatthewBehnke/exampleGoApi/config"
+	"github.com/MatthewBehnke/exampleGoApi/internal/app"
 )
 
 func main() {

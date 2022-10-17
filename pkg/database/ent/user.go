@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"iseage/bank/pkg/database/ent/user"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
 // User is the model entity for the User schema.

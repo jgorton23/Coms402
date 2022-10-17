@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 
-	"iseage/bank/pkg/database/ent/predicate"
-	"iseage/bank/pkg/database/ent/user"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/predicate"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.

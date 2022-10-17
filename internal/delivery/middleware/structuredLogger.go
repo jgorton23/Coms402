@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 
-	"iseage/bank/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 )
 
 func NewStructuredLogger(logger usecase.LoggerAdapter) func(next http.Handler) http.Handler {

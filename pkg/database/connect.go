@@ -9,7 +9,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq"
 
-	"iseage/bank/pkg/database/ent"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
 const (

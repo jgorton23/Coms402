@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"iseage/bank/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 )
 
 func LoggerCtx(logger usecase.LoggerAdapter) func(next http.Handler) http.Handler {

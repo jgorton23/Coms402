@@ -6,17 +6,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/samber/do"
 	"github.com/sirupsen/logrus"
 	logrusadapter "logur.dev/adapter/logrus"
 	"logur.dev/logur"
 
-	"iseage/bank/config"
-	"iseage/bank/internal/delivery/controller"
-	"iseage/bank/internal/delivery/controller/http/api"
-	"iseage/bank/internal/usecase"
-	"iseage/bank/internal/usecase/repo"
-	"iseage/bank/pkg/database"
+	"github.com/MatthewBehnke/exampleGoApi/config"
+	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller"
+	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller/http/api"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database"
 )
 
 // Run creates objects via constructors.

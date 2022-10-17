@@ -7,9 +7,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/schema"
 
-	"iseage/bank/pkg/database/ent"
-	"iseage/bank/pkg/database/ent/migrate"
-	_ "iseage/bank/pkg/database/ent/runtime"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/migrate"
+	_ "github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/runtime"
 )
 
 type (

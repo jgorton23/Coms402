@@ -6,7 +6,7 @@ import (
 
 	"github.com/volatiletech/authboss/v3"
 
-	"iseage/bank/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test

@@ -3,10 +3,10 @@ package repo
 import (
 	"context"
 
-	"iseage/bank/internal/entity"
-	"iseage/bank/pkg/database"
-	"iseage/bank/pkg/database/ent"
-	"iseage/bank/pkg/database/ent/user"
+	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
 type UserRepo struct {

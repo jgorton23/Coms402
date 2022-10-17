@@ -7,7 +7,7 @@ import (
 	"logur.dev/logur"
 	"logur.dev/logur/logtesting"
 
-	"iseage/bank/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 )
 
 func TestLoggerAdapter_Levels(t *testing.T) {

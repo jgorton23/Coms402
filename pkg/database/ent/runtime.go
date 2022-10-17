@@ -5,8 +5,8 @@ package ent
 import (
 	"time"
 
-	"iseage/bank/pkg/database/ent/user"
-	"iseage/bank/pkg/database/models"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/models"
 )
 
 // The init function reads all schema descriptors with runtime code

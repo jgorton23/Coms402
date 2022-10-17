@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"iseage/bank/pkg/database/ent"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary

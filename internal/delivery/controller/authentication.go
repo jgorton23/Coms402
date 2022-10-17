@@ -10,8 +10,8 @@ import (
 	"github.com/volatiletech/authboss/v3"
 	"github.com/volatiletech/authboss/v3/defaults"
 
-	"iseage/bank/config"
-	"iseage/bank/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/config"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 )
 
 func newAuthentication(cfg *config.Config, abuc usecase.AuthBossUseCase, logger usecase.LoggerAdapter) *authboss.Authboss {

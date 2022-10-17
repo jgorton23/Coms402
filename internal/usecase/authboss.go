@@ -8,7 +8,7 @@ import (
 
 	"github.com/volatiletech/authboss/v3"
 
-	"iseage/bank/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 )
 
 var (
