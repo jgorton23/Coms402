@@ -22,10 +22,10 @@ var (
 
 type AuthBossUseCase struct {
 	repo UserRepo
-	log  LoggerAdapter
+	log  LoggerUseCase
 }
 
-func NewAuthBossUseCase(r UserRepo, l LoggerAdapter) *AuthBossUseCase {
+func NewAuthBossUseCase(r UserRepo, l LoggerUseCase) *AuthBossUseCase {
 	return &AuthBossUseCase{
 		repo: r,
 		log:  l,

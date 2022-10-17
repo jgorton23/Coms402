@@ -25,7 +25,7 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/httpserver"
 )
 
-func New(cfg *entity.Config, logger usecase.LoggerAdapter, abuc usecase.AuthBossUseCase, httpV1 api.HttpV1) {
+func New(cfg *entity.Config, logger usecase.Logger, abuc usecase.AuthBossUseCase, httpV1 api.HttpV1) {
 	// HTTP Server
 	mux := chi.NewRouter()
 	mux.Use(chimiddleware.RequestID)

@@ -20,22 +20,27 @@ import (
 
 // Run creates objects via constructors.
 func Run() {
-	l := NewLogger(LogConfig{
-		Format:  "json", //logfmt or json
-		Level:   "info",
-		NoColor: true,
-	})
-
-	log.SetFlags(0) // Remove all flags
-	// Override the global standard library logger to make sure everything uses our logger
-	log.SetOutput(logur.NewLevelWriter(&l, logur.Info))
-
 	injector := do.New()
 
 	do.Provide(injector, repo.NewCleanEnvService)
-	do.Provide(injector, usecase.NewConfigUseCase("./config.yml", l.WithSubsystem("config")))
+	do.Provide(injector, usecase.NewConfigUseCase("./config.yml"))
 
 	config := do.MustInvoke[*usecase.ConfigUseCase](injector)
+
+	do.Provide(injector, repo.NewLogrusService(config.Get().LOG))
+
+	logrusService := do.MustInvoke[logrusadapter.Logger](injector)
+
+	// Override the global standard library logger to make sure everything uses our logger
+	log.SetOutput(logur.NewLevelWriter(&logrusService, logur.Info))
+
+	do.Provide(injector, usecase.NewLoggerUseCase(&logrusService))
+
+	l := do.MustInvoke[*usecase.LoggerUseCase](injector)
+
+	log.SetFlags(0) // Remove all flags
+	// Override the global standard library logger to make sure everything uses our logger
+	log.SetOutput(logur.NewLevelWriter(l, logur.Info))
 
 	// Database repository
 	db, err := database.NewClient(config.Get().PG.URL, database.MaxPoolSize(config.Get().PG.PoolMax))
@@ -48,21 +53,21 @@ func Run() {
 
 	userRepo := repo.NewUserRepo(db)
 
-	authBossUseCase := usecase.NewAuthBossUseCase(userRepo, l)
+	authBossUseCase := usecase.NewAuthBossUseCase(userRepo, *l)
 
-	httpV1UseCase := api.NewHttpV1(userRepo, l)
+	httpV1UseCase := api.NewHttpV1(userRepo, *l)
 
 	if err != nil {
 		l.Error(err.Error())
 	}
 
-	controller.New(config.Get(), l, *authBossUseCase, *httpV1UseCase)
+	controller.New(config.Get(), *l, *authBossUseCase, *httpV1UseCase)
 
 	injector.Shutdown()
 }
 
 // NewLogger creates a new logger.
-func NewLogger(config LogConfig) usecase.LoggerAdapter {
+func NewLogger(config LogConfig) logrusadapter.Logger {
 	l := logrus.New()
 
 	l.SetOutput(os.Stdout)
@@ -80,7 +85,7 @@ func NewLogger(config LogConfig) usecase.LoggerAdapter {
 		l.SetLevel(level)
 	}
 
-	return *usecase.NewLoggerAdapter(logrusadapter.New(l))
+	return *logrusadapter.New(l)
 }
 
 type LogConfig struct {

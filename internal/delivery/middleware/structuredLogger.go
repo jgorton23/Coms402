@@ -10,16 +10,16 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 )
 
-func NewStructuredLogger(logger usecase.LoggerAdapter) func(next http.Handler) http.Handler {
+func NewStructuredLogger(logger usecase.Logger) func(next http.Handler) http.Handler {
 	return middleware.RequestLogger(&StructuredLogger{logger})
 }
 
 type StructuredLogger struct {
-	Logger usecase.LoggerAdapter
+	Logger usecase.Logger
 }
 
 func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
-	entry := &Entry{Logger: *usecase.NewLoggerAdapter(&l.Logger)}
+	entry := &Entry{Logger: l.Logger}
 	logFields := usecase.LoggerFields{}
 
 	if reqID := middleware.GetReqID(r.Context()); reqID != "" {
@@ -45,7 +45,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 }
 
 type Entry struct {
-	Logger usecase.LoggerAdapter
+	Logger usecase.Logger
 }
 
 func (e *Entry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
@@ -70,7 +70,7 @@ func (e *Entry) Panic(v interface{}, stack []byte) {
 // passes through the handler chain, which at any point can be logged
 // with a call to .Print(), .Info(), etc.
 
-func GetLogEntry(r *http.Request) usecase.LoggerAdapter {
+func GetLogEntry(r *http.Request) usecase.Logger {
 	entry := middleware.GetLogEntry(r).(*Entry)
 	return entry.Logger
 }

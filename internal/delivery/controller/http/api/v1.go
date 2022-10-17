@@ -18,10 +18,10 @@ var (
 
 type HttpV1 struct {
 	repo usecase.UserRepo
-	log  usecase.LoggerAdapter
+	log  usecase.LoggerUseCase
 }
 
-func NewHttpV1(r usecase.UserRepo, l usecase.LoggerAdapter) *HttpV1 {
+func NewHttpV1(r usecase.UserRepo, l usecase.LoggerUseCase) *HttpV1 {
 	return &HttpV1{
 		repo: r,
 		log:  l,

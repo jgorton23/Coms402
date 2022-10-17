@@ -14,19 +14,16 @@ var (
 type ConfigUseCase struct {
 	config *repo.CleanEnvService
 	Path   string
-	logger Logger
 }
 
-func NewConfigUseCase(path string, la Logger) func(i *do.Injector) (*ConfigUseCase, error) {
+func NewConfigUseCase(path string) func(i *do.Injector) (*ConfigUseCase, error) {
 	return func(i *do.Injector) (*ConfigUseCase, error) {
-		la.Info("starting subsystem")
 		config := do.MustInvoke[*repo.CleanEnvService](i)
-		cs := ConfigUseCase{config: config, logger: la}
+		cs := ConfigUseCase{config: config}
 		err := cs.config.Load(path)
 		if err != nil {
 			return nil, err
 		}
-		cs.logger.Info("started subsystem")
 		return &cs, nil
 	}
 }
@@ -40,6 +37,5 @@ func (cs ConfigUseCase) HealthCheck() error {
 }
 
 func (cs ConfigUseCase) Shutdown() error {
-	cs.logger.Info("shutdown config")
 	return nil
 }

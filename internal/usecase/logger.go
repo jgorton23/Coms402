@@ -1,54 +1,56 @@
 package usecase
 
 import (
+	"github.com/samber/do"
 	"logur.dev/logur"
 )
 
 type LoggerFields map[string]interface{}
 
-// LoggerAdapter wraps a logur logger and exposes it under a custom interface.
-type LoggerAdapter struct {
+// LoggerUseCase wraps a logur logger and exposes it under a custom interface.
+type LoggerUseCase struct {
 	logger logur.Logger
 }
 
-// NewLoggerAdapter returns a new Logger instance.
-func NewLoggerAdapter(logger logur.Logger) *LoggerAdapter {
-	return &LoggerAdapter{
-		logger: logger,
+func NewLoggerUseCase(logger logur.Logger) func(i *do.Injector) (*LoggerUseCase, error) {
+	return func(i *do.Injector) (*LoggerUseCase, error) {
+		return &LoggerUseCase{
+			logger: logger,
+		}, nil
 	}
 }
 
 // Trace logs a trace event.
-func (l *LoggerAdapter) Trace(msg string, fields ...map[string]interface{}) {
+func (l LoggerUseCase) Trace(msg string, fields ...map[string]interface{}) {
 	l.logger.Trace(msg, fields...)
 }
 
 // Debug logs a debug event.
-func (l *LoggerAdapter) Debug(msg string, fields ...map[string]interface{}) {
+func (l LoggerUseCase) Debug(msg string, fields ...map[string]interface{}) {
 	l.logger.Debug(msg, fields...)
 }
 
 // Info logs an info event.
-func (l *LoggerAdapter) Info(msg string, fields ...map[string]interface{}) {
+func (l LoggerUseCase) Info(msg string, fields ...map[string]interface{}) {
 	l.logger.Info(msg, fields...)
 }
 
 // Warn logs a warning event.
-func (l *LoggerAdapter) Warn(msg string, fields ...map[string]interface{}) {
+func (l LoggerUseCase) Warn(msg string, fields ...map[string]interface{}) {
 	l.logger.Warn(msg, fields...)
 }
 
 // Error logs an error event.
-func (l *LoggerAdapter) Error(msg string, fields ...map[string]interface{}) {
+func (l LoggerUseCase) Error(msg string, fields ...map[string]interface{}) {
 	l.logger.Error(msg, fields...)
 }
 
 // WithFields annotates a logger with some context and it as a new instance.
-func (l *LoggerAdapter) WithFields(fields map[string]interface{}) Logger {
-	return &LoggerAdapter{logger: logur.WithFields(l.logger, fields)}
+func (l LoggerUseCase) WithFields(fields map[string]interface{}) Logger {
+	return &LoggerUseCase{logger: logur.WithFields(l.logger, fields)}
 }
 
 // WithFields annotates a logger with some context and it as a new instance.
-func (l *LoggerAdapter) WithSubsystem(subsystem string) Logger {
-	return &LoggerAdapter{logger: logur.WithFields(l.logger, map[string]interface{}{"subsystem": subsystem})}
+func (l LoggerUseCase) WithSubsystem(subsystem string) Logger {
+	return &LoggerUseCase{logger: logur.WithFields(l.logger, map[string]interface{}{"subsystem": subsystem})}
 }
