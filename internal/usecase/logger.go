@@ -1,6 +1,8 @@
 package usecase
 
-import "logur.dev/logur"
+import (
+	"logur.dev/logur"
+)
 
 type LoggerFields map[string]interface{}
 

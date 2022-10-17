@@ -18,14 +18,14 @@ import (
 	_ "github.com/volatiletech/authboss/v3/register"
 	"github.com/volatiletech/authboss/v3/remember"
 
-	"github.com/MatthewBehnke/exampleGoApi/config"
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller/http/api"
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/middleware"
+	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/httpserver"
 )
 
-func New(cfg *config.Config, logger usecase.LoggerAdapter, abuc usecase.AuthBossUseCase, httpV1 api.HttpV1) {
+func New(cfg *entity.Config, logger usecase.LoggerAdapter, abuc usecase.AuthBossUseCase, httpV1 api.HttpV1) {
 	// HTTP Server
 	mux := chi.NewRouter()
 	mux.Use(chimiddleware.RequestID)

@@ -1,6 +1,6 @@
 module github.com/MatthewBehnke/exampleGoApi
 
-go 1.17
+go 1.18
 
 require (
 	entgo.io/ent v0.11.2
@@ -29,6 +29,7 @@ require (
 
 require (
 	github.com/deepmap/oapi-codegen v1.11.0
+	github.com/samber/do v1.4.1
 	github.com/volatiletech/authboss-renderer v0.0.0-20210622044114-b32bb7a1387f
 )
 

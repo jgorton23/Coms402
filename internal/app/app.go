@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/samber/do"
 	"github.com/sirupsen/logrus"
 	logrusadapter "logur.dev/adapter/logrus"
 	"logur.dev/logur"
 
-	"github.com/MatthewBehnke/exampleGoApi/config"
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller"
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller/http/api"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
@@ -19,7 +19,15 @@ import (
 )
 
 // Run creates objects via constructors.
-func Run(cfg *config.Config) {
+func Run() {
+
+	injector := do.New()
+
+	do.Provide(injector, repo.NewCleanEnvService)
+
+	config := do.MustInvoke[*repo.CleanEnvService](injector)
+
+	config.Load("./config.yml")
 
 	l := NewLogger(LogConfig{
 		Format:  "logfmt", //logfmt or json
@@ -30,7 +38,7 @@ func Run(cfg *config.Config) {
 	log.SetOutput(logur.NewLevelWriter(&l, logur.Info))
 
 	// Database repository
-	db, err := database.NewClient(cfg.PG.URL, database.MaxPoolSize(cfg.PG.PoolMax))
+	db, err := database.NewClient(config.Get().PG.URL, database.MaxPoolSize(config.Get().PG.PoolMax))
 
 	if err != nil {
 		l.Error(fmt.Errorf("app - Run - postgres.New: %w", err).Error())
@@ -48,7 +56,7 @@ func Run(cfg *config.Config) {
 		l.Error(err.Error())
 	}
 
-	controller.New(cfg, l, *authBossUseCase, *httpV1UseCase)
+	controller.New(config.Get(), l, *authBossUseCase, *httpV1UseCase)
 }
 
 // NewLogger creates a new logger.

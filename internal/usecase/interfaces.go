@@ -24,6 +24,13 @@ type (
 		WithFields(fields map[string]interface{}) Logger
 	}
 
+	Config interface {
+		Load(string) error
+		Get() (entity.Config, error)
+		HealthCheck() error
+		Shutdown() error
+	}
+
 	// Conforms to the authboss interfaces
 	AuthBoss interface {
 		Load(context.Context, string) (authboss.User, error)
