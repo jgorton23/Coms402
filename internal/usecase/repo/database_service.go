@@ -8,10 +8,10 @@ import (
 
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq"
+	"github.com/samber/do"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
-	"github.com/samber/do"
 )
 
 func NewDatabaseService(i *do.Injector) (*DatabaseService, error) {

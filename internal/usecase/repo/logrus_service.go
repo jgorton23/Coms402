@@ -3,10 +3,11 @@ package repo
 import (
 	"os"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/samber/do"
 	"github.com/sirupsen/logrus"
 	logrusadapter "logur.dev/adapter/logrus"
+
+	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 )
 
 func NewLogrusService() func(i *do.Injector) (logrusadapter.Logger, error) {

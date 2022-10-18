@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/samber/do"
+
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
-	"github.com/samber/do"
 )
 
 // Pattern used to verify UseCase conforms to required interfaces

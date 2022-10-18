@@ -3,8 +3,9 @@ package repo
 import (
 	"fmt"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/ilyakaznacheev/cleanenv"
+
+	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 )
 
 // func NewCleanEnvService(i *do.Injector) (*CleanEnvService, error) {

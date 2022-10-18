@@ -3,10 +3,11 @@ package repo
 import (
 	"context"
 
+	"github.com/samber/do"
+
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
-	"github.com/samber/do"
 )
 
 // NewDataBaseServiceUser -.
