@@ -35,7 +35,7 @@ func NewDatabaseService(i *do.Injector) (*DatabaseService, error) {
 	if err := dbService.entClient.Schema.Create(context.Background()); err != nil {
 		return nil, fmt.Errorf("failed creating schema resources: %v", err)
 	}
-	log.Print("finished database setup")
+	log.Print("database service started")
 
 	return dbService, nil
 }
@@ -55,5 +55,6 @@ func (s *DatabaseService) HealthCheck() error {
 }
 
 func (s *DatabaseService) Shutdown() error {
+	log.Print("database service shutdown")
 	return s.entClient.Close()
 }

@@ -2,14 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 
 	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
 	"github.com/volatiletech/authboss/v3/lock"
@@ -25,18 +24,45 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/httpserver"
 )
 
-func New(cfg *entity.Config, logger usecase.Logger, abuc usecase.AuthBossUseCase, httpV1 api.HttpV1) {
+func New(i *do.Injector) (*Controller, error) {
+	c := &Controller{
+		config:          do.MustInvoke[*entity.Config](i),
+		log:             do.MustInvoke[*usecase.LoggerUseCase](i).WithSubsystem("controller"),
+		authBossUseCase: do.MustInvoke[*usecase.AuthBossUseCase](i),
+		httpV1:          do.MustInvoke[*api.HttpV1](i),
+	}
+	return c, nil
+}
+
+type Controller struct {
+	config          *entity.Config
+	log             usecase.Logger
+	authBossUseCase usecase.AuthBoss
+	httpV1          *api.HttpV1
+	httpServer      *httpserver.Server
+}
+
+func (c *Controller) Shutdown() error {
+	err := c.httpServer.Shutdown()
+	if err != nil {
+		return fmt.Errorf("app - Run - httpServer.Shutdown: %w", err)
+	}
+	log.Print("controller service shutdown")
+	return nil
+}
+
+func (c *Controller) Run() {
 	// HTTP Server
 	mux := chi.NewRouter()
 	mux.Use(chimiddleware.RequestID)
 	mux.Use(chimiddleware.RealIP)
 	mux.Use(chimiddleware.Recoverer)
-	mux.Use(middleware.NewStructuredLogger(logger))
+	mux.Use(middleware.NewStructuredLogger(c.log))
 
 	// loading usecase's onto context
-	mux.Use(middleware.LoggerCtx(logger))
+	mux.Use(middleware.LoggerCtx(c.log))
 
-	ab := newAuthentication(cfg, abuc, logger)
+	ab := newAuthentication(c.config, c.authBossUseCase, c.log)
 
 	mux.Use(ab.LoadClientStateMiddleware, remember.Middleware(ab))
 
@@ -56,25 +82,8 @@ func New(cfg *entity.Config, logger usecase.Logger, abuc usecase.AuthBossUseCase
 		r.Use(lock.Middleware(ab))
 
 		// Openapi generated interfaces
-		api.HandlerFromMuxWithBaseURL(httpV1, r, "/v1")
+		api.HandlerFromMuxWithBaseURL(c.httpV1, r, "/v1")
 	})
 
-	httpServer := httpserver.New(mux, httpserver.Port(cfg.HTTP.Port))
-
-	// Waiting signal
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
-	select {
-	case s := <-interrupt:
-		logger.Info("app - Run - signal: " + s.String())
-	case err := <-httpServer.Notify():
-		logger.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err).Error())
-	}
-
-	// Shutdown
-	err := httpServer.Shutdown()
-	if err != nil {
-		logger.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err).Error())
-	}
+	c.httpServer = httpserver.New(mux, httpserver.Port(c.config.HTTP.Port))
 }

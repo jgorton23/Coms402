@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
+	"github.com/samber/do"
 )
 
 // Pattern used to verify UseCase conforms to required interfaces
@@ -16,16 +18,17 @@ var (
 	_ ServerInterface = assertHttpV1
 )
 
-type HttpV1 struct {
-	repo usecase.DataBaseServiceUser
-	log  usecase.LoggerUseCase
+func NewHttpV1(i *do.Injector) (*HttpV1, error) {
+	httpV1 := &HttpV1{}
+	httpV1.log = do.MustInvoke[*usecase.LoggerUseCase](i).WithSubsystem("controller http v1")
+	httpV1.repo = do.MustInvoke[*repo.DataBaseServiceUser](i)
+
+	return httpV1, nil
 }
 
-func NewHttpV1(r usecase.DataBaseServiceUser, l usecase.LoggerUseCase) *HttpV1 {
-	return &HttpV1{
-		repo: r,
-		log:  l,
-	}
+type HttpV1 struct {
+	repo usecase.DataBaseServiceUser
+	log  usecase.Logger
 }
 
 func (v1 HttpV1) ShowUserById(w http.ResponseWriter, r *http.Request, userId UserId) {

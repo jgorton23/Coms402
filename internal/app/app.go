@@ -2,7 +2,11 @@
 package app
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/samber/do"
 	logrusadapter "logur.dev/adapter/logrus"
@@ -19,8 +23,6 @@ func Run() {
 	injector := do.New()
 
 	config := repo.NewCleanEnvService()
-	// do.Provide(injector, repo.NewCleanEnvService)
-	// config := do.MustInvoke[*repo.CleanEnvService](injector)
 	config.Load("./config.yml")
 	do.ProvideValue(injector, config.Get())
 
@@ -30,20 +32,33 @@ func Run() {
 	do.Provide(injector, usecase.NewLoggerUseCase(&logrus))
 	l := do.MustInvoke[*usecase.LoggerUseCase](injector)
 
-	log.SetFlags(0) // Remove all flags
+	// Remove all flags
+	log.SetFlags(0)
 	// Override the global standard library logger to make sure everything uses our logger
 	log.SetOutput(logur.NewLevelWriter(l, logur.Info))
 
 	do.Provide(injector, repo.NewDatabaseService)
 	do.Provide(injector, repo.NewDataBaseServiceUser)
+	do.Provide(injector, usecase.NewAuthBossUseCase)
+	do.Provide(injector, api.NewHttpV1)
+	do.Provide(injector, controller.New)
 
-	dbUser := do.MustInvoke[*repo.DataBaseServiceUser](injector)
+	controller := do.MustInvoke[*controller.Controller](injector)
 
-	authBossUseCase := usecase.NewAuthBossUseCase(dbUser, *l)
+	controller.Run()
 
-	httpV1UseCase := api.NewHttpV1(dbUser, *l)
+	// Waiting signal
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
-	controller.New(config.Get(), *l, *authBossUseCase, *httpV1UseCase)
+	select {
+	case s := <-interrupt:
+		log.Print("app - Run - signal: " + s.String())
+	}
 
-	injector.Shutdown()
+	// Shutdown
+	err := injector.Shutdown()
+	if err != nil {
+		log.Print(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err).Error())
+	}
 }

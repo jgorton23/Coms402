@@ -14,7 +14,7 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 )
 
-func newAuthentication(cfg *entity.Config, abuc usecase.AuthBossUseCase, logger usecase.Logger) *authboss.Authboss {
+func newAuthentication(cfg *entity.Config, abuc usecase.AuthBoss, logger usecase.Logger) *authboss.Authboss {
 	ab := authboss.New()
 
 	cookieStoreKey, _ := base64.StdEncoding.DecodeString(cfg.HTTP.CookieStoreKey)

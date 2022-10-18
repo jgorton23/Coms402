@@ -6,31 +6,40 @@ import (
 	"net/mail"
 	"strings"
 
+	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
 )
 
 var (
 	assertUserUseCase                               = &AuthBossUseCase{}
 	_                 authboss.CreatingServerStorer = assertUserUseCase
-	// _                 authboss.ConfirmingServerStorer = assertUserUseCase
-
-// 	_                 authboss.RecoveringServerStorer  = assertUserUseCase
-// 	_                 authboss.RememberingServerStorer = assertUserUseCase
+	//  _                 authboss.ConfirmingServerStorer = assertUserUseCase
+	// 	_                 authboss.RecoveringServerStorer  = assertUserUseCase
+	// 	_                 authboss.RememberingServerStorer = assertUserUseCase
 )
+
+func NewAuthBossUseCase(i *do.Injector) (*AuthBossUseCase, error) {
+	abuc := &AuthBossUseCase{}
+	abuc.log = do.MustInvoke[*LoggerUseCase](i)
+	abuc.repo = do.MustInvoke[*repo.DataBaseServiceUser](i)
+
+	return abuc, nil
+}
 
 type AuthBossUseCase struct {
 	repo DataBaseServiceUser
-	log  LoggerUseCase
+	log  *LoggerUseCase
 }
 
-func NewAuthBossUseCase(r DataBaseServiceUser, l LoggerUseCase) *AuthBossUseCase {
-	return &AuthBossUseCase{
-		repo: r,
-		log:  l,
-	}
-}
+// func NewAuthBossUseCase(r DataBaseServiceUser, l LoggerUseCase) *AuthBossUseCase {
+// 	return &AuthBossUseCase{
+// 		repo: r,
+// 		log:  l,
+// 	}
+// }
 
 func (uuc AuthBossUseCase) Save(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
