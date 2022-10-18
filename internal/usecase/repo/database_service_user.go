@@ -4,21 +4,24 @@ import (
 	"context"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
+	"github.com/samber/do"
 )
 
-type UserRepo struct {
-	*database.Database
+// NewDataBaseServiceUser -.
+func NewDataBaseServiceUser(i *do.Injector) (*DataBaseServiceUser, error) {
+	dbServiceUser := &DataBaseServiceUser{}
+	dbServiceUser.Client = do.MustInvoke[*DatabaseService](i).Client()
+
+	return dbServiceUser, nil
 }
 
-// NewUserRepo -.
-func NewUserRepo(db *database.Database) *UserRepo {
-	return &UserRepo{db}
+type DataBaseServiceUser struct {
+	*ent.Client
 }
 
-func (ur *UserRepo) Get(ctx context.Context) ([]entity.User, error) {
+func (ur *DataBaseServiceUser) Get(ctx context.Context) ([]entity.User, error) {
 	us, err := ur.Client.User.
 		Query().
 		All(ctx)
@@ -36,7 +39,7 @@ func (ur *UserRepo) Get(ctx context.Context) ([]entity.User, error) {
 	return users, nil
 }
 
-func (ur *UserRepo) GetById(ctx context.Context, id int) (entity.User, error) {
+func (ur *DataBaseServiceUser) GetById(ctx context.Context, id int) (entity.User, error) {
 	user, err := ur.Client.User.
 		Query().
 		Where(user.ID(id)).
@@ -49,7 +52,7 @@ func (ur *UserRepo) GetById(ctx context.Context, id int) (entity.User, error) {
 	return ur.databaseUserToEntityUser(user), nil
 }
 
-func (ur *UserRepo) GetByEmail(ctx context.Context, email string) (entity.User, error) {
+func (ur *DataBaseServiceUser) GetByEmail(ctx context.Context, email string) (entity.User, error) {
 	user, err := ur.Client.User.
 		Query().
 		Where(user.Email(email)).
@@ -63,7 +66,7 @@ func (ur *UserRepo) GetByEmail(ctx context.Context, email string) (entity.User, 
 }
 
 // Exists -.
-func (ur *UserRepo) Exists(ctx context.Context, u string) (bool, error) {
+func (ur *DataBaseServiceUser) Exists(ctx context.Context, u string) (bool, error) {
 	exists, err := ur.Client.User.
 		Query().
 		Where(user.Email(u)).
@@ -77,7 +80,7 @@ func (ur *UserRepo) Exists(ctx context.Context, u string) (bool, error) {
 }
 
 // Create -.
-func (ur *UserRepo) Create(ctx context.Context, u entity.User) (entity.User, error) {
+func (ur *DataBaseServiceUser) Create(ctx context.Context, u entity.User) (entity.User, error) {
 	user, err := ur.Client.User.
 		Create().
 		SetEmail(u.Email).
@@ -98,7 +101,7 @@ func (ur *UserRepo) Create(ctx context.Context, u entity.User) (entity.User, err
 }
 
 // Create -.
-func (ur *UserRepo) Update(ctx context.Context, u entity.User) error {
+func (ur *DataBaseServiceUser) Update(ctx context.Context, u entity.User) error {
 	_, err := ur.Client.User.
 		Update().
 		SetEmail(u.Email).
@@ -118,7 +121,7 @@ func (ur *UserRepo) Update(ctx context.Context, u entity.User) error {
 	return nil
 }
 
-func (ur *UserRepo) databaseUserToEntityUser(u *ent.User) entity.User {
+func (ur *DataBaseServiceUser) databaseUserToEntityUser(u *ent.User) entity.User {
 	return entity.User{
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,

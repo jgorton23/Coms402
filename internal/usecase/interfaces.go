@@ -30,11 +30,6 @@ type (
 		WithSubsystem(subsystem string) Logger
 	}
 
-	Config interface {
-		Get() *entity.Config
-		Service
-	}
-
 	// Conforms to the authboss interfaces
 	AuthBoss interface {
 		Load(context.Context, string) (authboss.User, error)
@@ -43,7 +38,7 @@ type (
 		Create(context.Context, authboss.User) error
 	}
 
-	UserRepo interface {
+	DataBaseServiceUser interface {
 		Get(context.Context) ([]entity.User, error)
 		GetById(context.Context, int) (entity.User, error)
 		GetByEmail(context.Context, string) (entity.User, error)

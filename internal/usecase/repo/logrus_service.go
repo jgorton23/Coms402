@@ -9,8 +9,10 @@ import (
 	logrusadapter "logur.dev/adapter/logrus"
 )
 
-func NewLogrusService(config entity.LOG) func(i *do.Injector) (logrusadapter.Logger, error) {
+func NewLogrusService() func(i *do.Injector) (logrusadapter.Logger, error) {
 	return func(i *do.Injector) (logrusadapter.Logger, error) {
+		config := do.MustInvoke[*entity.Config](i)
+
 		l := logrus.New()
 
 		l.SetOutput(os.Stdout)

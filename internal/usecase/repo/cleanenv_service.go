@@ -5,11 +5,14 @@ import (
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/ilyakaznacheev/cleanenv"
-	"github.com/samber/do"
 )
 
-func NewCleanEnvService(i *do.Injector) (*CleanEnvService, error) {
-	return &CleanEnvService{}, nil
+// func NewCleanEnvService(i *do.Injector) (*CleanEnvService, error) {
+// 	return &CleanEnvService{}, nil
+// }
+
+func NewCleanEnvService() *CleanEnvService {
+	return &CleanEnvService{}
 }
 
 type CleanEnvService struct {

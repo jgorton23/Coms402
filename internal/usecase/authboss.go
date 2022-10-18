@@ -21,11 +21,11 @@ var (
 )
 
 type AuthBossUseCase struct {
-	repo UserRepo
+	repo DataBaseServiceUser
 	log  LoggerUseCase
 }
 
-func NewAuthBossUseCase(r UserRepo, l LoggerUseCase) *AuthBossUseCase {
+func NewAuthBossUseCase(r DataBaseServiceUser, l LoggerUseCase) *AuthBossUseCase {
 	return &AuthBossUseCase{
 		repo: r,
 		log:  l,
