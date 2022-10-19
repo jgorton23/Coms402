@@ -14,27 +14,29 @@ import (
 )
 
 var (
-	assertUserUseCase                               = &AuthBossUseCase{}
-	_                 authboss.CreatingServerStorer = assertUserUseCase
+	assertAuthBossImplem                               = &authBossImplem{}
+	_                    authboss.CreatingServerStorer = assertAuthBossImplem
+	// If there is ever a need to implement confirming, recovering or remembering
+	// uncommenting the below lines will make it a lot easier
 	//  _                 authboss.ConfirmingServerStorer = assertUserUseCase
 	// 	_                 authboss.RecoveringServerStorer  = assertUserUseCase
 	// 	_                 authboss.RememberingServerStorer = assertUserUseCase
 )
 
-func NewAuthBossUseCase(i *do.Injector) (*AuthBossUseCase, error) {
-	abuc := &AuthBossUseCase{}
-	abuc.log = do.MustInvoke[*LoggerUseCase](i)
+func NewAuthBoss(i *do.Injector) (AuthBoss, error) {
+	abuc := &authBossImplem{}
+	abuc.log = do.MustInvoke[Logger](i)
 	abuc.userService = do.MustInvoke[repo.DataBaseServiceUser](i)
 
 	return abuc, nil
 }
 
-type AuthBossUseCase struct {
+type authBossImplem struct {
 	userService repo.DataBaseServiceUser
-	log         *LoggerUseCase
+	log         Logger
 }
 
-func (uuc AuthBossUseCase) Save(ctx context.Context, user authboss.User) error {
+func (uuc authBossImplem) Save(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
 
 	exists, err := uuc.userService.Exists(ctx, u.Email)
@@ -58,7 +60,7 @@ func (uuc AuthBossUseCase) Save(ctx context.Context, user authboss.User) error {
 	return nil
 }
 
-func (uuc AuthBossUseCase) Load(ctx context.Context, key string) (user authboss.User, err error) {
+func (uuc authBossImplem) Load(ctx context.Context, key string) (user authboss.User, err error) {
 
 	exists, err := uuc.userService.Exists(ctx, key)
 
@@ -83,11 +85,11 @@ func (uuc AuthBossUseCase) Load(ctx context.Context, key string) (user authboss.
 	return user, nil
 }
 
-func (uuc AuthBossUseCase) New(_ context.Context) authboss.User {
+func (uuc authBossImplem) New(_ context.Context) authboss.User {
 	return &entity.User{}
 }
 
-func (uuc AuthBossUseCase) Create(ctx context.Context, user authboss.User) error {
+func (uuc authBossImplem) Create(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
 
 	u.Email = strings.ToLower(u.Email)

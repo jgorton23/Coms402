@@ -10,6 +10,8 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 )
 
+type loggerFields map[string]interface{}
+
 func NewStructuredLogger(logger usecase.Logger) func(next http.Handler) http.Handler {
 	return middleware.RequestLogger(&StructuredLogger{logger})
 }
@@ -20,7 +22,7 @@ type StructuredLogger struct {
 
 func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	entry := &Entry{Logger: l.Logger}
-	logFields := usecase.LoggerFields{}
+	logFields := loggerFields{}
 
 	if reqID := middleware.GetReqID(r.Context()); reqID != "" {
 		logFields["req_id"] = reqID
@@ -49,7 +51,7 @@ type Entry struct {
 }
 
 func (e *Entry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
-	e.Logger.WithFields(usecase.LoggerFields{
+	e.Logger.WithFields(loggerFields{
 		"resp_status":       status,
 		"resp_bytes_length": bytes,
 		"resp_elapsed_ms":   float64(elapsed.Nanoseconds()) / 1000000.0,
@@ -57,7 +59,7 @@ func (e *Entry) Write(status, bytes int, header http.Header, elapsed time.Durati
 }
 
 func (e *Entry) Panic(v interface{}, stack []byte) {
-	e.Logger.WithFields(usecase.LoggerFields{
+	e.Logger.WithFields(loggerFields{
 		"stack": string(stack),
 		"panic": fmt.Sprintf("%+v", v),
 	})
@@ -77,7 +79,7 @@ func GetLogEntry(r *http.Request) usecase.Logger {
 
 func LogEntrySetField(r *http.Request, key string, value interface{}) {
 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*Entry); ok {
-		entry.Logger.WithFields(usecase.LoggerFields{
+		entry.Logger.WithFields(loggerFields{
 			key: value,
 		})
 	}

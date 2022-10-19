@@ -21,7 +21,7 @@ var (
 
 func NewHttpV1(i *do.Injector) (*HttpV1, error) {
 	httpV1 := &HttpV1{}
-	httpV1.log = do.MustInvoke[*usecase.LoggerUseCase](i).WithSubsystem("controller http v1")
+	httpV1.log = do.MustInvoke[usecase.Logger](i).WithSubsystem("controller http v1")
 	httpV1.repo = do.MustInvoke[repo.DataBaseServiceUser](i)
 
 	return httpV1, nil

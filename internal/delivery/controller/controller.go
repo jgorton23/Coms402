@@ -26,20 +26,20 @@ import (
 
 func New(i *do.Injector) (*Controller, error) {
 	c := &Controller{
-		config:          do.MustInvoke[*entity.Config](i),
-		log:             do.MustInvoke[*usecase.LoggerUseCase](i).WithSubsystem("controller"),
-		authBossUseCase: do.MustInvoke[*usecase.AuthBossUseCase](i),
-		httpV1:          do.MustInvoke[*HttpV1](i),
+		config:   do.MustInvoke[*entity.Config](i),
+		log:      do.MustInvoke[usecase.Logger](i).WithSubsystem("controller"),
+		authBoss: do.MustInvoke[usecase.AuthBoss](i),
+		httpV1:   do.MustInvoke[*HttpV1](i),
 	}
 	return c, nil
 }
 
 type Controller struct {
-	config          *entity.Config
-	log             usecase.Logger
-	authBossUseCase usecase.AuthBoss
-	httpV1          *HttpV1
-	httpServer      *httpserver.Server
+	config     *entity.Config
+	log        usecase.Logger
+	authBoss   usecase.AuthBoss
+	httpV1     *HttpV1
+	httpServer *httpserver.Server
 }
 
 func (c *Controller) Shutdown() error {
@@ -62,7 +62,7 @@ func (c *Controller) Run() {
 	// loading usecase's onto context
 	mux.Use(middleware.LoggerCtx(c.log))
 
-	ab := newAuthentication(c.config, c.authBossUseCase, c.log)
+	ab := newAuthentication(c.config, c.authBoss, c.log)
 
 	mux.Use(ab.LoadClientStateMiddleware)
 	// mux.Use(remember.Middleware(ab))

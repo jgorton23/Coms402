@@ -27,8 +27,8 @@ func Run() {
 	do.Provide(injector, repo.NewLogrusService())
 	logrus := do.MustInvoke[logrusadapter.Logger](injector)
 
-	do.Provide(injector, usecase.NewLoggerUseCase(&logrus))
-	l := do.MustInvoke[*usecase.LoggerUseCase](injector)
+	do.Provide(injector, usecase.NewLogger(&logrus))
+	l := do.MustInvoke[usecase.Logger](injector)
 
 	// Remove all flags
 	log.SetFlags(0)
@@ -37,8 +37,8 @@ func Run() {
 
 	do.Provide(injector, repo.NewDatabaseService)
 	do.Provide(injector, repo.NewDataBaseServiceUser)
-	// do.Provide(injector, repo.NewDataBaseServiceCasbin)
-	do.Provide(injector, usecase.NewAuthBossUseCase)
+	do.Provide(injector, repo.NewDataBaseServiceCasbin)
+	do.Provide(injector, usecase.NewAuthBoss)
 	do.Provide(injector, controller.NewHttpV1)
 	do.Provide(injector, controller.New)
 
