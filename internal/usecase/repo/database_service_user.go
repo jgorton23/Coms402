@@ -11,18 +11,18 @@ import (
 )
 
 // NewDataBaseServiceUser -.
-func NewDataBaseServiceUser(i *do.Injector) (*DataBaseServiceUser, error) {
-	dbServiceUser := &DataBaseServiceUser{}
-	dbServiceUser.Client = do.MustInvoke[*DatabaseService](i).Client()
-
+func NewDataBaseServiceUser(i *do.Injector) (DataBaseServiceUser, error) {
+	dbServiceUser := &dataBaseServiceUserImplem{
+		do.MustInvoke[DatabaseService](i).Client(),
+	}
 	return dbServiceUser, nil
 }
 
-type DataBaseServiceUser struct {
+type dataBaseServiceUserImplem struct {
 	*ent.Client
 }
 
-func (ur *DataBaseServiceUser) Get(ctx context.Context) ([]entity.User, error) {
+func (ur *dataBaseServiceUserImplem) Get(ctx context.Context) ([]entity.User, error) {
 	us, err := ur.Client.User.
 		Query().
 		All(ctx)
@@ -40,7 +40,7 @@ func (ur *DataBaseServiceUser) Get(ctx context.Context) ([]entity.User, error) {
 	return users, nil
 }
 
-func (ur *DataBaseServiceUser) GetById(ctx context.Context, id int) (entity.User, error) {
+func (ur *dataBaseServiceUserImplem) GetById(ctx context.Context, id int) (entity.User, error) {
 	user, err := ur.Client.User.
 		Query().
 		Where(user.ID(id)).
@@ -53,7 +53,7 @@ func (ur *DataBaseServiceUser) GetById(ctx context.Context, id int) (entity.User
 	return ur.databaseUserToEntityUser(user), nil
 }
 
-func (ur *DataBaseServiceUser) GetByEmail(ctx context.Context, email string) (entity.User, error) {
+func (ur *dataBaseServiceUserImplem) GetByEmail(ctx context.Context, email string) (entity.User, error) {
 	user, err := ur.Client.User.
 		Query().
 		Where(user.Email(email)).
@@ -67,7 +67,7 @@ func (ur *DataBaseServiceUser) GetByEmail(ctx context.Context, email string) (en
 }
 
 // Exists -.
-func (ur *DataBaseServiceUser) Exists(ctx context.Context, u string) (bool, error) {
+func (ur *dataBaseServiceUserImplem) Exists(ctx context.Context, u string) (bool, error) {
 	exists, err := ur.Client.User.
 		Query().
 		Where(user.Email(u)).
@@ -81,7 +81,7 @@ func (ur *DataBaseServiceUser) Exists(ctx context.Context, u string) (bool, erro
 }
 
 // Create -.
-func (ur *DataBaseServiceUser) Create(ctx context.Context, u entity.User) (entity.User, error) {
+func (ur *dataBaseServiceUserImplem) Create(ctx context.Context, u entity.User) (entity.User, error) {
 	user, err := ur.Client.User.
 		Create().
 		SetEmail(u.Email).
@@ -102,7 +102,7 @@ func (ur *DataBaseServiceUser) Create(ctx context.Context, u entity.User) (entit
 }
 
 // Create -.
-func (ur *DataBaseServiceUser) Update(ctx context.Context, u entity.User) error {
+func (ur *dataBaseServiceUserImplem) Update(ctx context.Context, u entity.User) error {
 	_, err := ur.Client.User.
 		Update().
 		SetEmail(u.Email).
@@ -122,7 +122,7 @@ func (ur *DataBaseServiceUser) Update(ctx context.Context, u entity.User) error 
 	return nil
 }
 
-func (ur *DataBaseServiceUser) databaseUserToEntityUser(u *ent.User) entity.User {
+func (ur *dataBaseServiceUserImplem) databaseUserToEntityUser(u *ent.User) entity.User {
 	return entity.User{
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,

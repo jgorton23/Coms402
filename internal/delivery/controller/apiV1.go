@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"encoding/json"
@@ -22,13 +22,13 @@ var (
 func NewHttpV1(i *do.Injector) (*HttpV1, error) {
 	httpV1 := &HttpV1{}
 	httpV1.log = do.MustInvoke[*usecase.LoggerUseCase](i).WithSubsystem("controller http v1")
-	httpV1.repo = do.MustInvoke[*repo.DataBaseServiceUser](i)
+	httpV1.repo = do.MustInvoke[repo.DataBaseServiceUser](i)
 
 	return httpV1, nil
 }
 
 type HttpV1 struct {
-	repo usecase.DataBaseServiceUser
+	repo repo.DataBaseServiceUser
 	log  usecase.Logger
 }
 

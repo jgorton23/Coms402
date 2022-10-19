@@ -12,15 +12,15 @@ import (
 // 	return &CleanEnvService{}, nil
 // }
 
-func NewCleanEnvService() *CleanEnvService {
-	return &CleanEnvService{}
+func NewCleanEnvService() ConfigService {
+	return &cleanEnvServiceImplem{}
 }
 
-type CleanEnvService struct {
+type cleanEnvServiceImplem struct {
 	cfg *entity.Config
 }
 
-func (c *CleanEnvService) Load(path string) error {
+func (c *cleanEnvServiceImplem) Load(path string) error {
 	c.cfg = &entity.Config{}
 	err := cleanenv.ReadConfig(path, c.cfg)
 	if err != nil {
@@ -33,6 +33,6 @@ func (c *CleanEnvService) Load(path string) error {
 	return nil
 }
 
-func (c *CleanEnvService) Get() *entity.Config {
+func (c *cleanEnvServiceImplem) Get() *entity.Config {
 	return c.cfg
 }

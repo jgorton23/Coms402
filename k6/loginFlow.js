@@ -3,7 +3,7 @@ import { check, group, sleep, fail } from 'k6';
 
 export const options = {
   vus: 1, // 1 user looping for 1 minute
-  duration: '10m',
+  duration: '1m',
 
   thresholds: {
     http_req_duration: ['p(99)<1500'], // 99% of requests must complete below 1.5s
@@ -12,7 +12,7 @@ export const options = {
 
 const BASE_URL = 'http://localhost:8082';
 const EMAIL = 'test@test.com';
-const PASSWORD = '@ironLions$00';
+const PASSWORD = 'test';
 
 export default () => {
 

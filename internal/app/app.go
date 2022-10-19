@@ -13,12 +13,10 @@ import (
 	"logur.dev/logur"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller"
-	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller/http/api"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
 )
 
-// Run creates objects via constructors.
 func Run() {
 	injector := do.New()
 
@@ -39,8 +37,9 @@ func Run() {
 
 	do.Provide(injector, repo.NewDatabaseService)
 	do.Provide(injector, repo.NewDataBaseServiceUser)
+	// do.Provide(injector, repo.NewDataBaseServiceCasbin)
 	do.Provide(injector, usecase.NewAuthBossUseCase)
-	do.Provide(injector, api.NewHttpV1)
+	do.Provide(injector, controller.NewHttpV1)
 	do.Provide(injector, controller.New)
 
 	controller := do.MustInvoke[*controller.Controller](injector)

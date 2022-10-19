@@ -34,7 +34,7 @@ func IDNEQ(id int) predicate.User {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -45,7 +45,7 @@ func IDIn(ids ...int) predicate.User {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -146,7 +146,7 @@ func CreatedAtNEQ(v time.Time) predicate.User {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -157,7 +157,7 @@ func CreatedAtIn(vs ...time.Time) predicate.User {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -210,7 +210,7 @@ func UpdatedAtNEQ(v time.Time) predicate.User {
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
 func UpdatedAtIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -221,7 +221,7 @@ func UpdatedAtIn(vs ...time.Time) predicate.User {
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
 func UpdatedAtNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -274,7 +274,7 @@ func EmailNEQ(v string) predicate.User {
 
 // EmailIn applies the In predicate on the "email" field.
 func EmailIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -285,7 +285,7 @@ func EmailIn(vs ...string) predicate.User {
 
 // EmailNotIn applies the NotIn predicate on the "email" field.
 func EmailNotIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -373,7 +373,7 @@ func PasswordHashNEQ(v string) predicate.User {
 
 // PasswordHashIn applies the In predicate on the "password_hash" field.
 func PasswordHashIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -384,7 +384,7 @@ func PasswordHashIn(vs ...string) predicate.User {
 
 // PasswordHashNotIn applies the NotIn predicate on the "password_hash" field.
 func PasswordHashNotIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -486,7 +486,7 @@ func AttemptCountNEQ(v int) predicate.User {
 
 // AttemptCountIn applies the In predicate on the "attempt_count" field.
 func AttemptCountIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -497,7 +497,7 @@ func AttemptCountIn(vs ...int) predicate.User {
 
 // AttemptCountNotIn applies the NotIn predicate on the "attempt_count" field.
 func AttemptCountNotIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -564,7 +564,7 @@ func LastAttemptNEQ(v time.Time) predicate.User {
 
 // LastAttemptIn applies the In predicate on the "last_attempt" field.
 func LastAttemptIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -575,7 +575,7 @@ func LastAttemptIn(vs ...time.Time) predicate.User {
 
 // LastAttemptNotIn applies the NotIn predicate on the "last_attempt" field.
 func LastAttemptNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -642,7 +642,7 @@ func LockedNEQ(v time.Time) predicate.User {
 
 // LockedIn applies the In predicate on the "locked" field.
 func LockedIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -653,7 +653,7 @@ func LockedIn(vs ...time.Time) predicate.User {
 
 // LockedNotIn applies the NotIn predicate on the "locked" field.
 func LockedNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

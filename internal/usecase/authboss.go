@@ -24,27 +24,20 @@ var (
 func NewAuthBossUseCase(i *do.Injector) (*AuthBossUseCase, error) {
 	abuc := &AuthBossUseCase{}
 	abuc.log = do.MustInvoke[*LoggerUseCase](i)
-	abuc.repo = do.MustInvoke[*repo.DataBaseServiceUser](i)
+	abuc.userService = do.MustInvoke[repo.DataBaseServiceUser](i)
 
 	return abuc, nil
 }
 
 type AuthBossUseCase struct {
-	repo DataBaseServiceUser
-	log  *LoggerUseCase
+	userService repo.DataBaseServiceUser
+	log         *LoggerUseCase
 }
-
-// func NewAuthBossUseCase(r DataBaseServiceUser, l LoggerUseCase) *AuthBossUseCase {
-// 	return &AuthBossUseCase{
-// 		repo: r,
-// 		log:  l,
-// 	}
-// }
 
 func (uuc AuthBossUseCase) Save(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
 
-	exists, err := uuc.repo.Exists(ctx, u.Email)
+	exists, err := uuc.userService.Exists(ctx, u.Email)
 
 	if err != nil {
 		return err
@@ -56,7 +49,7 @@ func (uuc AuthBossUseCase) Save(ctx context.Context, user authboss.User) error {
 		return authboss.ErrUserNotFound
 	}
 
-	err = uuc.repo.Update(ctx, *u)
+	err = uuc.userService.Update(ctx, *u)
 
 	if err != nil {
 		return err
@@ -67,7 +60,7 @@ func (uuc AuthBossUseCase) Save(ctx context.Context, user authboss.User) error {
 
 func (uuc AuthBossUseCase) Load(ctx context.Context, key string) (user authboss.User, err error) {
 
-	exists, err := uuc.repo.Exists(ctx, key)
+	exists, err := uuc.userService.Exists(ctx, key)
 
 	if err != nil {
 		return &entity.User{}, err
@@ -79,7 +72,7 @@ func (uuc AuthBossUseCase) Load(ctx context.Context, key string) (user authboss.
 		return &entity.User{}, authboss.ErrUserNotFound
 	}
 
-	u, err := uuc.repo.GetByEmail(ctx, key)
+	u, err := uuc.userService.GetByEmail(ctx, key)
 
 	user = &u
 
@@ -106,7 +99,7 @@ func (uuc AuthBossUseCase) Create(ctx context.Context, user authboss.User) error
 		return err
 	}
 
-	exists, err := uuc.repo.Exists(ctx, u.Email)
+	exists, err := uuc.userService.Exists(ctx, u.Email)
 
 	if err != nil {
 		return err
@@ -119,7 +112,7 @@ func (uuc AuthBossUseCase) Create(ctx context.Context, user authboss.User) error
 	}
 
 	// Insert into database
-	_, err = uuc.repo.Create(ctx, *u)
+	_, err = uuc.userService.Create(ctx, *u)
 
 	uuc.log.Info(fmt.Sprintf("User %v created in database", u.Email))
 

@@ -4,20 +4,15 @@ package usecase
 import (
 	"context"
 
+	"github.com/casbin/casbin/v2/model"
 	"github.com/volatiletech/authboss/v3"
-
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 
+// usecase interfaces
 type (
-	Service interface {
-		HealthCheck() error
-		Shutdown() error
-	}
-
-	// Logger -.
+	// Logger is a generic logging interface
 	Logger interface {
 		Trace(msg string, fields ...map[string]interface{})
 		Debug(msg string, fields ...map[string]interface{})
@@ -38,12 +33,11 @@ type (
 		Create(context.Context, authboss.User) error
 	}
 
-	DataBaseServiceUser interface {
-		Get(context.Context) ([]entity.User, error)
-		GetById(context.Context, int) (entity.User, error)
-		GetByEmail(context.Context, string) (entity.User, error)
-		Exists(context.Context, string) (bool, error)
-		Create(context.Context, entity.User) (entity.User, error)
-		Update(context.Context, entity.User) error
+	Casbin interface {
+		LoadPolicy(model model.Model) error
+		SavePolicy(model model.Model) error
+		AddPolicy(string, string, []string) error
+		RemovePolicy(string, string, []string) error
+		RemoveFilteredPolicy(string, string, int, ...string) error
 	}
 )

@@ -14,9 +14,10 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
-func NewDatabaseService(i *do.Injector) (*DatabaseService, error) {
-	dbService := &DatabaseService{}
-	dbService.config = do.MustInvoke[*entity.Config](i)
+func NewDatabaseService(i *do.Injector) (DatabaseService, error) {
+	dbService := &databaseServiceImplem{
+		config: do.MustInvoke[*entity.Config](i),
+	}
 
 	db, err := sql.Open("postgres", dbService.config.PG.URL)
 	if err != nil {
@@ -40,21 +41,21 @@ func NewDatabaseService(i *do.Injector) (*DatabaseService, error) {
 	return dbService, nil
 }
 
-type DatabaseService struct {
+type databaseServiceImplem struct {
 	config    *entity.Config
 	db        *sql.DB
 	entClient *ent.Client
 }
 
-func (s *DatabaseService) Client() *ent.Client {
+func (s *databaseServiceImplem) Client() *ent.Client {
 	return s.entClient
 }
 
-func (s *DatabaseService) HealthCheck() error {
+func (s *databaseServiceImplem) HealthCheck() error {
 	return s.db.Ping()
 }
 
-func (s *DatabaseService) Shutdown() error {
+func (s *databaseServiceImplem) Shutdown() error {
 	log.Print("database service shutdown")
 	return s.entClient.Close()
 }
