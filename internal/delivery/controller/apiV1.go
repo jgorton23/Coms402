@@ -49,7 +49,6 @@ func (v1 httpV1Implem) ShowUserById(w http.ResponseWriter, r *http.Request, user
 	json.NewEncoder(w).Encode(u)
 }
 
-
 func (v1 httpV1Implem) ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams) {
 	users, err := v1.repo.Get(r.Context())
 

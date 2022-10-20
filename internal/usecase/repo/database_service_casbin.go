@@ -8,7 +8,6 @@ import (
 
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
-	"github.com/pkg/errors"
 	"github.com/samber/do"
 
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
@@ -232,12 +231,12 @@ func (a *dataBaseServiceCasbinImplem) WithTx(fn func(tx *ent.Tx) error) error {
 	}()
 	if err := fn(tx); err != nil {
 		if rerr := tx.Rollback(); rerr != nil {
-			err = errors.Wrapf(err, "rolling back transaction: %v", rerr)
+			err = fmt.Errorf("rolling back transaction: %v", rerr)
 		}
 		return err
 	}
 	if err := tx.Commit(); err != nil {
-		return errors.Wrapf(err, "committing transaction: %v", err)
+		return fmt.Errorf("committing transaction: %v", err)
 	}
 	return nil
 }

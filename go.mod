@@ -10,7 +10,6 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/ilyakaznacheev/cleanenv v1.4.0
 	github.com/lib/pq v1.10.7
-	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.13.0
 	github.com/samber/do v1.4.1
 	github.com/sirupsen/logrus v1.9.0
