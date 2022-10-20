@@ -37,7 +37,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	logFields["http_method"] = r.Method
 
 	logFields["remote_addr"] = r.RemoteAddr
-	// logFields["user_agent"] = r.UserAgent()
+	logFields["user_agent"] = r.UserAgent()
 
 	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
 
@@ -55,7 +55,7 @@ func (e *Entry) Write(status, bytes int, header http.Header, elapsed time.Durati
 		"resp_status":       status,
 		"resp_bytes_length": bytes,
 		"resp_elapsed_ms":   float64(elapsed.Nanoseconds()) / 1000000.0,
-	}).Info("request complete")
+	}).Info("request complete") // RequestLogger returns a logger handler using a custom LogFormatter.
 }
 
 func (e *Entry) Panic(v interface{}, stack []byte) {
@@ -74,19 +74,22 @@ func (e *Entry) Panic(v interface{}, stack []byte) {
 
 func GetLogEntry(r *http.Request) usecase.Logger {
 	entry := middleware.GetLogEntry(r).(*Entry)
-	return entry.Logger
+
+	return entry.Logger.WithFields(loggerFields{
+		"req_id": middleware.GetReqID(r.Context()),
+	})
 }
 
-func LogEntrySetField(r *http.Request, key string, value interface{}) {
-	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*Entry); ok {
-		entry.Logger.WithFields(loggerFields{
-			key: value,
-		})
-	}
-}
+// func LogEntrySetField(r *http.Request, key string, value interface{}) {
+// 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*Entry); ok {
+// 		entry.Logger.WithFields(loggerFields{
+// 			key: value,
+// 		})
+// 	}
+// }
 
-func LogEntrySetFields(r *http.Request, fields map[string]interface{}) {
-	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*Entry); ok {
-		entry.Logger.WithFields(fields)
-	}
-}
+// func LogEntrySetFields(r *http.Request, fields map[string]interface{}) {
+// 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*Entry); ok {
+// 		entry.Logger.WithFields(fields)
+// 	}
+// }

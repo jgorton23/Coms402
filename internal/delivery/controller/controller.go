@@ -5,17 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
-
-	// "github.com/volatiletech/authboss/v3/lock"
 	_ "github.com/volatiletech/authboss/v3/logout"
-
-	// _ "github.com/volatiletech/authboss/v3/recover"
 	_ "github.com/volatiletech/authboss/v3/register"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/middleware"
@@ -29,7 +25,7 @@ func New(i *do.Injector) (*Controller, error) {
 		config:   do.MustInvoke[*entity.Config](i),
 		log:      do.MustInvoke[usecase.Logger](i).WithSubsystem("controller"),
 		authBoss: do.MustInvoke[usecase.AuthBoss](i),
-		httpV1:   do.MustInvoke[*HttpV1](i),
+		httpV1:   do.MustInvoke[ServerInterface](i),
 	}
 	return c, nil
 }
@@ -38,7 +34,7 @@ type Controller struct {
 	config     *entity.Config
 	log        usecase.Logger
 	authBoss   usecase.AuthBoss
-	httpV1     *HttpV1
+	httpV1     ServerInterface
 	httpServer *httpserver.Server
 }
 
@@ -56,11 +52,8 @@ func (c *Controller) Run() {
 	mux := chi.NewRouter()
 	mux.Use(chimiddleware.RequestID)
 	mux.Use(chimiddleware.RealIP)
-	mux.Use(chimiddleware.Recoverer)
 	mux.Use(middleware.NewStructuredLogger(c.log))
-
-	// loading usecase's onto context
-	mux.Use(middleware.LoggerCtx(c.log))
+	mux.Use(chimiddleware.Recoverer)
 
 	ab := newAuthentication(c.config, c.authBoss, c.log)
 

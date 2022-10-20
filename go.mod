@@ -6,7 +6,6 @@ require (
 	entgo.io/ent v0.11.3
 	github.com/casbin/casbin/v2 v2.56.0
 	github.com/deepmap/oapi-codegen v1.11.0
-	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/gorilla/sessions v1.2.1
 	github.com/ilyakaznacheev/cleanenv v1.4.0

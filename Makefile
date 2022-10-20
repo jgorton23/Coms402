@@ -68,7 +68,7 @@ gen-api-spec: ### gen http openapi spec
 .PHONY: gen-api-spec
 
 gen-http:  gen-api-spec ### gen http interface from openapi spec 
-	oapi-codegen --config oapi-codegen-config.yaml api/v1/_build/openapi.yaml > internal/delivery/controller/http/api/v1.gen.go
+	oapi-codegen --config oapi-codegen-config.yaml api/v1/_build/openapi.yaml > internal/delivery/controller/v1.gen.go
 .PHONY: gen-http
 
 # TODO convert to command
