@@ -23,8 +23,8 @@ import (
 func New(i *do.Injector) (*Controller, error) {
 	c := &Controller{
 		config:            do.MustInvoke[*entity.Config](i),
-		log:               do.MustInvoke[usecase.Logger](i).WithSubsystem("http server"),
-		httpAuthorization: do.MustInvoke[usecase.HttpAuthorization](i),
+		logger:            do.MustInvoke[*usecase.Logger](i).WithSubsystem("http server"),
+		httpAuthorization: do.MustInvoke[*usecase.HttpAuthorization](i),
 		httpV1:            do.MustInvoke[ServerInterface](i),
 		authBoss:          do.MustInvoke[*authboss.Authboss](i),
 	}
@@ -33,10 +33,10 @@ func New(i *do.Injector) (*Controller, error) {
 
 type Controller struct {
 	config            *entity.Config
-	log               usecase.Logger
+	logger            *usecase.Logger
 	httpV1            ServerInterface
 	httpServer        *httpserver.Server
-	httpAuthorization usecase.HttpAuthorization
+	httpAuthorization *usecase.HttpAuthorization
 	authBoss          *authboss.Authboss
 }
 
@@ -54,7 +54,7 @@ func (c *Controller) Run() {
 	mux := chi.NewRouter()
 	mux.Use(chimiddleware.RequestID)
 	mux.Use(chimiddleware.RealIP)
-	mux.Use(middleware.NewStructuredLogger(c.log))
+	mux.Use(middleware.NewStructuredLogger(c.logger))
 	mux.Use(chimiddleware.Recoverer)
 
 	mux.Use(c.authBoss.LoadClientStateMiddleware)

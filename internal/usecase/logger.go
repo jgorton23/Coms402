@@ -5,50 +5,48 @@ import (
 	"logur.dev/logur"
 )
 
-func NewLogger(logger logur.Logger) func(i *do.Injector) (Logger, error) {
-	return func(i *do.Injector) (Logger, error) {
-		return &loggerImplem{
-			logger: logger,
-		}, nil
-	}
+func NewLogger(i *do.Injector) (*Logger, error) {
+	return &Logger{
+		do.MustInvoke[LoggerRepo](i),
+	}, nil
 }
 
-// loggerImplem wraps a logur logger and exposes it under a custom interface.
-type loggerImplem struct {
-	logger logur.Logger
+// Logger wraps a LoggerRepo and exposes it.
+type Logger struct {
+	logger LoggerRepo
 }
 
 // Trace logs a trace event.
-func (l loggerImplem) Trace(msg string, fields ...map[string]interface{}) {
+func (l Logger) Trace(msg string, fields ...map[string]interface{}) {
 	l.logger.Trace(msg, fields...)
 }
 
 // Debug logs a debug event.
-func (l loggerImplem) Debug(msg string, fields ...map[string]interface{}) {
+func (l Logger) Debug(msg string, fields ...map[string]interface{}) {
 	l.logger.Debug(msg, fields...)
 }
 
 // Info logs an info event.
-func (l loggerImplem) Info(msg string, fields ...map[string]interface{}) {
+func (l Logger) Info(msg string, fields ...map[string]interface{}) {
 	l.logger.Info(msg, fields...)
 }
 
 // Warn logs a warning event.
-func (l loggerImplem) Warn(msg string, fields ...map[string]interface{}) {
+func (l Logger) Warn(msg string, fields ...map[string]interface{}) {
 	l.logger.Warn(msg, fields...)
 }
 
 // Error logs an error event.
-func (l loggerImplem) Error(msg string, fields ...map[string]interface{}) {
+func (l Logger) Error(msg string, fields ...map[string]interface{}) {
 	l.logger.Error(msg, fields...)
 }
 
-// WithFields annotates a logger with some context and it as a new instance.
-func (l loggerImplem) WithFields(fields map[string]interface{}) Logger {
-	return &loggerImplem{logger: logur.WithFields(l.logger, fields)}
+// WithFields annotates a loggerRepo with some context and returns it as a new instance.
+func (l Logger) WithFields(fields map[string]interface{}) *Logger {
+	return &Logger{logger: logur.WithFields(l.logger, fields)}
 }
 
-// WithFields annotates a logger with some context and it as a new instance.
-func (l loggerImplem) WithSubsystem(subsystem string) Logger {
-	return &loggerImplem{logger: logur.WithFields(l.logger, map[string]interface{}{"subsystem": subsystem})}
+// WithSubsystem annotates a loggerRepo with a subsystem and returns it as a new instance.
+func (l Logger) WithSubsystem(subsystem string) *Logger {
+	return &Logger{logger: logur.WithFields(l.logger, map[string]interface{}{"subsystem": subsystem})}
 }

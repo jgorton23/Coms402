@@ -2,26 +2,31 @@ package usecase
 
 import (
 	"github.com/samber/do"
-	"logur.dev/logur"
+	"github.com/volatiletech/authboss/v3"
 )
 
-func NewAuthbossLogger(i *do.Injector) (AuthBossLogger, error) {
-	return &authbossLoggerImplem{
-		logger: do.MustInvoke[Logger](i).WithSubsystem("http authenticator"),
+var (
+	assertAuthBossLogger                 = &AuthBossLogger{}
+	_                    authboss.Logger = assertAuthBossLogger
+)
+
+func NewAuthBossLogger(i *do.Injector) (*AuthBossLogger, error) {
+	return &AuthBossLogger{
+		logger: do.MustInvoke[*Logger](i).WithSubsystem("http authenticator"),
 	}, nil
 }
 
-// authbossLoggerImplem wraps a logur logger and exposes it under a custom interface.
-type authbossLoggerImplem struct {
-	logger logur.Logger
+// AuthBossLogger wraps a Logger and exposes it under a custom interface.
+type AuthBossLogger struct {
+	logger *Logger
 }
 
 // Info logs an info event.
-func (l authbossLoggerImplem) Info(msg string) {
+func (l AuthBossLogger) Info(msg string) {
 	l.logger.Info(msg)
 }
 
 // Error logs an error event.
-func (l authbossLoggerImplem) Error(msg string) {
+func (l AuthBossLogger) Error(msg string) {
 	l.logger.Error(msg)
 }

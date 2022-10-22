@@ -14,19 +14,19 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
-func NewDatabaseService(i *do.Injector) (DatabaseService, error) {
-	dbService := &databaseServiceImplem{
-		config: do.MustInvoke[*entity.Config](i),
-	}
+func NewDatabaseConnection(i *do.Injector) (*DatabaseConnection, error) {
+	dbService := &DatabaseConnection{}
 
-	db, err := sql.Open("postgres", dbService.config.PG.URL)
+	config := do.MustInvoke[*entity.Config](i)
+
+	db, err := sql.Open("postgres", config.PG.URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to: %v", err)
 	}
 
 	dbService.db = db
 
-	dbService.db.SetMaxOpenConns(dbService.config.PG.PoolMax)
+	dbService.db.SetMaxOpenConns(config.PG.PoolMax)
 
 	drv := entsql.OpenDB("postgres", dbService.db)
 
@@ -41,21 +41,20 @@ func NewDatabaseService(i *do.Injector) (DatabaseService, error) {
 	return dbService, nil
 }
 
-type databaseServiceImplem struct {
-	config    *entity.Config
+type DatabaseConnection struct {
 	db        *sql.DB
 	entClient *ent.Client
 }
 
-func (s *databaseServiceImplem) Client() *ent.Client {
+func (s *DatabaseConnection) Client() *ent.Client {
 	return s.entClient
 }
 
-func (s *databaseServiceImplem) HealthCheck() error {
+func (s *DatabaseConnection) HealthCheck() error {
 	return s.db.Ping()
 }
 
-func (s *databaseServiceImplem) Shutdown() error {
+func (s *DatabaseConnection) Shutdown() error {
 	log.Print("database service shutdown")
 	return s.entClient.Close()
 }

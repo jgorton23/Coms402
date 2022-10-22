@@ -6,23 +6,30 @@ import (
 	"github.com/samber/do"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
-// NewDataBaseServiceUser -.
-func NewDataBaseServiceUser(i *do.Injector) (DataBaseServiceUser, error) {
-	dbServiceUser := &dataBaseServiceUserImplem{
-		do.MustInvoke[DatabaseService](i).Client(),
+// Pattern to verify userDbEntImplem conforms to the required interfaces
+var (
+	assertUserImplem                  = &userDbEntImplem{}
+	_                usecase.UserRepo = assertUserImplem
+)
+
+// NewUserRepo -.
+func NewUserRepo(i *do.Injector) (usecase.UserRepo, error) {
+	implem := &userDbEntImplem{
+		do.MustInvoke[*DatabaseConnection](i).Client(),
 	}
-	return dbServiceUser, nil
+	return implem, nil
 }
 
-type dataBaseServiceUserImplem struct {
+type userDbEntImplem struct {
 	*ent.Client
 }
 
-func (ur *dataBaseServiceUserImplem) Get(ctx context.Context) ([]entity.User, error) {
+func (ur *userDbEntImplem) Get(ctx context.Context) ([]entity.User, error) {
 	us, err := ur.Client.User.
 		Query().
 		All(ctx)
@@ -40,7 +47,7 @@ func (ur *dataBaseServiceUserImplem) Get(ctx context.Context) ([]entity.User, er
 	return users, nil
 }
 
-func (ur *dataBaseServiceUserImplem) GetById(ctx context.Context, id int) (entity.User, error) {
+func (ur *userDbEntImplem) GetById(ctx context.Context, id int) (entity.User, error) {
 	u, err := ur.Client.User.
 		Query().
 		Where(user.ID(id)).
@@ -53,7 +60,7 @@ func (ur *dataBaseServiceUserImplem) GetById(ctx context.Context, id int) (entit
 	return ur.databaseUserToEntityUser(u), nil
 }
 
-func (ur *dataBaseServiceUserImplem) GetByEmail(ctx context.Context, email string) (entity.User, error) {
+func (ur *userDbEntImplem) GetByEmail(ctx context.Context, email string) (entity.User, error) {
 	u, err := ur.Client.User.
 		Query().
 		Where(user.Email(email)).
@@ -67,7 +74,7 @@ func (ur *dataBaseServiceUserImplem) GetByEmail(ctx context.Context, email strin
 }
 
 // Exists -.
-func (ur *dataBaseServiceUserImplem) Exists(ctx context.Context, u string) (bool, error) {
+func (ur *userDbEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 	exists, err := ur.Client.User.
 		Query().
 		Where(user.Email(u)).
@@ -81,7 +88,7 @@ func (ur *dataBaseServiceUserImplem) Exists(ctx context.Context, u string) (bool
 }
 
 // Create -.
-func (ur *dataBaseServiceUserImplem) Create(ctx context.Context, usr entity.User) (entity.User, error) {
+func (ur *userDbEntImplem) Create(ctx context.Context, usr entity.User) (entity.User, error) {
 	u, err := ur.Client.User.
 		Create().
 		SetEmail(usr.Email).
@@ -101,8 +108,8 @@ func (ur *dataBaseServiceUserImplem) Create(ctx context.Context, usr entity.User
 	return ur.databaseUserToEntityUser(u), nil
 }
 
-// Create -.
-func (ur *dataBaseServiceUserImplem) Update(ctx context.Context, u entity.User) error {
+// Update -.
+func (ur *userDbEntImplem) Update(ctx context.Context, u entity.User) error {
 	_, err := ur.Client.User.
 		Update().
 		SetEmail(u.Email).
@@ -122,7 +129,7 @@ func (ur *dataBaseServiceUserImplem) Update(ctx context.Context, u entity.User) 
 	return nil
 }
 
-func (ur *dataBaseServiceUserImplem) databaseUserToEntityUser(u *ent.User) entity.User {
+func (ur *userDbEntImplem) databaseUserToEntityUser(u *ent.User) entity.User {
 	return entity.User{
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,

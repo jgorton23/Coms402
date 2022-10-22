@@ -10,10 +10,34 @@ import (
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/samber/do"
 
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/predicate"
 )
+
+// Pattern to verify authorizationPolicyDbEntImplem conforms to the required interfaces
+var (
+	assertAuthorizationPolicyImplem                                 = &authorizationPolicyDbEntImplem{}
+	_                               usecase.AuthorizationPolicyRepo = assertAuthorizationPolicyImplem
+	_                               persist.Adapter                 = assertAuthorizationPolicyImplem
+)
+
+// NewAuthorizationPolicyRepo -.
+func NewAuthorizationPolicyRepo(i *do.Injector) (usecase.AuthorizationPolicyRepo, error) {
+	dbServiceCasbin := &authorizationPolicyDbEntImplem{
+		client: do.MustInvoke[*DatabaseConnection](i).Client(),
+		ctx:    context.Background(),
+	}
+
+	return dbServiceCasbin, nil
+}
+
+type authorizationPolicyDbEntImplem struct {
+	client   *ent.Client
+	ctx      context.Context
+	filtered bool
+}
 
 type filter struct {
 	Ptype []string
@@ -25,24 +49,8 @@ type filter struct {
 	V5    []string
 }
 
-// NewDataBaseServiceAuthorizationPolicy -.
-func NewDataBaseServiceAuthorizationPolicy(i *do.Injector) (*DataBaseServiceAuthorizationPolicy, error) {
-	dbServiceCasbin := &DataBaseServiceAuthorizationPolicy{
-		client: do.MustInvoke[DatabaseService](i).Client(),
-		ctx:    context.Background(),
-	}
-
-	return dbServiceCasbin, nil
-}
-
-type DataBaseServiceAuthorizationPolicy struct {
-	client   *ent.Client
-	ctx      context.Context
-	filtered bool
-}
-
 // LoadPolicy loads all policy rules from the storage.
-func (a *DataBaseServiceAuthorizationPolicy) LoadPolicy(model model.Model) error {
+func (a *authorizationPolicyDbEntImplem) LoadPolicy(model model.Model) error {
 	policies, err := a.client.AuthorizationPolicy.Query().Order(ent.Asc("id")).All(a.ctx)
 	if err != nil {
 		return err
@@ -55,7 +63,7 @@ func (a *DataBaseServiceAuthorizationPolicy) LoadPolicy(model model.Model) error
 
 // LoadFilteredPolicy loads only policy rules that match the filter.
 // Filter parameter here is a Filter structure
-func (a *DataBaseServiceAuthorizationPolicy) LoadFilteredPolicy(model model.Model, f interface{}) error {
+func (a *authorizationPolicyDbEntImplem) LoadFilteredPolicy(model model.Model, f interface{}) error {
 
 	filterValue, ok := f.(filter)
 	if !ok {
@@ -99,12 +107,12 @@ func (a *DataBaseServiceAuthorizationPolicy) LoadFilteredPolicy(model model.Mode
 }
 
 // IsFiltered returns true if the loaded policy has been filtered.
-func (a *DataBaseServiceAuthorizationPolicy) IsFiltered() bool {
+func (a *authorizationPolicyDbEntImplem) IsFiltered() bool {
 	return a.filtered
 }
 
 // SavePolicy saves all policy rules to the storage.
-func (a *DataBaseServiceAuthorizationPolicy) SavePolicy(model model.Model) error {
+func (a *authorizationPolicyDbEntImplem) SavePolicy(model model.Model) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		if _, err := tx.AuthorizationPolicy.Delete().Exec(a.ctx); err != nil {
 			return err
@@ -132,7 +140,7 @@ func (a *DataBaseServiceAuthorizationPolicy) SavePolicy(model model.Model) error
 
 // AddPolicy adds a policy rule to the storage.
 // This is part of the Auto-Save feature.
-func (a *DataBaseServiceAuthorizationPolicy) AddPolicy(sec string, ptype string, rule []string) error {
+func (a *authorizationPolicyDbEntImplem) AddPolicy(sec string, ptype string, rule []string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		_, err := a.savePolicyLine(tx, ptype, rule).Save(a.ctx)
 		return err
@@ -141,7 +149,7 @@ func (a *DataBaseServiceAuthorizationPolicy) AddPolicy(sec string, ptype string,
 
 // RemovePolicy removes a policy rule from the storage.
 // This is part of the Auto-Save feature.
-func (a *DataBaseServiceAuthorizationPolicy) RemovePolicy(sec string, ptype string, rule []string) error {
+func (a *authorizationPolicyDbEntImplem) RemovePolicy(sec string, ptype string, rule []string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		instance := a.toInstance(ptype, rule)
 		_, err := tx.AuthorizationPolicy.Delete().Where(
@@ -159,7 +167,7 @@ func (a *DataBaseServiceAuthorizationPolicy) RemovePolicy(sec string, ptype stri
 
 // RemoveFilteredPolicy removes policy rules that match the filter from the storage.
 // This is part of the Auto-Save feature.
-func (a *DataBaseServiceAuthorizationPolicy) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int, fieldValues ...string) error {
+func (a *authorizationPolicyDbEntImplem) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int, fieldValues ...string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		cond := make([]predicate.AuthorizationPolicy, 0)
 		cond = append(cond, authorizationpolicy.PtypeEQ(ptype))
@@ -190,7 +198,7 @@ func (a *DataBaseServiceAuthorizationPolicy) RemoveFilteredPolicy(sec string, pt
 
 // AddPolicies adds policy rules to the storage.
 // This is part of the Auto-Save feature.
-func (a *DataBaseServiceAuthorizationPolicy) AddPolicies(sec string, ptype string, rules [][]string) error {
+func (a *authorizationPolicyDbEntImplem) AddPolicies(sec string, ptype string, rules [][]string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		return a.createPolicies(tx, ptype, rules)
 	})
@@ -198,7 +206,7 @@ func (a *DataBaseServiceAuthorizationPolicy) AddPolicies(sec string, ptype strin
 
 // RemovePolicies removes policy rules from the storage.
 // This is part of the Auto-Save feature.
-func (a *DataBaseServiceAuthorizationPolicy) RemovePolicies(sec string, ptype string, rules [][]string) error {
+func (a *authorizationPolicyDbEntImplem) RemovePolicies(sec string, ptype string, rules [][]string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		for _, rule := range rules {
 			instance := a.toInstance(ptype, rule)
@@ -218,7 +226,7 @@ func (a *DataBaseServiceAuthorizationPolicy) RemovePolicies(sec string, ptype st
 	})
 }
 
-func (a *DataBaseServiceAuthorizationPolicy) WithTx(fn func(tx *ent.Tx) error) error {
+func (a *authorizationPolicyDbEntImplem) WithTx(fn func(tx *ent.Tx) error) error {
 	tx, err := a.client.Tx(a.ctx)
 	if err != nil {
 		return err
@@ -263,7 +271,7 @@ func loadPolicyLine(line *ent.AuthorizationPolicy, model model.Model) {
 	persist.LoadPolicyLine(lineText, model)
 }
 
-func (a *DataBaseServiceAuthorizationPolicy) toInstance(ptype string, rule []string) *ent.AuthorizationPolicy {
+func (a *authorizationPolicyDbEntImplem) toInstance(ptype string, rule []string) *ent.AuthorizationPolicy {
 	instance := &ent.AuthorizationPolicy{}
 
 	instance.Ptype = ptype
@@ -289,7 +297,7 @@ func (a *DataBaseServiceAuthorizationPolicy) toInstance(ptype string, rule []str
 	return instance
 }
 
-func (a *DataBaseServiceAuthorizationPolicy) savePolicyLine(tx *ent.Tx, ptype string, rule []string) *ent.AuthorizationPolicyCreate {
+func (a *authorizationPolicyDbEntImplem) savePolicyLine(tx *ent.Tx, ptype string, rule []string) *ent.AuthorizationPolicyCreate {
 	line := tx.AuthorizationPolicy.Create()
 
 	line.SetPtype(ptype)
@@ -317,7 +325,7 @@ func (a *DataBaseServiceAuthorizationPolicy) savePolicyLine(tx *ent.Tx, ptype st
 
 // UpdatePolicy updates a policy rule from storage.
 // This is part of the Auto-Save feature.
-func (a *DataBaseServiceAuthorizationPolicy) UpdatePolicy(sec string, ptype string, oldRule, newPolicy []string) error {
+func (a *authorizationPolicyDbEntImplem) UpdatePolicy(sec string, ptype string, oldRule, newPolicy []string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		rule := a.toInstance(ptype, oldRule)
 		line := tx.AuthorizationPolicy.Update().Where(
@@ -342,7 +350,7 @@ func (a *DataBaseServiceAuthorizationPolicy) UpdatePolicy(sec string, ptype stri
 }
 
 // UpdatePolicies updates some policy rules to storage, like db, redis.
-func (a *DataBaseServiceAuthorizationPolicy) UpdatePolicies(sec string, ptype string, oldRules, newRules [][]string) error {
+func (a *authorizationPolicyDbEntImplem) UpdatePolicies(sec string, ptype string, oldRules, newRules [][]string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		for _, policy := range oldRules {
 			rule := a.toInstance(ptype, policy)
@@ -370,7 +378,7 @@ func (a *DataBaseServiceAuthorizationPolicy) UpdatePolicies(sec string, ptype st
 }
 
 // UpdateFilteredPolicies deletes old rules and adds new rules.
-func (a *DataBaseServiceAuthorizationPolicy) UpdateFilteredPolicies(sec string, ptype string, newPolicies [][]string, fieldIndex int, fieldValues ...string) ([][]string, error) {
+func (a *authorizationPolicyDbEntImplem) UpdateFilteredPolicies(sec string, ptype string, newPolicies [][]string, fieldIndex int, fieldValues ...string) ([][]string, error) {
 	oldPolicies := make([][]string, 0)
 	err := a.WithTx(func(tx *ent.Tx) error {
 		line := tx.AuthorizationPolicy.Query()
@@ -415,7 +423,7 @@ func (a *DataBaseServiceAuthorizationPolicy) UpdateFilteredPolicies(sec string, 
 	return oldPolicies, nil
 }
 
-func (a *DataBaseServiceAuthorizationPolicy) createPolicies(tx *ent.Tx, ptype string, policies [][]string) error {
+func (a *authorizationPolicyDbEntImplem) createPolicies(tx *ent.Tx, ptype string, policies [][]string) error {
 	lines := make([]*ent.AuthorizationPolicyCreate, 0)
 	for _, policy := range policies {
 		lines = append(lines, a.savePolicyLine(tx, ptype, policy))

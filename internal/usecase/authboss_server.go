@@ -10,11 +10,10 @@ import (
 	"github.com/volatiletech/authboss/v3"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
-	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
 )
 
 var (
-	assertAuthBossImplem                               = &authBossImplem{}
+	assertAuthBossImplem                               = &AuthBossServer{}
 	_                    authboss.CreatingServerStorer = assertAuthBossImplem
 	// If there is ever a need to implement confirming, recovering or remembering
 	// uncommenting the below lines will make it a lot easier
@@ -23,24 +22,24 @@ var (
 	// 	_                 authboss.RememberingServerStorer = assertUserUseCase
 )
 
-func NewAuthBossServer(i *do.Injector) (AuthBossServer, error) {
-	abuc := &authBossImplem{
-		log:         do.MustInvoke[Logger](i),
-		userService: do.MustInvoke[repo.DataBaseServiceUser](i),
+func NewAuthBossServer(i *do.Injector) (*AuthBossServer, error) {
+	abuc := &AuthBossServer{
+		authBossLogger: do.MustInvoke[*AuthBossLogger](i),
+		userRepo:       do.MustInvoke[UserRepo](i),
 	}
 
 	return abuc, nil
 }
 
-type authBossImplem struct {
-	userService repo.DataBaseServiceUser
-	log         Logger
+type AuthBossServer struct {
+	userRepo       UserRepo
+	authBossLogger *AuthBossLogger
 }
 
-func (uuc authBossImplem) Save(ctx context.Context, user authboss.User) error {
+func (uuc AuthBossServer) Save(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
 
-	exists, err := uuc.userService.Exists(ctx, u.Email)
+	exists, err := uuc.userRepo.Exists(ctx, u.Email)
 
 	if err != nil {
 		return err
@@ -48,11 +47,11 @@ func (uuc authBossImplem) Save(ctx context.Context, user authboss.User) error {
 
 	// The user already exists
 	if !exists {
-		uuc.log.Info(fmt.Sprintf("User %v does not exists in database", u.Email))
+		uuc.authBossLogger.Info(fmt.Sprintf("User %v does not exists in database", u.Email))
 		return authboss.ErrUserNotFound
 	}
 
-	err = uuc.userService.Update(ctx, *u)
+	err = uuc.userRepo.Update(ctx, *u)
 
 	if err != nil {
 		return err
@@ -61,9 +60,9 @@ func (uuc authBossImplem) Save(ctx context.Context, user authboss.User) error {
 	return nil
 }
 
-func (uuc authBossImplem) Load(ctx context.Context, key string) (user authboss.User, err error) {
+func (uuc AuthBossServer) Load(ctx context.Context, key string) (user authboss.User, err error) {
 
-	exists, err := uuc.userService.Exists(ctx, key)
+	exists, err := uuc.userRepo.Exists(ctx, key)
 
 	if err != nil {
 		return &entity.User{}, err
@@ -71,11 +70,11 @@ func (uuc authBossImplem) Load(ctx context.Context, key string) (user authboss.U
 
 	// The user already exists
 	if !exists {
-		uuc.log.Info(fmt.Sprintf("User %v not found in database", key))
+		uuc.authBossLogger.Info(fmt.Sprintf("User %v not found in database", key))
 		return &entity.User{}, authboss.ErrUserNotFound
 	}
 
-	u, err := uuc.userService.GetByEmail(ctx, key)
+	u, err := uuc.userRepo.GetByEmail(ctx, key)
 
 	user = &u
 
@@ -86,11 +85,11 @@ func (uuc authBossImplem) Load(ctx context.Context, key string) (user authboss.U
 	return user, nil
 }
 
-func (uuc authBossImplem) New(_ context.Context) authboss.User {
+func (uuc AuthBossServer) New(_ context.Context) authboss.User {
 	return &entity.User{}
 }
 
-func (uuc authBossImplem) Create(ctx context.Context, user authboss.User) error {
+func (uuc AuthBossServer) Create(ctx context.Context, user authboss.User) error {
 	u := user.(*entity.User)
 
 	u.Email = strings.ToLower(u.Email)
@@ -102,7 +101,7 @@ func (uuc authBossImplem) Create(ctx context.Context, user authboss.User) error 
 		return err
 	}
 
-	exists, err := uuc.userService.Exists(ctx, u.Email)
+	exists, err := uuc.userRepo.Exists(ctx, u.Email)
 
 	if err != nil {
 		return err
@@ -110,14 +109,14 @@ func (uuc authBossImplem) Create(ctx context.Context, user authboss.User) error 
 
 	// The user already exists
 	if exists {
-		uuc.log.Info(fmt.Sprintf("User %v already exists in database", u.Email))
+		uuc.authBossLogger.Info(fmt.Sprintf("User %v already exists in database", u.Email))
 		return authboss.ErrUserFound
 	}
 
 	// Insert into database
-	_, err = uuc.userService.Create(ctx, *u)
+	_, err = uuc.userRepo.Create(ctx, *u)
 
-	uuc.log.Info(fmt.Sprintf("User %v created in database", u.Email))
+	uuc.authBossLogger.Info(fmt.Sprintf("User %v created in database", u.Email))
 
 	if err != nil {
 		return err

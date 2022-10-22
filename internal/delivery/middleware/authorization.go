@@ -22,7 +22,7 @@ import (
 // It's notable that this middleware should be behind the authentication (e.g.,
 // HTTP basic authentication, OAuth), so this plugin can get the logged-in role
 // to perform the authorization.
-func Authorizer(httpAuthorization usecase.HttpAuthorization, a *authboss.Authboss) func(next http.Handler) http.Handler {
+func Authorizer(httpAuthorization *usecase.HttpAuthorization, a *authboss.Authboss) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			log := GetLogEntry(r).WithSubsystem("http authorization")

@@ -4,41 +4,59 @@ package usecase
 import (
 	"context"
 
-	"github.com/volatiletech/authboss/v3"
+	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
+	"github.com/casbin/casbin/v2/model"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 
-// usecase interfaces
 type (
-	// Logger is a generic logging interface
-	Logger interface {
+	// ConfigRepo -
+	ConfigRepo interface {
+		Load(string) error
+		Get() *entity.Config
+	}
+
+	// AuthorizationPolicyRepo -
+	AuthorizationPolicyRepo interface {
+		// LoadPolicy loads all policy rules from the storage.
+		LoadPolicy(model model.Model) error
+		// SavePolicy saves all policy rules to the storage.
+		SavePolicy(model model.Model) error
+
+		// AddPolicy adds a policy rule to the storage.
+		// This is part of the Auto-Save feature.
+		AddPolicy(sec string, ptype string, rule []string) error
+		// RemovePolicy removes a policy rule from the storage.
+		// This is part of the Auto-Save feature.
+		RemovePolicy(sec string, ptype string, rule []string) error
+		// RemoveFilteredPolicy removes policy rules that match the filter from the storage.
+		// This is part of the Auto-Save feature.
+		RemoveFilteredPolicy(sec string, ptype string, fieldIndex int, fieldValues ...string) error
+	}
+
+	// UserRepo -
+	UserRepo interface {
+		Get(context.Context) ([]entity.User, error)
+		GetById(context.Context, int) (entity.User, error)
+		GetByEmail(context.Context, string) (entity.User, error)
+		Exists(context.Context, string) (bool, error)
+		Create(context.Context, entity.User) (entity.User, error)
+		Update(context.Context, entity.User) error
+	}
+
+	// LoggerRepo -
+	LoggerRepo interface {
 		Trace(msg string, fields ...map[string]interface{})
 		Debug(msg string, fields ...map[string]interface{})
 		Info(msg string, fields ...map[string]interface{})
 		Warn(msg string, fields ...map[string]interface{})
 		Error(msg string, fields ...map[string]interface{})
-
-		// WithFields annotates a logger with some context and it as a new instance.
-		WithFields(fields map[string]interface{}) Logger
-		WithSubsystem(subsystem string) Logger
 	}
 
-	//AuthBossServer conforms to the authboss interfaces
-	AuthBossServer interface {
-		Load(context.Context, string) (authboss.User, error)
-		Save(context.Context, authboss.User) error
-		New(context.Context) authboss.User
-		Create(context.Context, authboss.User) error
-	}
-
-	AuthBossLogger interface {
-		Info(string)
-		Error(string)
-	}
-
-	HttpAuthorization interface {
-		//EnforceUser ( user, path, method )
-		EnforceUser(string, string, string) (bool, error)
+	// AuthorizationEnforcerRepo -
+	AuthorizationEnforcerRepo interface {
+		EnforceRolePathMethod(role, path, method string) (bool, error)
+		ReloadPolicy() error
 	}
 )

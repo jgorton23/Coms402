@@ -9,7 +9,6 @@ import (
 	"syscall"
 
 	"github.com/samber/do"
-	logrusadapter "logur.dev/adapter/logrus"
 	"logur.dev/logur"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/controller"
@@ -20,32 +19,33 @@ import (
 func Run() {
 	injector := do.New()
 
-	config := repo.NewCleanEnvService()
+	config := repo.NewConfigRepo()
 	err := config.Load("./config.yml")
 	if err != nil {
 		return
 	}
 	do.ProvideValue(injector, config.Get())
 
-	do.Provide(injector, repo.NewLogrusService())
-	logrus := do.MustInvoke[logrusadapter.Logger](injector)
-
-	do.Provide(injector, usecase.NewLogger(&logrus))
-	l := do.MustInvoke[usecase.Logger](injector)
+	do.Provide(injector, repo.NewLoggerRepo)
+	do.Provide(injector, usecase.NewLogger)
+	l := do.MustInvoke[*usecase.Logger](injector)
 
 	// Remove all flags
 	log.SetFlags(0)
 	// Override the global standard library logger to make sure everything uses our logger
 	log.SetOutput(logur.NewLevelWriter(l, logur.Info))
 
-	do.Provide(injector, repo.NewDatabaseService)
-	do.Provide(injector, repo.NewDataBaseServiceUser)
-	do.Provide(injector, repo.NewDataBaseServiceAuthorizationPolicy)
-	do.Provide(injector, repo.NewCookieStorerService)
-	do.Provide(injector, repo.NewSessionStorerService)
-	do.Provide(injector, usecase.NewAuthbossLogger)
+	do.Provide(injector, repo.NewDatabaseConnection)
+	do.Provide(injector, repo.NewUserRepo)
+	do.Provide(injector, repo.NewAuthorizationPolicyRepo)
+	do.Provide(injector, repo.NewAuthorizationEnforcer)
+
+	do.Provide(injector, usecase.NewAuthBossLogger)
 	do.Provide(injector, usecase.NewAuthBossServer)
 	do.Provide(injector, usecase.NewHttpAuthorization)
+
+	//TODO Verify
+
 	do.Provide(injector, controller.NewAuthenticator)
 	do.Provide(injector, controller.NewHttpV1)
 	do.Provide(injector, controller.New)

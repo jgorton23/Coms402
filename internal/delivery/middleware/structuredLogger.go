@@ -12,16 +12,16 @@ import (
 
 type loggerFields map[string]interface{}
 
-func NewStructuredLogger(logger usecase.Logger) func(next http.Handler) http.Handler {
+func NewStructuredLogger(logger *usecase.Logger) func(next http.Handler) http.Handler {
 	return middleware.RequestLogger(&StructuredLogger{logger})
 }
 
 type StructuredLogger struct {
-	Logger usecase.Logger
+	logger *usecase.Logger
 }
 
 func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
-	entry := &Entry{Logger: l.Logger}
+	entry := &Entry{logger: l.logger}
 	logFields := loggerFields{}
 
 	if reqID := middleware.GetReqID(r.Context()); reqID != "" {
@@ -41,17 +41,17 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 
 	logFields["uri"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
 
-	entry.Logger.WithFields(logFields).Info("request started")
+	entry.logger.WithFields(logFields).Info("request started")
 
 	return entry
 }
 
 type Entry struct {
-	Logger usecase.Logger
+	logger *usecase.Logger
 }
 
 func (e *Entry) Write(status, bytes int, header http.Header, elapsed time.Duration, extra interface{}) {
-	e.Logger.WithFields(loggerFields{
+	e.logger.WithFields(loggerFields{
 		"resp_status":       status,
 		"resp_bytes_length": bytes,
 		"resp_elapsed_ms":   float64(elapsed.Nanoseconds()) / 1000000.0,
@@ -59,7 +59,7 @@ func (e *Entry) Write(status, bytes int, header http.Header, elapsed time.Durati
 }
 
 func (e *Entry) Panic(v interface{}, stack []byte) {
-	e.Logger.WithFields(loggerFields{
+	e.logger.WithFields(loggerFields{
 		"stack": string(stack),
 		"panic": fmt.Sprintf("%+v", v),
 	})
@@ -72,17 +72,17 @@ func (e *Entry) Panic(v interface{}, stack []byte) {
 // passes through the handler chain, which at any point can be logged
 // with a call to .Print(), .Info(), etc.
 
-func GetLogEntry(r *http.Request) usecase.Logger {
+func GetLogEntry(r *http.Request) *usecase.Logger {
 	entry := middleware.GetLogEntry(r).(*Entry)
 
-	return entry.Logger.WithFields(loggerFields{
+	return entry.logger.WithFields(loggerFields{
 		"req_id": middleware.GetReqID(r.Context()),
 	})
 }
 
 // func LogEntrySetField(r *http.Request, key string, value interface{}) {
 // 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*Entry); ok {
-// 		entry.Logger.WithFields(loggerFields{
+// 		entry.logger.WithFields(loggerFields{
 // 			key: value,
 // 		})
 // 	}
@@ -90,6 +90,6 @@ func GetLogEntry(r *http.Request) usecase.Logger {
 
 // func LogEntrySetFields(r *http.Request, fields map[string]interface{}) {
 // 	if entry, ok := r.Context().Value(middleware.LogEntryCtxKey).(*Entry); ok {
-// 		entry.Logger.WithFields(fields)
+// 		entry.logger.WithFields(fields)
 // 	}
 // }

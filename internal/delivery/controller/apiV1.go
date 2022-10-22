@@ -8,7 +8,6 @@ import (
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/middleware"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
-	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
@@ -22,19 +21,19 @@ var (
 
 func NewHttpV1(i *do.Injector) (ServerInterface, error) {
 	httpV1 := &httpV1Implem{
-		log:  do.MustInvoke[usecase.Logger](i).WithSubsystem("controller http v1"),
-		repo: do.MustInvoke[repo.DataBaseServiceUser](i),
+		logger:   do.MustInvoke[*usecase.Logger](i).WithSubsystem("controller http v1"),
+		userRepo: do.MustInvoke[usecase.UserRepo](i),
 	}
 	return httpV1, nil
 }
 
 type httpV1Implem struct {
-	repo repo.DataBaseServiceUser
-	log  usecase.Logger
+	userRepo usecase.UserRepo
+	logger   *usecase.Logger
 }
 
 func (v1 httpV1Implem) ShowUserById(w http.ResponseWriter, r *http.Request, userId UserId) {
-	u, err := v1.repo.GetByEmail(r.Context(), userId)
+	u, err := v1.userRepo.GetByEmail(r.Context(), userId)
 
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -50,7 +49,7 @@ func (v1 httpV1Implem) ShowUserById(w http.ResponseWriter, r *http.Request, user
 }
 
 func (v1 httpV1Implem) ListUsers(w http.ResponseWriter, r *http.Request, params ListUsersParams) {
-	users, err := v1.repo.Get(r.Context())
+	users, err := v1.userRepo.Get(r.Context())
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
