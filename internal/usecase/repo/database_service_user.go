@@ -41,7 +41,7 @@ func (ur *dataBaseServiceUserImplem) Get(ctx context.Context) ([]entity.User, er
 }
 
 func (ur *dataBaseServiceUserImplem) GetById(ctx context.Context, id int) (entity.User, error) {
-	user, err := ur.Client.User.
+	u, err := ur.Client.User.
 		Query().
 		Where(user.ID(id)).
 		First(ctx)
@@ -50,11 +50,11 @@ func (ur *dataBaseServiceUserImplem) GetById(ctx context.Context, id int) (entit
 		return entity.User{}, err
 	}
 
-	return ur.databaseUserToEntityUser(user), nil
+	return ur.databaseUserToEntityUser(u), nil
 }
 
 func (ur *dataBaseServiceUserImplem) GetByEmail(ctx context.Context, email string) (entity.User, error) {
-	user, err := ur.Client.User.
+	u, err := ur.Client.User.
 		Query().
 		Where(user.Email(email)).
 		First(ctx)
@@ -63,7 +63,7 @@ func (ur *dataBaseServiceUserImplem) GetByEmail(ctx context.Context, email strin
 		return entity.User{}, err
 	}
 
-	return ur.databaseUserToEntityUser(user), nil
+	return ur.databaseUserToEntityUser(u), nil
 }
 
 // Exists -.
@@ -81,24 +81,24 @@ func (ur *dataBaseServiceUserImplem) Exists(ctx context.Context, u string) (bool
 }
 
 // Create -.
-func (ur *dataBaseServiceUserImplem) Create(ctx context.Context, u entity.User) (entity.User, error) {
-	user, err := ur.Client.User.
+func (ur *dataBaseServiceUserImplem) Create(ctx context.Context, usr entity.User) (entity.User, error) {
+	u, err := ur.Client.User.
 		Create().
-		SetEmail(u.Email).
-		SetPasswordHash(u.PasswordHash).
+		SetEmail(usr.Email).
+		SetPasswordHash(usr.PasswordHash).
 		// SetConfirmSelector(u.ConfirmSelector).
 		// SetConfirmVerifier(u.ConfirmVerifier).
 		// SetConfirmed(u.Confirmed).
-		SetAttemptCount(u.AttemptCount).
-		SetLastAttempt(u.LastAttempt).
-		SetLocked(u.Locked).
+		SetAttemptCount(usr.AttemptCount).
+		SetLastAttempt(usr.LastAttempt).
+		SetLocked(usr.Locked).
 		Save(ctx)
 
 	if err != nil {
 		return entity.User{}, err
 	}
 
-	return ur.databaseUserToEntityUser(user), nil
+	return ur.databaseUserToEntityUser(u), nil
 }
 
 // Create -.
@@ -130,5 +130,6 @@ func (ur *dataBaseServiceUserImplem) databaseUserToEntityUser(u *ent.User) entit
 		PasswordHash:         u.PasswordHash,
 		Password:             "",
 		PasswordConfirmation: "",
+		Role:                 u.Role,
 	}
 }

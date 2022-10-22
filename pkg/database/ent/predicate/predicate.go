@@ -6,8 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// CasbinRule is the predicate function for casbinrule builders.
-type CasbinRule func(*sql.Selector)
+// AuthorizationPolicy is the predicate function for authorizationpolicy builders.
+type AuthorizationPolicy func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

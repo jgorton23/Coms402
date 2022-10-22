@@ -9,15 +9,15 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
-// The CasbinRuleFunc type is an adapter to allow the use of ordinary
-// function as CasbinRule mutator.
-type CasbinRuleFunc func(context.Context, *ent.CasbinRuleMutation) (ent.Value, error)
+// The AuthorizationPolicyFunc type is an adapter to allow the use of ordinary
+// function as AuthorizationPolicy mutator.
+type AuthorizationPolicyFunc func(context.Context, *ent.AuthorizationPolicyMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f CasbinRuleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.CasbinRuleMutation)
+func (f AuthorizationPolicyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AuthorizationPolicyMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CasbinRuleMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthorizationPolicyMutation", m)
 	}
 	return f(ctx, mv)
 }

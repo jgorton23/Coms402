@@ -11,7 +11,7 @@ import (
 	"github.com/samber/do"
 
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/casbinrule"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/predicate"
 )
 
@@ -25,9 +25,9 @@ type filter struct {
 	V5    []string
 }
 
-// NewDataBaseServiceUser -.
-func NewDataBaseServiceCasbin(i *do.Injector) (*dataBaseServiceCasbinImplem, error) {
-	dbServiceCasbin := &dataBaseServiceCasbinImplem{
+// NewDataBaseServiceAuthorizationPolicy -.
+func NewDataBaseServiceAuthorizationPolicy(i *do.Injector) (*DataBaseServiceAuthorizationPolicy, error) {
+	dbServiceCasbin := &DataBaseServiceAuthorizationPolicy{
 		client: do.MustInvoke[DatabaseService](i).Client(),
 		ctx:    context.Background(),
 	}
@@ -35,15 +35,15 @@ func NewDataBaseServiceCasbin(i *do.Injector) (*dataBaseServiceCasbinImplem, err
 	return dbServiceCasbin, nil
 }
 
-type dataBaseServiceCasbinImplem struct {
+type DataBaseServiceAuthorizationPolicy struct {
 	client   *ent.Client
 	ctx      context.Context
 	filtered bool
 }
 
 // LoadPolicy loads all policy rules from the storage.
-func (a *dataBaseServiceCasbinImplem) LoadPolicy(model model.Model) error {
-	policies, err := a.client.CasbinRule.Query().Order(ent.Asc("id")).All(a.ctx)
+func (a *DataBaseServiceAuthorizationPolicy) LoadPolicy(model model.Model) error {
+	policies, err := a.client.AuthorizationPolicy.Query().Order(ent.Asc("id")).All(a.ctx)
 	if err != nil {
 		return err
 	}
@@ -55,34 +55,34 @@ func (a *dataBaseServiceCasbinImplem) LoadPolicy(model model.Model) error {
 
 // LoadFilteredPolicy loads only policy rules that match the filter.
 // Filter parameter here is a Filter structure
-func (a *dataBaseServiceCasbinImplem) LoadFilteredPolicy(model model.Model, f interface{}) error {
+func (a *DataBaseServiceAuthorizationPolicy) LoadFilteredPolicy(model model.Model, f interface{}) error {
 
 	filterValue, ok := f.(filter)
 	if !ok {
 		return fmt.Errorf("invalid filter type: %v", reflect.TypeOf(f))
 	}
 
-	session := a.client.CasbinRule.Query()
+	session := a.client.AuthorizationPolicy.Query()
 	if len(filterValue.Ptype) != 0 {
-		session.Where(casbinrule.PtypeIn(filterValue.Ptype...))
+		session.Where(authorizationpolicy.PtypeIn(filterValue.Ptype...))
 	}
 	if len(filterValue.V0) != 0 {
-		session.Where(casbinrule.V0In(filterValue.V0...))
+		session.Where(authorizationpolicy.V0In(filterValue.V0...))
 	}
 	if len(filterValue.V1) != 0 {
-		session.Where(casbinrule.V1In(filterValue.V1...))
+		session.Where(authorizationpolicy.V1In(filterValue.V1...))
 	}
 	if len(filterValue.V2) != 0 {
-		session.Where(casbinrule.V2In(filterValue.V2...))
+		session.Where(authorizationpolicy.V2In(filterValue.V2...))
 	}
 	if len(filterValue.V3) != 0 {
-		session.Where(casbinrule.V3In(filterValue.V3...))
+		session.Where(authorizationpolicy.V3In(filterValue.V3...))
 	}
 	if len(filterValue.V4) != 0 {
-		session.Where(casbinrule.V4In(filterValue.V4...))
+		session.Where(authorizationpolicy.V4In(filterValue.V4...))
 	}
 	if len(filterValue.V5) != 0 {
-		session.Where(casbinrule.V5In(filterValue.V5...))
+		session.Where(authorizationpolicy.V5In(filterValue.V5...))
 	}
 
 	lines, err := session.All(a.ctx)
@@ -99,17 +99,17 @@ func (a *dataBaseServiceCasbinImplem) LoadFilteredPolicy(model model.Model, f in
 }
 
 // IsFiltered returns true if the loaded policy has been filtered.
-func (a *dataBaseServiceCasbinImplem) IsFiltered() bool {
+func (a *DataBaseServiceAuthorizationPolicy) IsFiltered() bool {
 	return a.filtered
 }
 
 // SavePolicy saves all policy rules to the storage.
-func (a *dataBaseServiceCasbinImplem) SavePolicy(model model.Model) error {
+func (a *DataBaseServiceAuthorizationPolicy) SavePolicy(model model.Model) error {
 	return a.WithTx(func(tx *ent.Tx) error {
-		if _, err := tx.CasbinRule.Delete().Exec(a.ctx); err != nil {
+		if _, err := tx.AuthorizationPolicy.Delete().Exec(a.ctx); err != nil {
 			return err
 		}
-		lines := make([]*ent.CasbinRuleCreate, 0)
+		lines := make([]*ent.AuthorizationPolicyCreate, 0)
 
 		for ptype, ast := range model["p"] {
 			for _, policy := range ast.Policy {
@@ -125,14 +125,14 @@ func (a *dataBaseServiceCasbinImplem) SavePolicy(model model.Model) error {
 			}
 		}
 
-		_, err := tx.CasbinRule.CreateBulk(lines...).Save(a.ctx)
+		_, err := tx.AuthorizationPolicy.CreateBulk(lines...).Save(a.ctx)
 		return err
 	})
 }
 
 // AddPolicy adds a policy rule to the storage.
 // This is part of the Auto-Save feature.
-func (a *dataBaseServiceCasbinImplem) AddPolicy(sec string, ptype string, rule []string) error {
+func (a *DataBaseServiceAuthorizationPolicy) AddPolicy(sec string, ptype string, rule []string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		_, err := a.savePolicyLine(tx, ptype, rule).Save(a.ctx)
 		return err
@@ -141,17 +141,17 @@ func (a *dataBaseServiceCasbinImplem) AddPolicy(sec string, ptype string, rule [
 
 // RemovePolicy removes a policy rule from the storage.
 // This is part of the Auto-Save feature.
-func (a *dataBaseServiceCasbinImplem) RemovePolicy(sec string, ptype string, rule []string) error {
+func (a *DataBaseServiceAuthorizationPolicy) RemovePolicy(sec string, ptype string, rule []string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		instance := a.toInstance(ptype, rule)
-		_, err := tx.CasbinRule.Delete().Where(
-			casbinrule.PtypeEQ(instance.Ptype),
-			casbinrule.V0EQ(instance.V0),
-			casbinrule.V1EQ(instance.V1),
-			casbinrule.V2EQ(instance.V2),
-			casbinrule.V3EQ(instance.V3),
-			casbinrule.V4EQ(instance.V4),
-			casbinrule.V5EQ(instance.V5),
+		_, err := tx.AuthorizationPolicy.Delete().Where(
+			authorizationpolicy.PtypeEQ(instance.Ptype),
+			authorizationpolicy.V0EQ(instance.V0),
+			authorizationpolicy.V1EQ(instance.V1),
+			authorizationpolicy.V2EQ(instance.V2),
+			authorizationpolicy.V3EQ(instance.V3),
+			authorizationpolicy.V4EQ(instance.V4),
+			authorizationpolicy.V5EQ(instance.V5),
 		).Exec(a.ctx)
 		return err
 	})
@@ -159,29 +159,29 @@ func (a *dataBaseServiceCasbinImplem) RemovePolicy(sec string, ptype string, rul
 
 // RemoveFilteredPolicy removes policy rules that match the filter from the storage.
 // This is part of the Auto-Save feature.
-func (a *dataBaseServiceCasbinImplem) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int, fieldValues ...string) error {
+func (a *DataBaseServiceAuthorizationPolicy) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int, fieldValues ...string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
-		cond := make([]predicate.CasbinRule, 0)
-		cond = append(cond, casbinrule.PtypeEQ(ptype))
+		cond := make([]predicate.AuthorizationPolicy, 0)
+		cond = append(cond, authorizationpolicy.PtypeEQ(ptype))
 		if fieldIndex <= 0 && 0 < fieldIndex+len(fieldValues) {
-			cond = append(cond, casbinrule.V0EQ(fieldValues[0-fieldIndex]))
+			cond = append(cond, authorizationpolicy.V0EQ(fieldValues[0-fieldIndex]))
 		}
 		if fieldIndex <= 1 && 1 < fieldIndex+len(fieldValues) {
-			cond = append(cond, casbinrule.V1EQ(fieldValues[1-fieldIndex]))
+			cond = append(cond, authorizationpolicy.V1EQ(fieldValues[1-fieldIndex]))
 		}
 		if fieldIndex <= 2 && 2 < fieldIndex+len(fieldValues) {
-			cond = append(cond, casbinrule.V2EQ(fieldValues[2-fieldIndex]))
+			cond = append(cond, authorizationpolicy.V2EQ(fieldValues[2-fieldIndex]))
 		}
 		if fieldIndex <= 3 && 3 < fieldIndex+len(fieldValues) {
-			cond = append(cond, casbinrule.V3EQ(fieldValues[3-fieldIndex]))
+			cond = append(cond, authorizationpolicy.V3EQ(fieldValues[3-fieldIndex]))
 		}
 		if fieldIndex <= 4 && 4 < fieldIndex+len(fieldValues) {
-			cond = append(cond, casbinrule.V4EQ(fieldValues[4-fieldIndex]))
+			cond = append(cond, authorizationpolicy.V4EQ(fieldValues[4-fieldIndex]))
 		}
 		if fieldIndex <= 5 && 5 < fieldIndex+len(fieldValues) {
-			cond = append(cond, casbinrule.V5EQ(fieldValues[5-fieldIndex]))
+			cond = append(cond, authorizationpolicy.V5EQ(fieldValues[5-fieldIndex]))
 		}
-		_, err := tx.CasbinRule.Delete().Where(
+		_, err := tx.AuthorizationPolicy.Delete().Where(
 			cond...,
 		).Exec(a.ctx)
 		return err
@@ -190,7 +190,7 @@ func (a *dataBaseServiceCasbinImplem) RemoveFilteredPolicy(sec string, ptype str
 
 // AddPolicies adds policy rules to the storage.
 // This is part of the Auto-Save feature.
-func (a *dataBaseServiceCasbinImplem) AddPolicies(sec string, ptype string, rules [][]string) error {
+func (a *DataBaseServiceAuthorizationPolicy) AddPolicies(sec string, ptype string, rules [][]string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		return a.createPolicies(tx, ptype, rules)
 	})
@@ -198,18 +198,18 @@ func (a *dataBaseServiceCasbinImplem) AddPolicies(sec string, ptype string, rule
 
 // RemovePolicies removes policy rules from the storage.
 // This is part of the Auto-Save feature.
-func (a *dataBaseServiceCasbinImplem) RemovePolicies(sec string, ptype string, rules [][]string) error {
+func (a *DataBaseServiceAuthorizationPolicy) RemovePolicies(sec string, ptype string, rules [][]string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		for _, rule := range rules {
 			instance := a.toInstance(ptype, rule)
-			if _, err := tx.CasbinRule.Delete().Where(
-				casbinrule.PtypeEQ(instance.Ptype),
-				casbinrule.V0EQ(instance.V0),
-				casbinrule.V1EQ(instance.V1),
-				casbinrule.V2EQ(instance.V2),
-				casbinrule.V3EQ(instance.V3),
-				casbinrule.V4EQ(instance.V4),
-				casbinrule.V5EQ(instance.V5),
+			if _, err := tx.AuthorizationPolicy.Delete().Where(
+				authorizationpolicy.PtypeEQ(instance.Ptype),
+				authorizationpolicy.V0EQ(instance.V0),
+				authorizationpolicy.V1EQ(instance.V1),
+				authorizationpolicy.V2EQ(instance.V2),
+				authorizationpolicy.V3EQ(instance.V3),
+				authorizationpolicy.V4EQ(instance.V4),
+				authorizationpolicy.V5EQ(instance.V5),
 			).Exec(a.ctx); err != nil {
 				return err
 			}
@@ -218,7 +218,7 @@ func (a *dataBaseServiceCasbinImplem) RemovePolicies(sec string, ptype string, r
 	})
 }
 
-func (a *dataBaseServiceCasbinImplem) WithTx(fn func(tx *ent.Tx) error) error {
+func (a *DataBaseServiceAuthorizationPolicy) WithTx(fn func(tx *ent.Tx) error) error {
 	tx, err := a.client.Tx(a.ctx)
 	if err != nil {
 		return err
@@ -241,7 +241,7 @@ func (a *dataBaseServiceCasbinImplem) WithTx(fn func(tx *ent.Tx) error) error {
 	return nil
 }
 
-func loadPolicyLine(line *ent.CasbinRule, model model.Model) {
+func loadPolicyLine(line *ent.AuthorizationPolicy, model model.Model) {
 	var p = []string{line.Ptype,
 		line.V0, line.V1, line.V2, line.V3, line.V4, line.V5}
 
@@ -263,8 +263,8 @@ func loadPolicyLine(line *ent.CasbinRule, model model.Model) {
 	persist.LoadPolicyLine(lineText, model)
 }
 
-func (a *dataBaseServiceCasbinImplem) toInstance(ptype string, rule []string) *ent.CasbinRule {
-	instance := &ent.CasbinRule{}
+func (a *DataBaseServiceAuthorizationPolicy) toInstance(ptype string, rule []string) *ent.AuthorizationPolicy {
+	instance := &ent.AuthorizationPolicy{}
 
 	instance.Ptype = ptype
 
@@ -289,8 +289,8 @@ func (a *dataBaseServiceCasbinImplem) toInstance(ptype string, rule []string) *e
 	return instance
 }
 
-func (a *dataBaseServiceCasbinImplem) savePolicyLine(tx *ent.Tx, ptype string, rule []string) *ent.CasbinRuleCreate {
-	line := tx.CasbinRule.Create()
+func (a *DataBaseServiceAuthorizationPolicy) savePolicyLine(tx *ent.Tx, ptype string, rule []string) *ent.AuthorizationPolicyCreate {
+	line := tx.AuthorizationPolicy.Create()
 
 	line.SetPtype(ptype)
 	if len(rule) > 0 {
@@ -317,17 +317,17 @@ func (a *dataBaseServiceCasbinImplem) savePolicyLine(tx *ent.Tx, ptype string, r
 
 // UpdatePolicy updates a policy rule from storage.
 // This is part of the Auto-Save feature.
-func (a *dataBaseServiceCasbinImplem) UpdatePolicy(sec string, ptype string, oldRule, newPolicy []string) error {
+func (a *DataBaseServiceAuthorizationPolicy) UpdatePolicy(sec string, ptype string, oldRule, newPolicy []string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		rule := a.toInstance(ptype, oldRule)
-		line := tx.CasbinRule.Update().Where(
-			casbinrule.PtypeEQ(rule.Ptype),
-			casbinrule.V0EQ(rule.V0),
-			casbinrule.V1EQ(rule.V1),
-			casbinrule.V2EQ(rule.V2),
-			casbinrule.V3EQ(rule.V3),
-			casbinrule.V4EQ(rule.V4),
-			casbinrule.V5EQ(rule.V5),
+		line := tx.AuthorizationPolicy.Update().Where(
+			authorizationpolicy.PtypeEQ(rule.Ptype),
+			authorizationpolicy.V0EQ(rule.V0),
+			authorizationpolicy.V1EQ(rule.V1),
+			authorizationpolicy.V2EQ(rule.V2),
+			authorizationpolicy.V3EQ(rule.V3),
+			authorizationpolicy.V4EQ(rule.V4),
+			authorizationpolicy.V5EQ(rule.V5),
 		)
 		rule = a.toInstance(ptype, newPolicy)
 		line.SetV0(rule.V0)
@@ -342,27 +342,27 @@ func (a *dataBaseServiceCasbinImplem) UpdatePolicy(sec string, ptype string, old
 }
 
 // UpdatePolicies updates some policy rules to storage, like db, redis.
-func (a *dataBaseServiceCasbinImplem) UpdatePolicies(sec string, ptype string, oldRules, newRules [][]string) error {
+func (a *DataBaseServiceAuthorizationPolicy) UpdatePolicies(sec string, ptype string, oldRules, newRules [][]string) error {
 	return a.WithTx(func(tx *ent.Tx) error {
 		for _, policy := range oldRules {
 			rule := a.toInstance(ptype, policy)
-			if _, err := tx.CasbinRule.Delete().Where(
-				casbinrule.PtypeEQ(rule.Ptype),
-				casbinrule.V0EQ(rule.V0),
-				casbinrule.V1EQ(rule.V1),
-				casbinrule.V2EQ(rule.V2),
-				casbinrule.V3EQ(rule.V3),
-				casbinrule.V4EQ(rule.V4),
-				casbinrule.V5EQ(rule.V5),
+			if _, err := tx.AuthorizationPolicy.Delete().Where(
+				authorizationpolicy.PtypeEQ(rule.Ptype),
+				authorizationpolicy.V0EQ(rule.V0),
+				authorizationpolicy.V1EQ(rule.V1),
+				authorizationpolicy.V2EQ(rule.V2),
+				authorizationpolicy.V3EQ(rule.V3),
+				authorizationpolicy.V4EQ(rule.V4),
+				authorizationpolicy.V5EQ(rule.V5),
 			).Exec(a.ctx); err != nil {
 				return err
 			}
 		}
-		lines := make([]*ent.CasbinRuleCreate, 0)
+		lines := make([]*ent.AuthorizationPolicyCreate, 0)
 		for _, policy := range newRules {
 			lines = append(lines, a.savePolicyLine(tx, ptype, policy))
 		}
-		if _, err := tx.CasbinRule.CreateBulk(lines...).Save(a.ctx); err != nil {
+		if _, err := tx.AuthorizationPolicy.CreateBulk(lines...).Save(a.ctx); err != nil {
 			return err
 		}
 		return nil
@@ -370,42 +370,42 @@ func (a *dataBaseServiceCasbinImplem) UpdatePolicies(sec string, ptype string, o
 }
 
 // UpdateFilteredPolicies deletes old rules and adds new rules.
-func (a *dataBaseServiceCasbinImplem) UpdateFilteredPolicies(sec string, ptype string, newPolicies [][]string, fieldIndex int, fieldValues ...string) ([][]string, error) {
+func (a *DataBaseServiceAuthorizationPolicy) UpdateFilteredPolicies(sec string, ptype string, newPolicies [][]string, fieldIndex int, fieldValues ...string) ([][]string, error) {
 	oldPolicies := make([][]string, 0)
 	err := a.WithTx(func(tx *ent.Tx) error {
-		line := tx.CasbinRule.Query()
+		line := tx.AuthorizationPolicy.Query()
 		if fieldIndex <= 0 && 0 < fieldIndex+len(fieldValues) {
-			line = line.Where(casbinrule.V0EQ(fieldValues[0-fieldIndex]))
+			line = line.Where(authorizationpolicy.V0EQ(fieldValues[0-fieldIndex]))
 		}
 		if fieldIndex <= 1 && 1 < fieldIndex+len(fieldValues) {
-			line = line.Where(casbinrule.V1EQ(fieldValues[1-fieldIndex]))
+			line = line.Where(authorizationpolicy.V1EQ(fieldValues[1-fieldIndex]))
 		}
 		if fieldIndex <= 2 && 2 < fieldIndex+len(fieldValues) {
-			line = line.Where(casbinrule.V2EQ(fieldValues[2-fieldIndex]))
+			line = line.Where(authorizationpolicy.V2EQ(fieldValues[2-fieldIndex]))
 		}
 		if fieldIndex <= 3 && 3 < fieldIndex+len(fieldValues) {
-			line = line.Where(casbinrule.V3EQ(fieldValues[3-fieldIndex]))
+			line = line.Where(authorizationpolicy.V3EQ(fieldValues[3-fieldIndex]))
 		}
 		if fieldIndex <= 4 && 4 < fieldIndex+len(fieldValues) {
-			line = line.Where(casbinrule.V4EQ(fieldValues[4-fieldIndex]))
+			line = line.Where(authorizationpolicy.V4EQ(fieldValues[4-fieldIndex]))
 		}
 		if fieldIndex <= 5 && 5 < fieldIndex+len(fieldValues) {
-			line = line.Where(casbinrule.V5EQ(fieldValues[5-fieldIndex]))
+			line = line.Where(authorizationpolicy.V5EQ(fieldValues[5-fieldIndex]))
 		}
 		rules, err := line.All(a.ctx)
 		if err != nil {
 			return err
 		}
 		for _, rule := range rules {
-			if _, err := tx.CasbinRule.Delete().Where(
-				casbinrule.IDEQ(rule.ID),
+			if _, err := tx.AuthorizationPolicy.Delete().Where(
+				authorizationpolicy.IDEQ(rule.ID),
 			).Exec(a.ctx); err != nil {
 				return err
 			}
 		}
 		a.createPolicies(tx, ptype, newPolicies)
 		for _, rule := range rules {
-			oldPolicies = append(oldPolicies, CasbinRuleToStringArray(rule))
+			oldPolicies = append(oldPolicies, AuthorizationPolicyToStringArray(rule))
 		}
 		return nil
 	})
@@ -415,18 +415,18 @@ func (a *dataBaseServiceCasbinImplem) UpdateFilteredPolicies(sec string, ptype s
 	return oldPolicies, nil
 }
 
-func (a *dataBaseServiceCasbinImplem) createPolicies(tx *ent.Tx, ptype string, policies [][]string) error {
-	lines := make([]*ent.CasbinRuleCreate, 0)
+func (a *DataBaseServiceAuthorizationPolicy) createPolicies(tx *ent.Tx, ptype string, policies [][]string) error {
+	lines := make([]*ent.AuthorizationPolicyCreate, 0)
 	for _, policy := range policies {
 		lines = append(lines, a.savePolicyLine(tx, ptype, policy))
 	}
-	if _, err := tx.CasbinRule.CreateBulk(lines...).Save(a.ctx); err != nil {
+	if _, err := tx.AuthorizationPolicy.CreateBulk(lines...).Save(a.ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CasbinRuleToStringArray(rule *ent.CasbinRule) []string {
+func AuthorizationPolicyToStringArray(rule *ent.AuthorizationPolicy) []string {
 	arr := make([]string, 0)
 	if rule.V0 != "" {
 		arr = append(arr, rule.V0)

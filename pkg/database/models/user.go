@@ -45,6 +45,8 @@ func (User) Fields() []ent.Field {
 		// 	Optional(),
 		// field.Time("recover_token_expiry").
 		// 	Optional(),
+		field.String("role").
+			Default("user"),
 	}
 }
 

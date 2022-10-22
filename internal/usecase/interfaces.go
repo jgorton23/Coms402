@@ -4,7 +4,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/casbin/casbin/v2/model"
 	"github.com/volatiletech/authboss/v3"
 )
 
@@ -25,19 +24,21 @@ type (
 		WithSubsystem(subsystem string) Logger
 	}
 
-	// Conforms to the authboss interfaces
-	AuthBoss interface {
+	//AuthBossServer conforms to the authboss interfaces
+	AuthBossServer interface {
 		Load(context.Context, string) (authboss.User, error)
 		Save(context.Context, authboss.User) error
 		New(context.Context) authboss.User
 		Create(context.Context, authboss.User) error
 	}
 
-	Casbin interface {
-		LoadPolicy(model model.Model) error
-		SavePolicy(model model.Model) error
-		AddPolicy(string, string, []string) error
-		RemovePolicy(string, string, []string) error
-		RemoveFilteredPolicy(string, string, int, ...string) error
+	AuthBossLogger interface {
+		Info(string)
+		Error(string)
+	}
+
+	HttpAuthorization interface {
+		//EnforceUser ( user, path, method )
+		EnforceUser(string, string, string) (bool, error)
 	}
 )

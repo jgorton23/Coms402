@@ -21,7 +21,10 @@ func Run() {
 	injector := do.New()
 
 	config := repo.NewCleanEnvService()
-	config.Load("./config.yml")
+	err := config.Load("./config.yml")
+	if err != nil {
+		return
+	}
 	do.ProvideValue(injector, config.Get())
 
 	do.Provide(injector, repo.NewLogrusService())
@@ -37,14 +40,19 @@ func Run() {
 
 	do.Provide(injector, repo.NewDatabaseService)
 	do.Provide(injector, repo.NewDataBaseServiceUser)
-	do.Provide(injector, repo.NewDataBaseServiceCasbin)
-	do.Provide(injector, usecase.NewAuthBoss)
+	do.Provide(injector, repo.NewDataBaseServiceAuthorizationPolicy)
+	do.Provide(injector, repo.NewCookieStorerService)
+	do.Provide(injector, repo.NewSessionStorerService)
+	do.Provide(injector, usecase.NewAuthbossLogger)
+	do.Provide(injector, usecase.NewAuthBossServer)
+	do.Provide(injector, usecase.NewHttpAuthorization)
+	do.Provide(injector, controller.NewAuthenticator)
 	do.Provide(injector, controller.NewHttpV1)
 	do.Provide(injector, controller.New)
 
-	controller := do.MustInvoke[*controller.Controller](injector)
+	c := do.MustInvoke[*controller.Controller](injector)
 
-	controller.Run()
+	c.Run()
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
@@ -56,7 +64,7 @@ func Run() {
 	}
 
 	// Shutdown
-	err := injector.Shutdown()
+	err = injector.Shutdown()
 	if err != nil {
 		log.Print(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err).Error())
 	}

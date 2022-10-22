@@ -22,20 +22,22 @@ import (
 
 func New(i *do.Injector) (*Controller, error) {
 	c := &Controller{
-		config:   do.MustInvoke[*entity.Config](i),
-		log:      do.MustInvoke[usecase.Logger](i).WithSubsystem("controller"),
-		authBoss: do.MustInvoke[usecase.AuthBoss](i),
-		httpV1:   do.MustInvoke[ServerInterface](i),
+		config:            do.MustInvoke[*entity.Config](i),
+		log:               do.MustInvoke[usecase.Logger](i).WithSubsystem("http server"),
+		httpAuthorization: do.MustInvoke[usecase.HttpAuthorization](i),
+		httpV1:            do.MustInvoke[ServerInterface](i),
+		authBoss:          do.MustInvoke[*authboss.Authboss](i),
 	}
 	return c, nil
 }
 
 type Controller struct {
-	config     *entity.Config
-	log        usecase.Logger
-	authBoss   usecase.AuthBoss
-	httpV1     ServerInterface
-	httpServer *httpserver.Server
+	config            *entity.Config
+	log               usecase.Logger
+	httpV1            ServerInterface
+	httpServer        *httpserver.Server
+	httpAuthorization usecase.HttpAuthorization
+	authBoss          *authboss.Authboss
 }
 
 func (c *Controller) Shutdown() error {
@@ -55,10 +57,8 @@ func (c *Controller) Run() {
 	mux.Use(middleware.NewStructuredLogger(c.log))
 	mux.Use(chimiddleware.Recoverer)
 
-	ab := newAuthentication(c.config, c.authBoss, c.log)
-
-	mux.Use(ab.LoadClientStateMiddleware)
-	// mux.Use(remember.Middleware(ab))
+	mux.Use(c.authBoss.LoadClientStateMiddleware)
+	mux.Use(middleware.Authorizer(c.httpAuthorization, c.authBoss))
 
 	mux.Get("/metrics", promhttp.Handler().(http.HandlerFunc))
 
@@ -66,14 +66,13 @@ func (c *Controller) Run() {
 	// mux in this example is a chi router, but it could be anything that can route to
 	// the Core.Router.
 	mux.Group(func(mux chi.Router) {
-		mux.Use(authboss.ModuleListMiddleware(ab))
-		mux.Mount("/auth", http.StripPrefix("/auth", ab.Config.Core.Router))
+		mux.Use(authboss.ModuleListMiddleware(c.authBoss))
+		mux.Mount("/auth", http.StripPrefix("/auth", c.authBoss.Config.Core.Router))
 	})
 
 	// Protected Routes
 	mux.Group(func(r chi.Router) {
-		r.Use(authboss.Middleware2(ab, authboss.RequireNone, authboss.RespondUnauthorized))
-		// r.Use(lock.Middleware(ab))
+		r.Use(authboss.Middleware2(c.authBoss, authboss.RequireNone, authboss.RespondUnauthorized))
 
 		// Openapi generated interfaces
 		HandlerFromMuxWithBaseURL(c.httpV1, r, "/v1")

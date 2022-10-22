@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/casbinrule"
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
@@ -33,8 +33,8 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		casbinrule.Table: casbinrule.ValidColumn,
-		user.Table:       user.ValidColumn,
+		authorizationpolicy.Table: authorizationpolicy.ValidColumn,
+		user.Table:                user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

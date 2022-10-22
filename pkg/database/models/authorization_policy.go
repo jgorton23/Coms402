@@ -6,13 +6,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// CasbinRule holds the schema definition for the CasbinRule entity.
-type CasbinRule struct {
+// AuthorizationPolicy holds the schema definition for the AuthorizationPolicy entity.
+type AuthorizationPolicy struct {
 	ent.Schema
 }
 
-// Fields of the CasbinRule.
-func (CasbinRule) Fields() []ent.Field {
+// Fields of the AuthorizationPolicy.
+func (AuthorizationPolicy) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("Ptype").Default(""),
 		field.String("V0").Default(""),
@@ -24,12 +24,12 @@ func (CasbinRule) Fields() []ent.Field {
 	}
 }
 
-// Edges of the CasbinRule.
-func (CasbinRule) Edges() []ent.Edge {
+// Edges of the AuthorizationPolicy.
+func (AuthorizationPolicy) Edges() []ent.Edge {
 	return nil
 }
 
-func (CasbinRule) Index() []ent.Index {
+func (AuthorizationPolicy) Index() []ent.Index {
 	return []ent.Index{
 		index.Fields("Ptype", "V0", "V1", "V2", "V3", "V4", "V5").Unique(),
 	}

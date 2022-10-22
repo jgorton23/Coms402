@@ -43,6 +43,8 @@ type User struct {
 	// RecoverSelector    string
 	// RecoverVerifier    string
 	// RecoverTokenExpiry time.Time
+
+	Role string
 }
 
 // GetPID from user

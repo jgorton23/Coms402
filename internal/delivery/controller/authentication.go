@@ -1,50 +1,38 @@
 package controller
 
 import (
-	"encoding/base64"
-	"time"
-
-	"github.com/gorilla/sessions"
-	abclientstate "github.com/volatiletech/authboss-clientstate"
-	abrenderer "github.com/volatiletech/authboss-renderer"
+	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 	"github.com/volatiletech/authboss/v3/defaults"
 
 	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase/repo"
 )
 
-func newAuthentication(cfg *entity.Config, abuc usecase.AuthBoss, logger usecase.Logger) *authboss.Authboss {
+func NewAuthenticator(i *do.Injector) (*authboss.Authboss, error) {
+	log := do.MustInvoke[usecase.Logger](i).WithSubsystem("http authenticator")
+	conf := do.MustInvoke[*entity.Config](i)
+
 	ab := authboss.New()
-
-	cookieStoreKey, _ := base64.StdEncoding.DecodeString(cfg.HTTP.CookieStoreKey)
-	sessionStoreKey, _ := base64.StdEncoding.DecodeString(cfg.HTTP.SessionStoreKey)
-
-	cookieStore := abclientstate.NewCookieStorer(cookieStoreKey, nil)
-	cookieStore.HTTPOnly = false
-	cookieStore.Secure = false
-
-	sessionStore := abclientstate.NewSessionStorer(cfg.App.Name, sessionStoreKey, nil)
-	cstore := sessionStore.Store.(*sessions.CookieStore)
-	cstore.Options.HttpOnly = false
-	cstore.Options.Secure = false
-	cstore.MaxAge(int((30 * 24 * time.Hour) / time.Second))
-
-	ab.Config.Storage.Server = abuc
-	ab.Config.Storage.SessionState = sessionStore
-	ab.Config.Storage.CookieState = cookieStore
+	ab.Config.Storage.Server = do.MustInvoke[usecase.AuthBossServer](i)
+	ab.Config.Storage.SessionState = do.MustInvoke[*repo.SessionStorerService](i)
+	ab.Config.Storage.CookieState = do.MustInvoke[*repo.CookieStorerService](i)
 
 	ab.Config.Paths.Mount = "/auth"
-	ab.Config.Paths.RootURL = "http://localhost:" + cfg.HTTP.Port
+	//TODO set this from the config
+	ab.Config.Paths.RootURL = "http://localhost:" + conf.HTTP.Port
 
 	ab.Config.Core.ViewRenderer = defaults.JSONRenderer{}
-	ab.Config.Core.MailRenderer = abrenderer.NewEmail("/auth", "ab_views")
-
-	//TODO switch to using a custom logger so the logs can be more consistent
+	ab.Config.Core.MailRenderer = defaults.JSONRenderer{}
 	defaults.SetCore(&ab.Config, true, false)
+	ab.Config.Core.Logger = do.MustInvoke[usecase.AuthBossLogger](i)
 
 	if err := ab.Init(); err != nil {
-		logger.Error(err.Error())
+		return nil, err
 	}
-	return ab
+
+	log.Info("http authentication started")
+
+	return ab, nil
 }

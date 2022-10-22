@@ -31,6 +31,8 @@ type User struct {
 	LastAttempt time.Time `json:"last_attempt,omitempty"`
 	// Locked holds the value of the "locked" field.
 	Locked time.Time `json:"locked,omitempty"`
+	// Role holds the value of the "role" field.
+	Role string `json:"role,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -40,7 +42,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldID, user.FieldAttemptCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldEmail, user.FieldPasswordHash:
+		case user.FieldEmail, user.FieldPasswordHash, user.FieldRole:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldLastAttempt, user.FieldLocked:
 			values[i] = new(sql.NullTime)
@@ -107,6 +109,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Locked = value.Time
 			}
+		case user.FieldRole:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				u.Role = value.String
+			}
 		}
 	}
 	return nil
@@ -155,6 +163,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("locked=")
 	builder.WriteString(u.Locked.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("role=")
+	builder.WriteString(u.Role)
 	builder.WriteByte(')')
 	return builder.String()
 }

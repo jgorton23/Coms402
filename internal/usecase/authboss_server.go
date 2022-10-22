@@ -23,10 +23,11 @@ var (
 	// 	_                 authboss.RememberingServerStorer = assertUserUseCase
 )
 
-func NewAuthBoss(i *do.Injector) (AuthBoss, error) {
-	abuc := &authBossImplem{}
-	abuc.log = do.MustInvoke[Logger](i)
-	abuc.userService = do.MustInvoke[repo.DataBaseServiceUser](i)
+func NewAuthBossServer(i *do.Injector) (AuthBossServer, error) {
+	abuc := &authBossImplem{
+		log:         do.MustInvoke[Logger](i),
+		userService: do.MustInvoke[repo.DataBaseServiceUser](i),
+	}
 
 	return abuc, nil
 }
