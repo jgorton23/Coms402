@@ -3,8 +3,8 @@ package usecase
 
 import (
 	"context"
+	"github.com/MatthewBehnke/exampleGoApi/internal/domain"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
 	"github.com/casbin/casbin/v2/model"
 )
 
@@ -14,7 +14,7 @@ type (
 	// ConfigRepo -
 	ConfigRepo interface {
 		Load(string) error
-		Get() *entity.Config
+		Get() *domain.Config
 	}
 
 	// AuthorizationPolicyRepo -
@@ -37,12 +37,12 @@ type (
 
 	// UserRepo -
 	UserRepo interface {
-		Get(context.Context) ([]entity.User, error)
-		GetById(context.Context, int) (entity.User, error)
-		GetByEmail(context.Context, string) (entity.User, error)
+		Get(context.Context) ([]domain.User, error)
+		GetById(context.Context, int) (domain.User, error)
+		GetByEmail(context.Context, string) (domain.User, error)
 		Exists(context.Context, string) (bool, error)
-		Create(context.Context, entity.User) (entity.User, error)
-		Update(context.Context, entity.User) error
+		Create(context.Context, domain.User) (domain.User, error)
+		Update(context.Context, domain.User) error
 	}
 
 	// LoggerRepo -

@@ -14,7 +14,7 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
-// UserCreate is the builder for creating a User entity.
+// UserCreate is the builder for creating a User domain.
 type UserCreate struct {
 	config
 	mutation *UserMutation

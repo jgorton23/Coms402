@@ -2,11 +2,11 @@ package repo
 
 import (
 	"context"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
-	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/domain"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
@@ -29,7 +29,7 @@ type userDbEntImplem struct {
 	*ent.Client
 }
 
-func (ur *userDbEntImplem) Get(ctx context.Context) ([]entity.User, error) {
+func (ur *userDbEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	us, err := ur.Client.User.
 		Query().
 		All(ctx)
@@ -38,7 +38,7 @@ func (ur *userDbEntImplem) Get(ctx context.Context) ([]entity.User, error) {
 		return nil, err
 	}
 
-	users := make([]entity.User, len(us))
+	users := make([]domain.User, len(us))
 
 	for i := 0; i < len(us); i++ {
 		users[i] = ur.databaseUserToEntityUser(us[i])
@@ -47,27 +47,27 @@ func (ur *userDbEntImplem) Get(ctx context.Context) ([]entity.User, error) {
 	return users, nil
 }
 
-func (ur *userDbEntImplem) GetById(ctx context.Context, id int) (entity.User, error) {
+func (ur *userDbEntImplem) GetById(ctx context.Context, id int) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
 		Where(user.ID(id)).
 		First(ctx)
 
 	if err != nil {
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	return ur.databaseUserToEntityUser(u), nil
 }
 
-func (ur *userDbEntImplem) GetByEmail(ctx context.Context, email string) (entity.User, error) {
+func (ur *userDbEntImplem) GetByEmail(ctx context.Context, email string) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
 		Where(user.Email(email)).
 		First(ctx)
 
 	if err != nil {
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	return ur.databaseUserToEntityUser(u), nil
@@ -88,7 +88,7 @@ func (ur *userDbEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 }
 
 // Create -.
-func (ur *userDbEntImplem) Create(ctx context.Context, usr entity.User) (entity.User, error) {
+func (ur *userDbEntImplem) Create(ctx context.Context, usr domain.User) (domain.User, error) {
 	u, err := ur.Client.User.
 		Create().
 		SetEmail(usr.Email).
@@ -102,14 +102,14 @@ func (ur *userDbEntImplem) Create(ctx context.Context, usr entity.User) (entity.
 		Save(ctx)
 
 	if err != nil {
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	return ur.databaseUserToEntityUser(u), nil
 }
 
 // Update -.
-func (ur *userDbEntImplem) Update(ctx context.Context, u entity.User) error {
+func (ur *userDbEntImplem) Update(ctx context.Context, u domain.User) error {
 	_, err := ur.Client.User.
 		Update().
 		SetEmail(u.Email).
@@ -129,8 +129,8 @@ func (ur *userDbEntImplem) Update(ctx context.Context, u entity.User) error {
 	return nil
 }
 
-func (ur *userDbEntImplem) databaseUserToEntityUser(u *ent.User) entity.User {
-	return entity.User{
+func (ur *userDbEntImplem) databaseUserToEntityUser(u *ent.User) domain.User {
+	return domain.User{
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,
 		Email:                u.Email,

@@ -1,4 +1,4 @@
-package entity
+package domain
 
 type (
 	// Config -.
@@ -28,7 +28,7 @@ type (
 		URL     string `env-required:"true"                 env:"PG_URL"`
 	}
 
-	// Log -.
+	// LOG -.
 	LOG struct {
 		// Format specifies the output log format.
 		// Accepted values are: json, logfmt

@@ -9,7 +9,7 @@ import (
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/internal/domain"
 )
 
 var (
@@ -37,7 +37,7 @@ type AuthBossServer struct {
 }
 
 func (uuc AuthBossServer) Save(ctx context.Context, user authboss.User) error {
-	u := user.(*entity.User)
+	u := user.(*domain.User)
 
 	exists, err := uuc.userRepo.Exists(ctx, u.Email)
 
@@ -65,13 +65,13 @@ func (uuc AuthBossServer) Load(ctx context.Context, key string) (user authboss.U
 	exists, err := uuc.userRepo.Exists(ctx, key)
 
 	if err != nil {
-		return &entity.User{}, err
+		return &domain.User{}, err
 	}
 
 	// The user already exists
 	if !exists {
 		uuc.authBossLogger.Info(fmt.Sprintf("User %v not found in database", key))
-		return &entity.User{}, authboss.ErrUserNotFound
+		return &domain.User{}, authboss.ErrUserNotFound
 	}
 
 	u, err := uuc.userRepo.GetByEmail(ctx, key)
@@ -86,11 +86,11 @@ func (uuc AuthBossServer) Load(ctx context.Context, key string) (user authboss.U
 }
 
 func (uuc AuthBossServer) New(_ context.Context) authboss.User {
-	return &entity.User{}
+	return &domain.User{}
 }
 
 func (uuc AuthBossServer) Create(ctx context.Context, user authboss.User) error {
-	u := user.(*entity.User)
+	u := user.(*domain.User)
 
 	u.Email = strings.ToLower(u.Email)
 

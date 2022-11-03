@@ -1,13 +1,13 @@
 package repo
 
 import (
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"os"
 
 	"github.com/samber/do"
 	"github.com/sirupsen/logrus"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
-	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/domain"
 )
 
 // Pattern to verify loggerLogrusImplem conforms to the required interfaces
@@ -17,7 +17,7 @@ var (
 )
 
 func NewLoggerRepo(i *do.Injector) (usecase.LoggerRepo, error) {
-	config := do.MustInvoke[*entity.Config](i)
+	config := do.MustInvoke[*domain.Config](i)
 
 	l := logrus.New()
 

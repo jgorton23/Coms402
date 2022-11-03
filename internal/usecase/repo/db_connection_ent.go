@@ -10,14 +10,14 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/internal/domain"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 )
 
 func NewDatabaseConnection(i *do.Injector) (*DatabaseConnection, error) {
 	dbService := &DatabaseConnection{}
 
-	config := do.MustInvoke[*entity.Config](i)
+	config := do.MustInvoke[*domain.Config](i)
 
 	db, err := sql.Open("postgres", config.PG.URL)
 	if err != nil {

@@ -1,14 +1,23 @@
 package usecase
 
 import (
+	"log"
+
 	"github.com/samber/do"
 	"logur.dev/logur"
 )
 
 func NewLogger(i *do.Injector) (*Logger, error) {
-	return &Logger{
+	logger := &Logger{
 		do.MustInvoke[LoggerRepo](i),
-	}, nil
+	}
+
+	// Remove all flags
+	log.SetFlags(0)
+	// Override the global standard library logger to make sure everything uses our logger
+	log.SetOutput(logur.NewLevelWriter(logger, logur.Info))
+
+	return logger, nil
 }
 
 // Logger wraps a LoggerRepo and exposes it.

@@ -1,4 +1,4 @@
-package entity
+package domain
 
 import (
 	"time"
@@ -14,7 +14,7 @@ var (
 	_ authboss.User         = assertUser
 	_ authboss.AuthableUser = assertUser
 	// _ authboss.ConfirmableUser = assertUser
-	_ authboss.LockableUser = assertUser
+	// _ authboss.LockableUser = assertUser
 	// _ authboss.RecoverableUser = assertUser
 	// _ authboss.ArbitraryUser = assertUser
 )

@@ -60,7 +60,7 @@ func (apq *AuthorizationPolicyQuery) Order(o ...OrderFunc) *AuthorizationPolicyQ
 	return apq
 }
 
-// First returns the first AuthorizationPolicy entity from the query.
+// First returns the first AuthorizationPolicy domain from the query.
 // Returns a *NotFoundError when no AuthorizationPolicy was found.
 func (apq *AuthorizationPolicyQuery) First(ctx context.Context) (*AuthorizationPolicy, error) {
 	nodes, err := apq.Limit(1).All(ctx)
@@ -105,8 +105,8 @@ func (apq *AuthorizationPolicyQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single AuthorizationPolicy entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one AuthorizationPolicy entity is found.
+// Only returns a single AuthorizationPolicy domain found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one AuthorizationPolicy domain is found.
 // Returns a *NotFoundError when no AuthorizationPolicy entities are found.
 func (apq *AuthorizationPolicyQuery) Only(ctx context.Context) (*AuthorizationPolicy, error) {
 	nodes, err := apq.Limit(2).All(ctx)
@@ -278,7 +278,7 @@ func (apq *AuthorizationPolicyQuery) GroupBy(field string, fields ...string) *Au
 }
 
 // Select allows the selection one or more fields/columns for the given query,
-// instead of selecting all fields in the entity.
+// instead of selecting all fields in the domain.
 //
 // Example:
 //

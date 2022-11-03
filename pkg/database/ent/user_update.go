@@ -318,7 +318,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return n, nil
 }
 
-// UserUpdateOne is the builder for updating a single User entity.
+// UserUpdateOne is the builder for updating a single User domain.
 type UserUpdateOne struct {
 	config
 	fields   []string
@@ -452,14 +452,14 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// Select allows selecting one or more fields (columns) of the returned entity.
-// The default is selecting all fields defined in the entity schema.
+// Select allows selecting one or more fields (columns) of the returned domain.
+// The default is selecting all fields defined in the domain schema.
 func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 	uuo.fields = append([]string{field}, fields...)
 	return uuo
 }
 
-// Save executes the query and returns the updated User entity.
+// Save executes the query and returns the updated User domain.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -506,7 +506,7 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 	return node
 }
 
-// Exec executes the query on the entity.
+// Exec executes the query on the domain.
 func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
 	_, err := uuo.Save(ctx)
 	return err

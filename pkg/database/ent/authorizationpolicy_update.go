@@ -263,7 +263,7 @@ func (apu *AuthorizationPolicyUpdate) sqlSave(ctx context.Context) (n int, err e
 	return n, nil
 }
 
-// AuthorizationPolicyUpdateOne is the builder for updating a single AuthorizationPolicy entity.
+// AuthorizationPolicyUpdateOne is the builder for updating a single AuthorizationPolicy domain.
 type AuthorizationPolicyUpdateOne struct {
 	config
 	fields   []string
@@ -374,14 +374,14 @@ func (apuo *AuthorizationPolicyUpdateOne) Mutation() *AuthorizationPolicyMutatio
 	return apuo.mutation
 }
 
-// Select allows selecting one or more fields (columns) of the returned entity.
-// The default is selecting all fields defined in the entity schema.
+// Select allows selecting one or more fields (columns) of the returned domain.
+// The default is selecting all fields defined in the domain schema.
 func (apuo *AuthorizationPolicyUpdateOne) Select(field string, fields ...string) *AuthorizationPolicyUpdateOne {
 	apuo.fields = append([]string{field}, fields...)
 	return apuo
 }
 
-// Save executes the query and returns the updated AuthorizationPolicy entity.
+// Save executes the query and returns the updated AuthorizationPolicy domain.
 func (apuo *AuthorizationPolicyUpdateOne) Save(ctx context.Context) (*AuthorizationPolicy, error) {
 	var (
 		err  error
@@ -428,7 +428,7 @@ func (apuo *AuthorizationPolicyUpdateOne) SaveX(ctx context.Context) *Authorizat
 	return node
 }
 
-// Exec executes the query on the entity.
+// Exec executes the query on the domain.
 func (apuo *AuthorizationPolicyUpdateOne) Exec(ctx context.Context) error {
 	_, err := apuo.Save(ctx)
 	return err

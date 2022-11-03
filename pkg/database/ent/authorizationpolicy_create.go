@@ -13,7 +13,7 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 )
 
-// AuthorizationPolicyCreate is the builder for creating a AuthorizationPolicy entity.
+// AuthorizationPolicyCreate is the builder for creating a AuthorizationPolicy domain.
 type AuthorizationPolicyCreate struct {
 	config
 	mutation *AuthorizationPolicyMutation

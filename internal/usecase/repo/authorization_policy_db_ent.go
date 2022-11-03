@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"reflect"
 	"strings"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/predicate"

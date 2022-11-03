@@ -1,4 +1,4 @@
-package controller
+package v1
 
 import (
 	"fmt"
@@ -14,15 +14,15 @@ import (
 	_ "github.com/volatiletech/authboss/v3/logout"
 	_ "github.com/volatiletech/authboss/v3/register"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/middleware"
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
+	"github.com/MatthewBehnke/exampleGoApi/internal/delivery/http/middleware"
+	"github.com/MatthewBehnke/exampleGoApi/internal/domain"
 	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/httpserver"
 )
 
-func New(i *do.Injector) (*Controller, error) {
-	c := &Controller{
-		config:            do.MustInvoke[*entity.Config](i),
+func NewHttpV1Router(i *do.Injector) (*HttpV1Router, error) {
+	c := &HttpV1Router{
+		config:            do.MustInvoke[*domain.Config](i),
 		logger:            do.MustInvoke[*usecase.Logger](i).WithSubsystem("http server"),
 		httpAuthorization: do.MustInvoke[*usecase.HttpAuthorization](i),
 		httpV1:            do.MustInvoke[ServerInterface](i),
@@ -31,8 +31,8 @@ func New(i *do.Injector) (*Controller, error) {
 	return c, nil
 }
 
-type Controller struct {
-	config            *entity.Config
+type HttpV1Router struct {
+	config            *domain.Config
 	logger            *usecase.Logger
 	httpV1            ServerInterface
 	httpServer        *httpserver.Server
@@ -40,7 +40,7 @@ type Controller struct {
 	authBoss          *authboss.Authboss
 }
 
-func (c *Controller) Shutdown() error {
+func (c *HttpV1Router) Shutdown() error {
 	err := c.httpServer.Shutdown()
 	if err != nil {
 		return fmt.Errorf("app - Run - httpServer.Shutdown: %w", err)
@@ -49,7 +49,7 @@ func (c *Controller) Shutdown() error {
 	return nil
 }
 
-func (c *Controller) Run() {
+func (c *HttpV1Router) Run() {
 	// HTTP Server
 	mux := chi.NewRouter()
 	mux.Use(chimiddleware.RequestID)
@@ -64,7 +64,7 @@ func (c *Controller) Run() {
 
 	// Mount the router to a path (this should be the same as the Mount path above)
 	// mux in this example is a chi router, but it could be anything that can route to
-	// the Core.Router.
+	// the Core.HttpV1Router.
 	mux.Group(func(mux chi.Router) {
 		mux.Use(authboss.ModuleListMiddleware(c.authBoss))
 		mux.Mount("/auth", http.StripPrefix("/auth", c.authBoss.Config.Core.Router))

@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// AuthorizationPolicy holds the schema definition for the AuthorizationPolicy entity.
+// AuthorizationPolicy holds the schema definition for the AuthorizationPolicy domain.
 type AuthorizationPolicy struct {
 	ent.Schema
 }

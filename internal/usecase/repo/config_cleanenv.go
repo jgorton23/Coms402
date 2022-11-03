@@ -1,10 +1,10 @@
 package repo
 
 import (
+	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
 	"github.com/ilyakaznacheev/cleanenv"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/entity"
-	"github.com/MatthewBehnke/exampleGoApi/internal/usecase"
+	"github.com/MatthewBehnke/exampleGoApi/internal/domain"
 )
 
 // Pattern to verify configCleanenvImplem conforms to the required interfaces
@@ -18,11 +18,11 @@ func NewConfigRepo() usecase.ConfigRepo {
 }
 
 type configCleanenvImplem struct {
-	cfg *entity.Config
+	cfg *domain.Config
 }
 
 func (c *configCleanenvImplem) Load(path string) error {
-	c.cfg = &entity.Config{}
+	c.cfg = &domain.Config{}
 	err := cleanenv.ReadConfig(path, c.cfg)
 	if err != nil {
 		return err
@@ -34,6 +34,6 @@ func (c *configCleanenvImplem) Load(path string) error {
 	return nil
 }
 
-func (c *configCleanenvImplem) Get() *entity.Config {
+func (c *configCleanenvImplem) Get() *domain.Config {
 	return c.cfg
 }

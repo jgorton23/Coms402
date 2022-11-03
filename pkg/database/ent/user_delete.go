@@ -14,7 +14,7 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
-// UserDelete is the builder for deleting a User entity.
+// UserDelete is the builder for deleting a User domain.
 type UserDelete struct {
 	config
 	hooks    []Hook
@@ -92,7 +92,7 @@ func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// UserDeleteOne is the builder for deleting a single User entity.
+// UserDeleteOne is the builder for deleting a single User domain.
 type UserDeleteOne struct {
 	ud *UserDelete
 }
