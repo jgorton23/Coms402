@@ -7,7 +7,7 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// User holds the schema definition for the User entity.
+// User holds the schema definition for the User domain.
 type User struct {
 	ent.Schema
 }
@@ -45,6 +45,8 @@ func (User) Fields() []ent.Field {
 		// 	Optional(),
 		// field.Time("recover_token_expiry").
 		// 	Optional(),
+		field.String("role").
+			Default("user"),
 	}
 }
 

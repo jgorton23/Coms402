@@ -1,5 +1,5 @@
 # config for oapi-codegen
-package: api
+package: controller
 generate:
   chi-server: true
   models: true

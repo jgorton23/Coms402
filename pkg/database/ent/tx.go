@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AuthorizationPolicy is the client for interacting with the AuthorizationPolicy builders.
+	AuthorizationPolicy *AuthorizationPolicyClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -149,6 +151,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AuthorizationPolicy = NewAuthorizationPolicyClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 
@@ -158,8 +161,8 @@ func (tx *Tx) init() {
 // Commit and Rollback are nop for the internal builders and the user must call one
 // of them in order to commit or rollback the transaction.
 //
-// If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: User.QueryXXX(), the query will be executed
+// If a closed transaction is embedded in one of the generated entities, and the domain
+// applies a query, for example: AuthorizationPolicy.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
@@ -198,12 +201,12 @@ func (*txDriver) Commit() error { return nil }
 func (*txDriver) Rollback() error { return nil }
 
 // Exec calls tx.Exec.
-func (tx *txDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
+func (tx *txDriver) Exec(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Exec(ctx, query, args, v)
 }
 
 // Query calls tx.Query.
-func (tx *txDriver) Query(ctx context.Context, query string, args, v interface{}) error {
+func (tx *txDriver) Query(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Query(ctx, query, args, v)
 }
 

@@ -12,7 +12,7 @@ import (
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
-// User is the model entity for the User schema.
+// User is the model domain for the User schema.
 type User struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -31,16 +31,18 @@ type User struct {
 	LastAttempt time.Time `json:"last_attempt,omitempty"`
 	// Locked holds the value of the "locked" field.
 	Locked time.Time `json:"locked,omitempty"`
+	// Role holds the value of the "role" field.
+	Role string `json:"role,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*User) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldID, user.FieldAttemptCount:
 			values[i] = new(sql.NullInt64)
-		case user.FieldEmail, user.FieldPasswordHash:
+		case user.FieldEmail, user.FieldPasswordHash, user.FieldRole:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldLastAttempt, user.FieldLocked:
 			values[i] = new(sql.NullTime)
@@ -53,7 +55,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []interface{}) error {
+func (u *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -107,6 +109,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Locked = value.Time
 			}
+		case user.FieldRole:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				u.Role = value.String
+			}
 		}
 	}
 	return nil
@@ -119,12 +127,12 @@ func (u *User) Update() *UserUpdateOne {
 	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
-// Unwrap unwraps the User entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the User domain that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
 	_tx, ok := u.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: User is not a transactional entity")
+		panic("ent: User is not a transactional domain")
 	}
 	u.config.driver = _tx.drv
 	return u
@@ -155,6 +163,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("locked=")
 	builder.WriteString(u.Locked.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("role=")
+	builder.WriteString(u.Role)
 	builder.WriteByte(')')
 	return builder.String()
 }

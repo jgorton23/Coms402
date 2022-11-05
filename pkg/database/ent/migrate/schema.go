@@ -8,6 +8,23 @@ import (
 )
 
 var (
+	// AuthorizationPoliciesColumns holds the columns for the "authorization_policies" table.
+	AuthorizationPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "ptype", Type: field.TypeString, Default: ""},
+		{Name: "v0", Type: field.TypeString, Default: ""},
+		{Name: "v1", Type: field.TypeString, Default: ""},
+		{Name: "v2", Type: field.TypeString, Default: ""},
+		{Name: "v3", Type: field.TypeString, Default: ""},
+		{Name: "v4", Type: field.TypeString, Default: ""},
+		{Name: "v5", Type: field.TypeString, Default: ""},
+	}
+	// AuthorizationPoliciesTable holds the schema information for the "authorization_policies" table.
+	AuthorizationPoliciesTable = &schema.Table{
+		Name:       "authorization_policies",
+		Columns:    AuthorizationPoliciesColumns,
+		PrimaryKey: []*schema.Column{AuthorizationPoliciesColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -18,6 +35,7 @@ var (
 		{Name: "attempt_count", Type: field.TypeInt, Nullable: true},
 		{Name: "last_attempt", Type: field.TypeTime, Nullable: true},
 		{Name: "locked", Type: field.TypeTime, Nullable: true},
+		{Name: "role", Type: field.TypeString, Default: "user"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -27,6 +45,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AuthorizationPoliciesTable,
 		UsersTable,
 	}
 )

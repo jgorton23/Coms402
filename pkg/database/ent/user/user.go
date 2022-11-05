@@ -25,6 +25,8 @@ const (
 	FieldLastAttempt = "last_attempt"
 	// FieldLocked holds the string denoting the locked field in the database.
 	FieldLocked = "locked"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -39,6 +41,7 @@ var Columns = []string{
 	FieldAttemptCount,
 	FieldLastAttempt,
 	FieldLocked,
+	FieldRole,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -56,6 +59,8 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt time.Time
+	// DefaultRole holds the default value on creation for the "role" field.
+	DefaultRole string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(int) error
 )

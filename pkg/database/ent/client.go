@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/migrate"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
@@ -20,6 +21,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AuthorizationPolicy is the client for interacting with the AuthorizationPolicy builders.
+	AuthorizationPolicy *AuthorizationPolicyClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -35,6 +38,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AuthorizationPolicy = NewAuthorizationPolicyClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -67,9 +71,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		AuthorizationPolicy: NewAuthorizationPolicyClient(cfg),
+		User:                NewUserClient(cfg),
 	}, nil
 }
 
@@ -87,16 +92,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		User:   NewUserClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		AuthorizationPolicy: NewAuthorizationPolicyClient(cfg),
+		User:                NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		User.
+//		AuthorizationPolicy.
 //		Query().
 //		Count(ctx)
 //
@@ -116,10 +122,101 @@ func (c *Client) Close() error {
 	return c.driver.Close()
 }
 
-// Use adds the mutation hooks to all the entity clients.
+// Use adds the mutation hooks to all the domain clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.AuthorizationPolicy.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// AuthorizationPolicyClient is a client for the AuthorizationPolicy schema.
+type AuthorizationPolicyClient struct {
+	config
+}
+
+// NewAuthorizationPolicyClient returns a client for the AuthorizationPolicy from the given config.
+func NewAuthorizationPolicyClient(c config) *AuthorizationPolicyClient {
+	return &AuthorizationPolicyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `authorizationpolicy.Hooks(f(g(h())))`.
+func (c *AuthorizationPolicyClient) Use(hooks ...Hook) {
+	c.hooks.AuthorizationPolicy = append(c.hooks.AuthorizationPolicy, hooks...)
+}
+
+// Create returns a builder for creating a AuthorizationPolicy domain.
+func (c *AuthorizationPolicyClient) Create() *AuthorizationPolicyCreate {
+	mutation := newAuthorizationPolicyMutation(c.config, OpCreate)
+	return &AuthorizationPolicyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AuthorizationPolicy entities.
+func (c *AuthorizationPolicyClient) CreateBulk(builders ...*AuthorizationPolicyCreate) *AuthorizationPolicyCreateBulk {
+	return &AuthorizationPolicyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AuthorizationPolicy.
+func (c *AuthorizationPolicyClient) Update() *AuthorizationPolicyUpdate {
+	mutation := newAuthorizationPolicyMutation(c.config, OpUpdate)
+	return &AuthorizationPolicyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given domain.
+func (c *AuthorizationPolicyClient) UpdateOne(ap *AuthorizationPolicy) *AuthorizationPolicyUpdateOne {
+	mutation := newAuthorizationPolicyMutation(c.config, OpUpdateOne, withAuthorizationPolicy(ap))
+	return &AuthorizationPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AuthorizationPolicyClient) UpdateOneID(id int) *AuthorizationPolicyUpdateOne {
+	mutation := newAuthorizationPolicyMutation(c.config, OpUpdateOne, withAuthorizationPolicyID(id))
+	return &AuthorizationPolicyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AuthorizationPolicy.
+func (c *AuthorizationPolicyClient) Delete() *AuthorizationPolicyDelete {
+	mutation := newAuthorizationPolicyMutation(c.config, OpDelete)
+	return &AuthorizationPolicyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given domain.
+func (c *AuthorizationPolicyClient) DeleteOne(ap *AuthorizationPolicy) *AuthorizationPolicyDeleteOne {
+	return c.DeleteOneID(ap.ID)
+}
+
+// DeleteOne returns a builder for deleting the given domain by its id.
+func (c *AuthorizationPolicyClient) DeleteOneID(id int) *AuthorizationPolicyDeleteOne {
+	builder := c.Delete().Where(authorizationpolicy.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AuthorizationPolicyDeleteOne{builder}
+}
+
+// Query returns a query builder for AuthorizationPolicy.
+func (c *AuthorizationPolicyClient) Query() *AuthorizationPolicyQuery {
+	return &AuthorizationPolicyQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a AuthorizationPolicy domain by its id.
+func (c *AuthorizationPolicyClient) Get(ctx context.Context, id int) (*AuthorizationPolicy, error) {
+	return c.Query().Where(authorizationpolicy.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AuthorizationPolicyClient) GetX(ctx context.Context, id int) *AuthorizationPolicy {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AuthorizationPolicyClient) Hooks() []Hook {
+	return c.hooks.AuthorizationPolicy
 }
 
 // UserClient is a client for the User schema.
@@ -138,7 +235,7 @@ func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
 }
 
-// Create returns a builder for creating a User entity.
+// Create returns a builder for creating a User domain.
 func (c *UserClient) Create() *UserCreate {
 	mutation := newUserMutation(c.config, OpCreate)
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -155,7 +252,7 @@ func (c *UserClient) Update() *UserUpdate {
 	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// UpdateOne returns an update builder for the given entity.
+// UpdateOne returns an update builder for the given domain.
 func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -173,12 +270,12 @@ func (c *UserClient) Delete() *UserDelete {
 	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// DeleteOne returns a builder for deleting the given entity.
+// DeleteOne returns a builder for deleting the given domain.
 func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOne returns a builder for deleting the given domain by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
@@ -193,7 +290,7 @@ func (c *UserClient) Query() *UserQuery {
 	}
 }
 
-// Get returns a User entity by its id.
+// Get returns a User domain by its id.
 func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 	return c.Query().Where(user.ID(id)).Only(ctx)
 }

@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/models"
 )
@@ -13,6 +14,36 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	authorizationpolicyFields := models.AuthorizationPolicy{}.Fields()
+	_ = authorizationpolicyFields
+	// authorizationpolicyDescPtype is the schema descriptor for Ptype field.
+	authorizationpolicyDescPtype := authorizationpolicyFields[0].Descriptor()
+	// authorizationpolicy.DefaultPtype holds the default value on creation for the Ptype field.
+	authorizationpolicy.DefaultPtype = authorizationpolicyDescPtype.Default.(string)
+	// authorizationpolicyDescV0 is the schema descriptor for V0 field.
+	authorizationpolicyDescV0 := authorizationpolicyFields[1].Descriptor()
+	// authorizationpolicy.DefaultV0 holds the default value on creation for the V0 field.
+	authorizationpolicy.DefaultV0 = authorizationpolicyDescV0.Default.(string)
+	// authorizationpolicyDescV1 is the schema descriptor for V1 field.
+	authorizationpolicyDescV1 := authorizationpolicyFields[2].Descriptor()
+	// authorizationpolicy.DefaultV1 holds the default value on creation for the V1 field.
+	authorizationpolicy.DefaultV1 = authorizationpolicyDescV1.Default.(string)
+	// authorizationpolicyDescV2 is the schema descriptor for V2 field.
+	authorizationpolicyDescV2 := authorizationpolicyFields[3].Descriptor()
+	// authorizationpolicy.DefaultV2 holds the default value on creation for the V2 field.
+	authorizationpolicy.DefaultV2 = authorizationpolicyDescV2.Default.(string)
+	// authorizationpolicyDescV3 is the schema descriptor for V3 field.
+	authorizationpolicyDescV3 := authorizationpolicyFields[4].Descriptor()
+	// authorizationpolicy.DefaultV3 holds the default value on creation for the V3 field.
+	authorizationpolicy.DefaultV3 = authorizationpolicyDescV3.Default.(string)
+	// authorizationpolicyDescV4 is the schema descriptor for V4 field.
+	authorizationpolicyDescV4 := authorizationpolicyFields[5].Descriptor()
+	// authorizationpolicy.DefaultV4 holds the default value on creation for the V4 field.
+	authorizationpolicy.DefaultV4 = authorizationpolicyDescV4.Default.(string)
+	// authorizationpolicyDescV5 is the schema descriptor for V5 field.
+	authorizationpolicyDescV5 := authorizationpolicyFields[6].Descriptor()
+	// authorizationpolicy.DefaultV5 holds the default value on creation for the V5 field.
+	authorizationpolicy.DefaultV5 = authorizationpolicyDescV5.Default.(string)
 	userFields := models.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -23,6 +54,10 @@ func init() {
 	userDescUpdatedAt := userFields[2].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(time.Time)
+	// userDescRole is the schema descriptor for role field.
+	userDescRole := userFields[8].Descriptor()
+	// user.DefaultRole holds the default value on creation for the role field.
+	user.DefaultRole = userDescRole.Default.(string)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.

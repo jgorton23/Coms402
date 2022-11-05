@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 
+	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
 )
 
@@ -32,7 +33,8 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		user.Table: user.ValidColumn,
+		authorizationpolicy.Table: authorizationpolicy.ValidColumn,
+		user.Table:                user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
@@ -169,7 +171,7 @@ func IsValidationError(err error) bool {
 	return errors.As(err, &e)
 }
 
-// NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
+// NotFoundError returns when trying to fetch a specific domain and it was not found in the database.
 type NotFoundError struct {
 	label string
 }
@@ -196,7 +198,7 @@ func MaskNotFound(err error) error {
 	return err
 }
 
-// NotSingularError returns when trying to fetch a singular entity and more then one was found in the database.
+// NotSingularError returns when trying to fetch a singular domain and more then one was found in the database.
 type NotSingularError struct {
 	label string
 }
@@ -265,11 +267,11 @@ func IsConstraintError(err error) bool {
 type selector struct {
 	label string
 	flds  *[]string
-	scan  func(context.Context, interface{}) error
+	scan  func(context.Context, any) error
 }
 
 // ScanX is like Scan, but panics if an error occurs.
-func (s *selector) ScanX(ctx context.Context, v interface{}) {
+func (s *selector) ScanX(ctx context.Context, v any) {
 	if err := s.scan(ctx, v); err != nil {
 		panic(err)
 	}
