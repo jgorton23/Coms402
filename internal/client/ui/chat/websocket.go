@@ -6,9 +6,10 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/common"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/gorilla/websocket"
+
+	"github.com/MatthewBehnke/apis/internal/client/ui/common"
 )
 
 func Chat(httpClient *http.Client, m *Model) error {

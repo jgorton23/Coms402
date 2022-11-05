@@ -10,8 +10,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/domain"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
+	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"github.com/MatthewBehnke/apis/pkg/database/ent"
 )
 
 func NewDatabaseConnection(i *do.Injector) (*DatabaseConnection, error) {

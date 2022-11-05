@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 type loggerFields map[string]interface{}

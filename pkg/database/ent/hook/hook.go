@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
+	"github.com/MatthewBehnke/apis/pkg/database/ent"
 )
 
 // The AuthorizationPolicyFunc type is an adapter to allow the use of ordinary

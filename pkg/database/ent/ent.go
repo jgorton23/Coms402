@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

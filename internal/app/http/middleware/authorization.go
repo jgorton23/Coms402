@@ -6,7 +6,7 @@ import (
 
 	"github.com/volatiletech/authboss/v3"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Authorizer Authz is a middleware that controls the access to the HTTP service, it is based

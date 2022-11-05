@@ -5,9 +5,9 @@ package ent
 import (
 	"time"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/models"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
+	"github.com/MatthewBehnke/apis/pkg/database/models"
 )
 
 // The init function reads all schema descriptors with runtime code

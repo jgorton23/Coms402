@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
 )
 
 // AuthorizationPolicy is the model domain for the AuthorizationPolicy schema.

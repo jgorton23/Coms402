@@ -1,6 +1,6 @@
 package main
 
-import "github.com/MatthewBehnke/exampleGoApi/internal/client/ui"
+import "github.com/MatthewBehnke/apis/internal/client/ui"
 
 func main() {
 	prog, err := ui.NewProgram()

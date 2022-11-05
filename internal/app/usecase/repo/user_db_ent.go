@@ -3,13 +3,12 @@ package repo
 import (
 	"context"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
-
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/domain"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
+	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/MatthewBehnke/apis/pkg/database/ent"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
 )
 
 // Pattern to verify userDbEntImplem conforms to the required interfaces

@@ -7,9 +7,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/schema"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/migrate"
-	_ "github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/runtime"
+	"github.com/MatthewBehnke/apis/pkg/database/ent"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/migrate"
+	_ "github.com/MatthewBehnke/apis/pkg/database/ent/runtime"
 )
 
 type (

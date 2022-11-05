@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/predicate"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/predicate"
 )
 
 // AuthorizationPolicyQuery is the builder for querying AuthorizationPolicy entities.

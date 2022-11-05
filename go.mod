@@ -1,4 +1,4 @@
-module github.com/MatthewBehnke/exampleGoApi
+module github.com/MatthewBehnke/apis
 
 go 1.18
 
@@ -10,7 +10,6 @@ require (
 	github.com/charmbracelet/lipgloss v0.6.0
 	github.com/deepmap/oapi-codegen v1.12.2
 	github.com/go-chi/chi/v5 v5.0.7
-	github.com/go-co-op/gocron v1.17.1
 	github.com/gorilla/sessions v1.2.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/ilyakaznacheev/cleanenv v1.4.0
@@ -57,14 +56,12 @@ require (
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/rivo/uniseg v0.4.2 // indirect
-	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sahilm/fuzzy v0.1.0 // indirect
 	github.com/zclconf/go-cty v1.12.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/term v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect

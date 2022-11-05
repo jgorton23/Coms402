@@ -1,10 +1,10 @@
 package repo
 
 import (
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
 	"github.com/ilyakaznacheev/cleanenv"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/domain"
+	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Pattern to verify configCleanenvImplem conforms to the required interfaces

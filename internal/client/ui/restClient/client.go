@@ -8,8 +8,9 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/common"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/MatthewBehnke/apis/internal/client/ui/common"
 )
 
 type registerResponse struct {

@@ -3,12 +3,11 @@ package repo
 import (
 	"os"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
-
 	"github.com/samber/do"
 	"github.com/sirupsen/logrus"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/domain"
+	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Pattern to verify loggerLogrusImplem conforms to the required interfaces

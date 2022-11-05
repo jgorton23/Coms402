@@ -7,16 +7,16 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/mitchellh/go-wordwrap"
-
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/chat"
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/common"
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/landing"
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/login"
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/register"
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/restClient"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mitchellh/go-wordwrap"
 	"github.com/muesli/reflow/indent"
+
+	"github.com/MatthewBehnke/apis/internal/client/ui/chat"
+	"github.com/MatthewBehnke/apis/internal/client/ui/common"
+	"github.com/MatthewBehnke/apis/internal/client/ui/landing"
+	"github.com/MatthewBehnke/apis/internal/client/ui/login"
+	"github.com/MatthewBehnke/apis/internal/client/ui/register"
+	"github.com/MatthewBehnke/apis/internal/client/ui/restClient"
 )
 
 func NewProgram() (*tea.Program, error) {

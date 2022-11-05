@@ -6,15 +6,14 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
-
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/predicate"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/MatthewBehnke/apis/pkg/database/ent"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/predicate"
 )
 
 // Pattern to verify authorizationPolicyDbEntImplem conforms to the required interfaces
