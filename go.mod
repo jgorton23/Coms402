@@ -1,4 +1,4 @@
-module github.com/MatthewBehnke/exampleGoApi
+module github.com/MatthewBehnke/apis
 
 go 1.18
 

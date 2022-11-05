@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
 )
 
 // AuthorizationPolicyCreate is the builder for creating a AuthorizationPolicy domain.

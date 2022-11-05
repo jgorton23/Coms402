@@ -5,7 +5,7 @@ import (
 
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Pattern used to verify UseCase conforms to required interfaces

@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
 )
 
 // UserCreate is the builder for creating a User domain.

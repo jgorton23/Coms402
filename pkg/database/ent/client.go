@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/authorizationpolicy"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/migrate"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/migrate"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
 )
 
 // Client is the client that holds all ent builders.

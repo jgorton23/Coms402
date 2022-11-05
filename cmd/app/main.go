@@ -12,13 +12,11 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
-
-	v1 "github.com/MatthewBehnke/exampleGoApi/internal/app/http/v1"
-
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase/repo"
+	v1 "github.com/MatthewBehnke/apis/internal/app/http/v1"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/MatthewBehnke/apis/internal/app/usecase/repo"
 )
 
 func main() {

@@ -14,10 +14,10 @@ import (
 	_ "github.com/volatiletech/authboss/v3/logout"
 	_ "github.com/volatiletech/authboss/v3/register"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/domain"
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/http/middleware"
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/usecase"
-	"github.com/MatthewBehnke/exampleGoApi/pkg/httpserver"
+	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"github.com/MatthewBehnke/apis/internal/app/http/middleware"
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/MatthewBehnke/apis/pkg/httpserver"
 )
 
 func NewHttpV1Router(i *do.Injector) (*HttpV1Router, error) {

@@ -5,7 +5,7 @@ package authorizationpolicy
 import (
 	"entgo.io/ent/dialect/sql"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/predicate"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

@@ -9,7 +9,7 @@ import (
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 
-	"github.com/MatthewBehnke/exampleGoApi/internal/app/domain"
+	"github.com/MatthewBehnke/apis/internal/app/domain"
 )
 
 var (

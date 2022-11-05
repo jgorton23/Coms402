@@ -2,13 +2,15 @@ package chat
 
 import (
 	"fmt"
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/common"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/gorilla/websocket"
-	"strings"
+
+	"github.com/MatthewBehnke/apis/internal/client/ui/common"
 )
 
 type (

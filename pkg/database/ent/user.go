@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"github.com/MatthewBehnke/exampleGoApi/pkg/database/ent/user"
+	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
 )
 
 // User is the model domain for the User schema.

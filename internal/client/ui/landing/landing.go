@@ -1,10 +1,11 @@
 package landing
 
 import (
-	"github.com/MatthewBehnke/exampleGoApi/internal/client/ui/common"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/MatthewBehnke/apis/internal/client/ui/common"
 )
 
 const listHeight = 14
