@@ -1,16 +1,15 @@
 package repo
 
 import (
-	"github.com/ilyakaznacheev/cleanenv"
-
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 // Pattern to verify configCleanenvImplem conforms to the required interfaces
 var (
-	assertConfigRepoImplem                    = &configCleanenvImplem{}
-	_                      usecase.ConfigRepo = assertConfigRepoImplem
+	_assertConfigRepoImplem                    = &configCleanenvImplem{}
+	_                       usecase.ConfigRepo = _assertConfigRepoImplem
 )
 
 func NewConfigRepo() usecase.ConfigRepo {
@@ -24,13 +23,17 @@ type configCleanenvImplem struct {
 func (c *configCleanenvImplem) Load(path string) error {
 	c.cfg = &domain.Config{}
 	err := cleanenv.ReadConfig(path, c.cfg)
+
 	if err != nil {
 		return err
 	}
+
 	err = cleanenv.ReadEnv(c.cfg)
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

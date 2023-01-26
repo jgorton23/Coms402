@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/volatiletech/authboss/v3"
-
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/volatiletech/authboss/v3"
 )
 
 // Authorizer Authz is a middleware that controls the access to the HTTP service, it is based
@@ -22,7 +21,7 @@ import (
 // It's notable that this middleware should be behind the authentication (e.g.,
 // HTTP basic authentication, OAuth), so this plugin can get the logged-in role
 // to perform the authorization.
-func Authorizer(httpAuthorization *usecase.HttpAuthorization, a *authboss.Authboss) func(next http.Handler) http.Handler {
+func Authorizer(httpAuthorization *usecase.HTTPAuthorization, a *authboss.Authboss) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			log := GetLogEntry(r).WithSubsystem("http authorization")
@@ -35,8 +34,9 @@ func Authorizer(httpAuthorization *usecase.HttpAuthorization, a *authboss.Authbo
 			if err != nil {
 				if err.Error() != "user not found" {
 					GetLogEntry(r).Warn(fmt.Sprintf("user not found: %v", err.Error()))
-					http.Error(w, http.StatusText(401), 401)
+					http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				}
+
 				user = "anonymous"
 			} else {
 				user = u.GetPID()
@@ -49,14 +49,15 @@ func Authorizer(httpAuthorization *usecase.HttpAuthorization, a *authboss.Authbo
 
 			if err != nil {
 				log.Error(err.Error())
-				http.Error(w, err.Error(), 500)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
+
 			if ok {
 				log.Info(fmt.Sprintf("user: %v, allowed on: %v %v", user, method, path))
 				next.ServeHTTP(w, r)
 			} else {
 				log.Info(fmt.Sprintf("user: %v, denied on: %v %v", user, method, path))
-				http.Error(w, http.StatusText(403), 403)
+				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			}
 		}
 

@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5/middleware"
-
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type loggerFields map[string]interface{}
@@ -32,6 +31,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 	if r.TLS != nil {
 		scheme = "https"
 	}
+
 	logFields["http_scheme"] = scheme
 	logFields["http_proto"] = r.Proto
 	logFields["http_method"] = r.Method

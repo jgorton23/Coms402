@@ -6,15 +6,14 @@ import (
 	"net/mail"
 	"strings"
 
+	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
-
-	"github.com/MatthewBehnke/apis/internal/app/domain"
 )
 
 var (
-	assertAuthBossImplem                               = &AuthBossServer{}
-	_                    authboss.CreatingServerStorer = assertAuthBossImplem
+	_assertAuthBossImplem                               = &AuthBossServer{}
+	_                     authboss.CreatingServerStorer = _assertAuthBossImplem
 	// If there is ever a need to implement confirming, recovering or remembering
 	// uncommenting the below lines will make it a lot easier
 	//  _                 authboss.ConfirmingServerStorer = assertUserUseCase
@@ -48,6 +47,7 @@ func (uuc AuthBossServer) Save(ctx context.Context, user authboss.User) error {
 	// The user already exists
 	if !exists {
 		uuc.authBossLogger.Info(fmt.Sprintf("User %v does not exists in database", u.Email))
+
 		return authboss.ErrUserNotFound
 	}
 
@@ -61,7 +61,6 @@ func (uuc AuthBossServer) Save(ctx context.Context, user authboss.User) error {
 }
 
 func (uuc AuthBossServer) Load(ctx context.Context, key string) (user authboss.User, err error) {
-
 	exists, err := uuc.userRepo.Exists(ctx, key)
 
 	if err != nil {
@@ -71,6 +70,7 @@ func (uuc AuthBossServer) Load(ctx context.Context, key string) (user authboss.U
 	// The user already exists
 	if !exists {
 		uuc.authBossLogger.Info(fmt.Sprintf("User %v not found in database", key))
+
 		return &domain.User{}, authboss.ErrUserNotFound
 	}
 
@@ -110,6 +110,7 @@ func (uuc AuthBossServer) Create(ctx context.Context, user authboss.User) error 
 	// The user already exists
 	if exists {
 		uuc.authBossLogger.Info(fmt.Sprintf("User %v already exists in database", u.Email))
+
 		return authboss.ErrUserFound
 	}
 

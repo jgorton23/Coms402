@@ -4,25 +4,24 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"os/signal"
-	"strconv"
 	"syscall"
-
-	"github.com/samber/do"
 
 	v1 "github.com/MatthewBehnke/apis/internal/app/http/v1"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/internal/app/usecase/repo"
+	"github.com/samber/do"
 )
 
 func main() {
 	injector := do.New()
 
 	config := repo.NewConfigRepo()
-	err := config.Load(os.Getenv("APP_CONFIG"))
+	err := config.Load("config.yml")
+
 	if err != nil {
 		log.Fatal(err)
+
 		return
 	}
 
@@ -35,10 +34,10 @@ func main() {
 	do.Provide(injector, usecase.NewLogger)
 	do.Provide(injector, usecase.NewAuthBossLogger)
 	do.Provide(injector, usecase.NewAuthBossServer)
-	do.Provide(injector, usecase.NewHttpAuthorization)
+	do.Provide(injector, usecase.NewHTTPAuthorization)
 
-	//TODO Verify
-	do.Provide(injector, usecase.NewHttpAuthenticator)
+	//HTTP stuff
+	do.Provide(injector, v1.NewHttpAuthenticator)
 	do.Provide(injector, v1.NewHttpV1)
 	do.Provide(injector, v1.NewHttpV1Router)
 
@@ -59,13 +58,4 @@ func main() {
 	if err != nil {
 		log.Print(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err).Error())
 	}
-}
-
-func getProcessOwner() string {
-	stdout, err := exec.Command("ps", "-o", "user=", "-p", strconv.Itoa(os.Getpid())).Output()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	return string(stdout)
 }

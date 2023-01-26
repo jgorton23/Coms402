@@ -7,11 +7,10 @@ import (
 	"log"
 
 	entsql "entgo.io/ent/dialect/sql"
-	_ "github.com/lib/pq"
-	"github.com/samber/do"
-
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/pkg/database/ent"
+	_ "github.com/lib/pq"
+	"github.com/samber/do"
 )
 
 func NewDatabaseConnection(i *do.Injector) (*DatabaseConnection, error) {
@@ -21,7 +20,7 @@ func NewDatabaseConnection(i *do.Injector) (*DatabaseConnection, error) {
 
 	db, err := sql.Open("postgres", config.PG.URL)
 	if err != nil {
-		return nil, fmt.Errorf("failed opening connection to: %v", err)
+		return nil, fmt.Errorf("failed opening connection to: %w", err)
 	}
 
 	dbService.db = db
@@ -34,8 +33,9 @@ func NewDatabaseConnection(i *do.Injector) (*DatabaseConnection, error) {
 
 	// Run the auto migration tool.
 	if err := dbService.entClient.Schema.Create(context.Background()); err != nil {
-		return nil, fmt.Errorf("failed creating schema resources: %v", err)
+		return nil, fmt.Errorf("failed creating schema resources: %w", err)
 	}
+
 	log.Print("database service started")
 
 	return dbService, nil
@@ -56,5 +56,6 @@ func (s *DatabaseConnection) HealthCheck() error {
 
 func (s *DatabaseConnection) Shutdown() error {
 	log.Print("database service shutdown")
+
 	return s.entClient.Close()
 }

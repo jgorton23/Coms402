@@ -12,7 +12,7 @@ export const options = {
 
 const BASE_URL = 'http://localhost:8082';
 const EMAIL = 'test@test.com';
-const PASSWORD = 'test';
+const PASSWORD = 'testTest@Test';
 
 export default () => {
 

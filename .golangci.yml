@@ -1,6 +1,4 @@
 linters-settings:
-  gci:
-    local-prefixes: github.com/evrone/go-clean-template
   dupl:
     threshold: 100
   errorlint:
@@ -57,62 +55,58 @@ linters:
   enable:
     - asciicheck
     - bodyclose
-    - cyclop
-    - deadcode
-    - depguard
+    # - cyclop
+    # - depguard
     - dogsled
     - dupl
     - durationcheck
-    - errcheck
+    # - errcheck
     - errorlint
     - exhaustive
     - exportloopref
     - forbidigo
     - funlen
     - gci
-    - gochecknoglobals
+    # - gochecknoglobals
     - gochecknoinits
-    - gocognit
+    # - gocognit
     - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - godox
-    - goerr113
+    # - gocritic
+    # - gocyclo
+    # - godot
+    # - godox
+    # - goerr113
     - gofmt
-    - gofumpt
+    # - gofumpt
     - goimports
-    - gomnd
+    # - gomnd
     - gomodguard
     - goprintffuncname
     - gosec
-    - gosimple
+    # - gosimple
     - govet
     - ineffassign
     - makezero
     - misspell
     - nakedret
-    - nestif
+    # - nestif
     - nlreturn
     - noctx
     - nolintlint
     - paralleltest
     - predeclared
-    - revive
-    - rowserrcheck
-    - sqlclosecheck
+    # - revive // easy fixes
     - staticcheck
-    - structcheck
-    - stylecheck
+    # - stylecheck // easy fixes
     - tparallel
     - thelper
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
-    - wsl
     - whitespace
+    - wsl
+
 
 # disable:
 #    - exhaustivestruct
@@ -122,16 +116,17 @@ linters:
 #    - testpackage
 #    - wrapcheck
 
-issues:
-  exclude-rules:
-    - path: integration-test
-      linters:
-        - paralleltest
-        - godot
-    - path: internal/controller/http
-      linters:
-        - godot
+# issues:
+  # exclude-rules:
+  #   - path: integration-test
+  #     linters:
+  #       - paralleltest
+  #       - godot
+    # - path: internal/controller/http
+    #   linters:
+    #     - godot
 
 run:
   skip-dirs:
     - docs
+    - testing

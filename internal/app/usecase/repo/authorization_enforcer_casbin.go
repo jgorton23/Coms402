@@ -1,17 +1,16 @@
 package repo
 
 import (
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/samber/do"
-
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
-// Pattern to verify assertAuthorizationEnforcerCasbinImplem conforms to the required interfaces
+// Pattern to verify _assertAuthorizationEnforcerCasbinImplem conforms to the required interfaces
 var (
-	assertAuthorizationEnforcerCasbinImplem                                   = &authorizationEnforcerCasbinImplem{}
-	_                                       usecase.AuthorizationEnforcerRepo = assertAuthorizationEnforcerCasbinImplem
+	_assertAuthorizationEnforcerCasbinImplem                                   = &authorizationEnforcerCasbinImplem{}
+	_                                        usecase.AuthorizationEnforcerRepo = _assertAuthorizationEnforcerCasbinImplem
 )
 
 // NewAuthorizationEnforcer -.
@@ -50,6 +49,7 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.AuthorizationEnforcerRepo
 	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/static", "*")
 	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/auth/*", "*")
 	_, _ = authorizationEnforcer.enforcer.AddPolicy("user", "/v1/*", "*")
+	_, _ = authorizationEnforcer.enforcer.AddPolicy("user", "/hello", "*")
 
 	return authorizationEnforcer, nil
 }
@@ -65,6 +65,7 @@ func (a authorizationEnforcerCasbinImplem) ReloadPolicy() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -73,5 +74,6 @@ func (a authorizationEnforcerCasbinImplem) EnforceRolePathMethod(role, path, met
 	if err != nil {
 		return false, err
 	}
+
 	return enforce, nil
 }
