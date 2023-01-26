@@ -6,8 +6,8 @@ import (
 	"github.com/samber/do"
 )
 
-func NewHttpAuthorization(i *do.Injector) (*HttpAuthorization, error) {
-	a := &HttpAuthorization{
+func NewHTTPAuthorization(i *do.Injector) (*HTTPAuthorization, error) {
+	a := &HTTPAuthorization{
 		userRepo:                do.MustInvoke[UserRepo](i),
 		authorizationPolicyRepo: do.MustInvoke[AuthorizationPolicyRepo](i),
 		authorizationEnforcer:   do.MustInvoke[AuthorizationEnforcerRepo](i),
@@ -18,16 +18,16 @@ func NewHttpAuthorization(i *do.Injector) (*HttpAuthorization, error) {
 	return a, nil
 }
 
-type HttpAuthorization struct {
+type HTTPAuthorization struct {
 	userRepo                UserRepo
 	authorizationPolicyRepo AuthorizationPolicyRepo
 	authorizationEnforcer   AuthorizationEnforcerRepo
 }
 
-func (a HttpAuthorization) EnforceUser(user, path, method string) (bool, error) {
+func (a HTTPAuthorization) EnforceUser(user, path, method string) (bool, error) {
 	role := "anonymous"
 
-	if user != "anonymous" {
+	if user != role {
 		ok, err := a.userRepo.Exists(context.Background(), user)
 
 		if err != nil {
@@ -60,5 +60,4 @@ func (a HttpAuthorization) EnforceUser(user, path, method string) (bool, error) 
 	}
 
 	return enf, nil
-
 }

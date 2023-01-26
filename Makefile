@@ -42,8 +42,8 @@ linter-dotenv: ### check by dotenv linter
 	dotenv-linter
 .PHONY: linter-dotenv
 
-linter-imports: ## sort imports
-	~/go/bin/goimports-reviser	./...
+linter-gci: ## sort imports
+	gci write . --skip-generated -s standard,default
 .PHONY: linter-imports
 
 test: ### run test

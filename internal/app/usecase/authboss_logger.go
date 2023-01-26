@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	assertAuthBossLogger                 = &AuthBossLogger{}
-	_                    authboss.Logger = assertAuthBossLogger
+	_assertAuthBossLogger                 = &AuthBossLogger{}
+	_                     authboss.Logger = _assertAuthBossLogger
 )
 
 func NewAuthBossLogger(i *do.Injector) (*AuthBossLogger, error) {

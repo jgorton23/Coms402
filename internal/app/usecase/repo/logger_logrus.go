@@ -3,17 +3,16 @@ package repo
 import (
 	"os"
 
-	"github.com/samber/do"
-	"github.com/sirupsen/logrus"
-
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"github.com/samber/do"
+	"github.com/sirupsen/logrus"
 )
 
 // Pattern to verify loggerLogrusImplem conforms to the required interfaces
 var (
-	assertLoggerRepoImplem                    = &loggerLogrusImplem{}
-	_                      usecase.LoggerRepo = assertLoggerRepoImplem
+	_assertLoggerRepoImplem                    = &loggerLogrusImplem{}
+	_                       usecase.LoggerRepo = _assertLoggerRepoImplem
 )
 
 func NewLoggerRepo(i *do.Injector) (usecase.LoggerRepo, error) {
@@ -32,6 +31,7 @@ func NewLoggerRepo(i *do.Injector) (usecase.LoggerRepo, error) {
 			EnvironmentOverrideColors: true,
 		})
 	}
+
 	level, err := logrus.ParseLevel(config.Level)
 
 	if err != nil {
@@ -43,7 +43,6 @@ func NewLoggerRepo(i *do.Injector) (usecase.LoggerRepo, error) {
 	return &loggerLogrusImplem{
 		entry: logrus.NewEntry(l),
 	}, nil
-
 }
 
 type loggerLogrusImplem struct {

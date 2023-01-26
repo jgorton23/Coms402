@@ -3,33 +3,33 @@ package repo
 import (
 	"context"
 
-	"github.com/samber/do"
-
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/pkg/database/ent"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
+	"github.com/samber/do"
 )
 
-// Pattern to verify userDbEntImplem conforms to the required interfaces
+// Pattern to verify userDBEntImplem conforms to the required interfaces
 var (
-	assertUserImplem                  = &userDbEntImplem{}
-	_                usecase.UserRepo = assertUserImplem
+	_assertUserImplem                  = &userDBEntImplem{}
+	_                 usecase.UserRepo = _assertUserImplem
 )
 
 // NewUserRepo -.
 func NewUserRepo(i *do.Injector) (usecase.UserRepo, error) {
-	implem := &userDbEntImplem{
+	implem := &userDBEntImplem{
 		do.MustInvoke[*DatabaseConnection](i).Client(),
 	}
+
 	return implem, nil
 }
 
-type userDbEntImplem struct {
+type userDBEntImplem struct {
 	*ent.Client
 }
 
-func (ur *userDbEntImplem) Get(ctx context.Context) ([]domain.User, error) {
+func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	us, err := ur.Client.User.
 		Query().
 		All(ctx)
@@ -47,7 +47,7 @@ func (ur *userDbEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	return users, nil
 }
 
-func (ur *userDbEntImplem) GetById(ctx context.Context, id int) (domain.User, error) {
+func (ur *userDBEntImplem) GetById(ctx context.Context, id int) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
 		Where(user.ID(id)).
@@ -60,7 +60,7 @@ func (ur *userDbEntImplem) GetById(ctx context.Context, id int) (domain.User, er
 	return ur.databaseUserToEntityUser(u), nil
 }
 
-func (ur *userDbEntImplem) GetByEmail(ctx context.Context, email string) (domain.User, error) {
+func (ur *userDBEntImplem) GetByEmail(ctx context.Context, email string) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
 		Where(user.Email(email)).
@@ -74,7 +74,7 @@ func (ur *userDbEntImplem) GetByEmail(ctx context.Context, email string) (domain
 }
 
 // Exists -.
-func (ur *userDbEntImplem) Exists(ctx context.Context, u string) (bool, error) {
+func (ur *userDBEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 	exists, err := ur.Client.User.
 		Query().
 		Where(user.Email(u)).
@@ -88,7 +88,7 @@ func (ur *userDbEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 }
 
 // Create -.
-func (ur *userDbEntImplem) Create(ctx context.Context, usr domain.User) (domain.User, error) {
+func (ur *userDBEntImplem) Create(ctx context.Context, usr domain.User) (domain.User, error) {
 	u, err := ur.Client.User.
 		Create().
 		SetEmail(usr.Email).
@@ -109,7 +109,7 @@ func (ur *userDbEntImplem) Create(ctx context.Context, usr domain.User) (domain.
 }
 
 // Update -.
-func (ur *userDbEntImplem) Update(ctx context.Context, u domain.User) error {
+func (ur *userDBEntImplem) Update(ctx context.Context, u domain.User) error {
 	_, err := ur.Client.User.
 		Update().
 		SetEmail(u.Email).
@@ -129,7 +129,7 @@ func (ur *userDbEntImplem) Update(ctx context.Context, u domain.User) error {
 	return nil
 }
 
-func (ur *userDbEntImplem) databaseUserToEntityUser(u *ent.User) domain.User {
+func (ur *userDBEntImplem) databaseUserToEntityUser(u *ent.User) domain.User {
 	return domain.User{
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,

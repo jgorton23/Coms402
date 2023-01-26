@@ -9,14 +9,14 @@ import (
 // This pattern is useful in real code to ensure that
 // we've got the right interfaces implemented.
 var (
-	assertUser = &User{}
+	_assertUser = &User{}
 
-	_ authboss.User         = assertUser
-	_ authboss.AuthableUser = assertUser
-	// _ authboss.ConfirmableUser = assertUser
-	// _ authboss.LockableUser = assertUser
-	// _ authboss.RecoverableUser = assertUser
-	// _ authboss.ArbitraryUser = assertUser
+	_ authboss.User         = _assertUser
+	_ authboss.AuthableUser = _assertUser
+	// _ authboss.ConfirmableUser = _assertUser
+	// _ authboss.LockableUser = _assertUser
+	// _ authboss.RecoverableUser = _assertUser
+	// _ authboss.ArbitraryUser = _assertUser
 )
 
 type User struct {

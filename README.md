@@ -1,17 +1,17 @@
+# API staring point 
 
-# Future Work
-
-## Casbin
-
-Casbin will provide authorization for the API routes
-
-## Migrate middleware.RequestLogger 
-
-I want to have the request id on connection close and the only way to do that will be to modify middleware.RequestLogger
-
-## Migrate authboss logger
-
-I want to include the request_id on every log message 
+## Included features 
+- http (Chi)
+- http_authentication (authboss)
+- authorization (casbin)
+- linting (see .golangci.yaml)
 
 
-go run -mod=mod entgo.io/ent/cmd/ent init --target ./pkg/database/models {User}
+## General TODO's
+- Enable more golangci linters
+- Unit testing
+- Mock testing
+- Have the request id on connection close and the only way to do that will be to modify middleware.RequestLogger
+- add "go run -mod=mod entgo.io/ent/cmd/ent init --target ./pkg/database/models {User}" to makefile 
+- cleanup makefile 
+- start documentation
