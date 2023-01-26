@@ -50,6 +50,10 @@ linters-settings:
     require-explanation: true
     require-specific: true
 
+
+# The committed out linters all currently do not pass. There should be some effort to 
+# enable more of the linters sometime soon but go ahead and see if you can fix any of 
+# them.  
 linters:
   disable-all: true
   enable:
@@ -106,15 +110,6 @@ linters:
     - unused
     - whitespace
     - wsl
-
-
-# disable:
-#    - exhaustivestruct
-#    - ifshort
-#    - goheader
-#    - prealloc
-#    - testpackage
-#    - wrapcheck
 
 # issues:
   # exclude-rules:
