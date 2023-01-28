@@ -4,8 +4,8 @@ services:
   postgres:
     container_name: postgres
     image: postgres
-    # volumes:
-    #   - pg-data:/var/lib/postgresql/data
+    volumes:
+      - pg-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: 'user'
       POSTGRES_PASSWORD: 'pass'
@@ -34,5 +34,5 @@ services:
   #   depends_on:
   #     - app
 
-# volumes:
-#   pg-data:
+volumes:
+  pg-data:

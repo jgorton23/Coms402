@@ -3,11 +3,12 @@ package repo
 import (
 	"context"
 
+	"github.com/samber/do"
+
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/pkg/database/ent"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
-	"github.com/samber/do"
 )
 
 // Pattern to verify userDBEntImplem conforms to the required interfaces

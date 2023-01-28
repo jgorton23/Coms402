@@ -6,9 +6,10 @@ import (
 	"net/mail"
 	"strings"
 
-	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
+
+	"github.com/MatthewBehnke/apis/internal/app/domain"
 )
 
 var (

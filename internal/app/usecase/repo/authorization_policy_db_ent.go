@@ -6,13 +6,14 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/casbin/casbin/v2/model"
+	"github.com/casbin/casbin/v2/persist"
+	"github.com/samber/do"
+
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/pkg/database/ent"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/predicate"
-	"github.com/casbin/casbin/v2/model"
-	"github.com/casbin/casbin/v2/persist"
-	"github.com/samber/do"
 )
 
 // Pattern to verify authorizationPolicyDBEntImplem conforms to the required interfaces

@@ -1,10 +1,11 @@
-package v1
+package http
 
 import (
 	"net/http"
 
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/samber/do"
+
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Pattern used to verify UseCase conforms to required interfaces

@@ -7,10 +7,11 @@ import (
 	"log"
 
 	entsql "entgo.io/ent/dialect/sql"
-	"github.com/MatthewBehnke/apis/internal/app/domain"
-	"github.com/MatthewBehnke/apis/pkg/database/ent"
 	_ "github.com/lib/pq"
 	"github.com/samber/do"
+
+	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"github.com/MatthewBehnke/apis/pkg/database/ent"
 )
 
 func NewDatabaseConnection(i *do.Injector) (*DatabaseConnection, error) {

@@ -9,30 +9,30 @@ export
 help: ## Display this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-compose-up: ### Run docker-compose
-	docker-compose up --build -d postgres && docker-compose logs -f
-.PHONY: compose-up
+# compose-up: ### Run docker-compose
+# 	docker-compose up --build -d postgres && docker-compose logs -f
+# .PHONY: compose-up
 
-compose-up-integration-test: ### Run docker-compose with integration test
-	docker-compose up --build --abort-on-container-exit --exit-code-from integration
-.PHONY: compose-up-integration-test
+# compose-up-integration-test: ### Run docker-compose with integration test
+# 	docker-compose up --build --abort-on-container-exit --exit-code-from integration
+# .PHONY: compose-up-integration-test
 
-compose-down: ### Down docker-compose
-	docker-compose down --remove-orphans
-.PHONY: compose-down
+# compose-down: ### Down docker-compose
+# 	docker-compose down --remove-orphans
+# .PHONY: compose-down
 
-run: #swag-v1 
-	go mod tidy && go mod download && \
-	CGO_ENABLED=0 go run ./cmd/app
-.PHONY: run
+# run: #swag-v1 
+# 	go mod tidy && go mod download && \
+# 	CGO_ENABLED=0 go run ./cmd/app
+# .PHONY: run
 
-docker-rm-volume: ### remove docker volume
-	docker volume rm go-clean-template_pg-data
-.PHONY: docker-rm-volume
+# docker-rm-volume: ### remove docker volume
+# 	docker volume rm go-clean-template_pg-data
+# .PHONY: docker-rm-volume
 
-linter-golangci: ### check by golangci linter
-	golangci-lint run
-.PHONY: linter-golangci
+# linter-golangci: ### check by golangci linter
+# 	golangci-lint run
+# .PHONY: linter-golangci
 
 linter-hadolint: ### check by hadolint linter
 	git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint

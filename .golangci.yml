@@ -101,7 +101,7 @@ linters:
     - predeclared
     # - revive // easy fixes
     - staticcheck
-    # - stylecheck // easy fixes
+    # - stylecheck # easy fixes
     - tparallel
     - thelper
     - typecheck

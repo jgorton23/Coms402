@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/ilyakaznacheev/cleanenv v1.4.0
 	github.com/lib/pq v1.10.7
+	github.com/magefile/mage v1.14.0
 	github.com/prometheus/client_golang v1.13.1
 	github.com/samber/do v1.4.1
 	github.com/sirupsen/logrus v1.9.0
@@ -31,6 +32,8 @@ require (
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-github/v50 v50.0.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.14.1 // indirect

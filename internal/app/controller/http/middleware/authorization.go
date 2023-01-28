@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/volatiletech/authboss/v3"
+
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Authorizer Authz is a middleware that controls the access to the HTTP service, it is based

@@ -1,10 +1,11 @@
 package repo
 
 import (
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/samber/do"
+
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Pattern to verify _assertAuthorizationEnforcerCasbinImplem conforms to the required interfaces
