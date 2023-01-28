@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/google/go-github/v50/github"
-
 	// mg contains helpful utility functions, like Deps
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"

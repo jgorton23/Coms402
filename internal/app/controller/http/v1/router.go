@@ -10,14 +10,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
-	_ "github.com/volatiletech/authboss/v3/auth"
-	_ "github.com/volatiletech/authboss/v3/logout"
-	_ "github.com/volatiletech/authboss/v3/register"
 
 	"github.com/MatthewBehnke/apis/internal/app/controller/http/middleware"
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/pkg/httpserver"
+
+	_ "github.com/volatiletech/authboss/v3/auth"
+	_ "github.com/volatiletech/authboss/v3/logout"
+	_ "github.com/volatiletech/authboss/v3/register"
 )
 
 func NewHttpV1Router(i *do.Injector) (*HttpV1Router, error) {
