@@ -40,7 +40,6 @@ func (uuc AuthBossServer) Save(ctx context.Context, user authboss.User) error {
 	u := user.(*domain.User)
 
 	exists, err := uuc.userRepo.Exists(ctx, u.Email)
-
 	if err != nil {
 		return err
 	}
@@ -63,7 +62,6 @@ func (uuc AuthBossServer) Save(ctx context.Context, user authboss.User) error {
 
 func (uuc AuthBossServer) Load(ctx context.Context, key string) (user authboss.User, err error) {
 	exists, err := uuc.userRepo.Exists(ctx, key)
-
 	if err != nil {
 		return &domain.User{}, err
 	}
@@ -97,13 +95,11 @@ func (uuc AuthBossServer) Create(ctx context.Context, user authboss.User) error 
 
 	// Verify email is valid
 	_, err := mail.ParseAddress(u.Email)
-
 	if err != nil {
 		return err
 	}
 
 	exists, err := uuc.userRepo.Exists(ctx, u.Email)
-
 	if err != nil {
 		return err
 	}

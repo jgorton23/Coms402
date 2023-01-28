@@ -270,8 +270,10 @@ func (a *authorizationPolicyDBEntImplem) WithTx(fn func(tx *ent.Tx) error) error
 }
 
 func loadPolicyLine(line *ent.AuthorizationPolicy, model model.Model) {
-	var p = []string{line.Ptype,
-		line.V0, line.V1, line.V2, line.V3, line.V4, line.V5}
+	p := []string{
+		line.Ptype,
+		line.V0, line.V1, line.V2, line.V3, line.V4, line.V5,
+	}
 
 	var lineText string
 	if line.V5 != "" {

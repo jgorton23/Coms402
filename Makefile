@@ -34,17 +34,17 @@ help: ## Display this help screen
 # 	golangci-lint run
 # .PHONY: linter-golangci
 
-linter-hadolint: ### check by hadolint linter
-	git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
-.PHONY: linter-hadolint
+# linter-hadolint: ### check by hadolint linter
+# 	git ls-files --exclude='Dockerfile*' --ignored | xargs hadolint
+# .PHONY: linter-hadolint
 
-linter-dotenv: ### check by dotenv linter
-	dotenv-linter
-.PHONY: linter-dotenv
+# linter-dotenv: ### check by dotenv linter
+# 	dotenv-linter
+# .PHONY: linter-dotenv
 
-linter-gci: ## sort imports
-	gci write . --skip-generated -s standard,default
-.PHONY: linter-imports
+# linter-gci: ## sort imports
+# 	gci write . --skip-generated -s standard,default
+# .PHONY: linter-imports
 
 test: ### run test
 	go test -v -cover -race ./internal/...

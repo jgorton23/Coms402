@@ -20,8 +20,7 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.AuthorizationEnforcerRepo
 		authorizationPolicy: do.MustInvoke[usecase.AuthorizationPolicyRepo](i),
 	}
 
-	text :=
-		`
+	text := `
 		[request_definition]
 		r = sub, obj, act
 		
@@ -38,7 +37,6 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.AuthorizationEnforcerRepo
 
 	// Create the enforcer.
 	enforcer, err := casbin.NewEnforcer(m, authorizationEnforcer.authorizationPolicy)
-
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +60,6 @@ type authorizationEnforcerCasbinImplem struct {
 
 func (a authorizationEnforcerCasbinImplem) ReloadPolicy() error {
 	err := a.enforcer.LoadPolicy()
-
 	if err != nil {
 		return err
 	}

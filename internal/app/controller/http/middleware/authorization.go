@@ -47,7 +47,6 @@ func Authorizer(httpAuthorization *usecase.HTTPAuthorization, a *authboss.Authbo
 			path := r.URL.Path
 
 			ok, err := httpAuthorization.EnforceUser(user, path, method)
-
 			if err != nil {
 				log.Error(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -32,7 +32,7 @@ func NewHttpAuthenticator(i *do.Injector) (*authboss.Authboss, error) {
 	ab.Config.Storage.SessionState = sessionStore
 
 	ab.Config.Paths.Mount = "/auth"
-	//TODO set from env file....
+	// TODO set from env file....
 	ab.Config.Paths.RootURL = "http://" + os.Getenv("APP_HOST")
 
 	ab.Config.Core.ViewRenderer = defaults.JSONRenderer{}
