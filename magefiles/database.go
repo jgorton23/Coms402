@@ -35,3 +35,20 @@ func (Database) Generate() error {
 
 	return err
 }
+
+// Create a new Ent Schema
+func (Database) New(schema string) error {
+	fmt.Println("Creating new schema")
+
+	ok, err := sh.Exec(nil, os.Stdout, os.Stdout, "go", "run", "-mod=mod", "entgo.io/ent/cmd/ent", "init", "--target", "./pkg/database/models", schema)
+
+	if !ok {
+		fmt.Println("Program failed to run")
+
+		return nil
+	}
+
+	mg.SerialDeps(Linter.All)
+
+	return err
+}

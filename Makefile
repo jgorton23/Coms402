@@ -58,14 +58,10 @@ mock: ### run mockery
 	mockery --all -r --case snake
 .PHONY: mock
 
-gen-db: ### gen database from models 
-	go run -mod=mod entgo.io/ent/cmd/ent generate ./pkg/database/models --target ./pkg/database/ent
-	make linter-imports
-.PHONY: gen-db
-
-gen-api-spec: ### gen http openapi spec 
-	cd api/v1 && npm run build
-.PHONY: gen-api-spec
+# gen-db: ### gen database from models 
+# 	go run -mod=mod entgo.io/ent/cmd/ent generate ./pkg/database/models --target ./pkg/database/ent
+# 	make linter-imports
+# .PHONY: gen-db
 
 gen-http:  gen-api-spec ### gen http interface from openapi spec 
 	oapi-codegen --config oapi-codegen-config.yaml api/v1/_build/openapi.yaml > internal/delivery/controller/v1.gen.go
