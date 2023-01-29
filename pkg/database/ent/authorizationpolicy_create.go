@@ -13,7 +13,7 @@ import (
 	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
 )
 
-// AuthorizationPolicyCreate is the builder for creating a AuthorizationPolicy domain.
+// AuthorizationPolicyCreate is the builder for creating a AuthorizationPolicy entity.
 type AuthorizationPolicyCreate struct {
 	config
 	mutation *AuthorizationPolicyMutation
@@ -276,59 +276,31 @@ func (apc *AuthorizationPolicyCreate) createSpec() (*AuthorizationPolicy, *sqlgr
 		}
 	)
 	if value, ok := apc.mutation.Ptype(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldPtype,
-		})
+		_spec.SetField(authorizationpolicy.FieldPtype, field.TypeString, value)
 		_node.Ptype = value
 	}
 	if value, ok := apc.mutation.V0(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV0,
-		})
+		_spec.SetField(authorizationpolicy.FieldV0, field.TypeString, value)
 		_node.V0 = value
 	}
 	if value, ok := apc.mutation.V1(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV1,
-		})
+		_spec.SetField(authorizationpolicy.FieldV1, field.TypeString, value)
 		_node.V1 = value
 	}
 	if value, ok := apc.mutation.V2(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV2,
-		})
+		_spec.SetField(authorizationpolicy.FieldV2, field.TypeString, value)
 		_node.V2 = value
 	}
 	if value, ok := apc.mutation.V3(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV3,
-		})
+		_spec.SetField(authorizationpolicy.FieldV3, field.TypeString, value)
 		_node.V3 = value
 	}
 	if value, ok := apc.mutation.V4(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV4,
-		})
+		_spec.SetField(authorizationpolicy.FieldV4, field.TypeString, value)
 		_node.V4 = value
 	}
 	if value, ok := apc.mutation.V5(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV5,
-		})
+		_spec.SetField(authorizationpolicy.FieldV5, field.TypeString, value)
 		_node.V5 = value
 	}
 	return _node, _spec

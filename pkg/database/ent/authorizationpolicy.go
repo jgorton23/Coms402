@@ -11,7 +11,7 @@ import (
 	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
 )
 
-// AuthorizationPolicy is the model domain for the AuthorizationPolicy schema.
+// AuthorizationPolicy is the model entity for the AuthorizationPolicy schema.
 type AuthorizationPolicy struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -116,12 +116,12 @@ func (ap *AuthorizationPolicy) Update() *AuthorizationPolicyUpdateOne {
 	return (&AuthorizationPolicyClient{config: ap.config}).UpdateOne(ap)
 }
 
-// Unwrap unwraps the AuthorizationPolicy domain that was returned from a transaction after it was closed,
+// Unwrap unwraps the AuthorizationPolicy entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (ap *AuthorizationPolicy) Unwrap() *AuthorizationPolicy {
 	_tx, ok := ap.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: AuthorizationPolicy is not a transactional domain")
+		panic("ent: AuthorizationPolicy is not a transactional entity")
 	}
 	ap.config.driver = _tx.drv
 	return ap

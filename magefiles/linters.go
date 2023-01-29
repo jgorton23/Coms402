@@ -11,39 +11,7 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-type (
-	Compose mg.Namespace
-	Linter  mg.Namespace
-	Server  mg.Namespace
-)
-
-// Start docker compose development dependencies
-func (Compose) Up() error {
-	fmt.Println("Starting Dependencies...")
-
-	err := sh.Run("docker-compose", "up", "--build", "-d", "postgres")
-
-	return err
-}
-
-// Start docker compose development dependencies
-func (Compose) Down() error {
-	fmt.Println("Stopping Dependencies...")
-
-	return sh.Run("docker-compose", "down", "--remove-orphans")
-}
-
-// Show docker compose development dependency logs
-func (Compose) Logs() error {
-	return sh.Run("docker-compose", "logs", "-f")
-}
-
-// Clean docker compose development environment
-func (Compose) Clean() error {
-	mg.Deps(Compose.Down)
-
-	return sh.Run("docker", "volume", "rm", "com-s-402c_pg-data")
-}
+type Linter mg.Namespace
 
 // Run all Linters
 func (Linter) All() error {
@@ -79,9 +47,12 @@ func (Linter) Gci() error {
 		return err
 	}
 
-	return sh.Run("gci", "write", ".", "--skip-generated", "-s", "standard", "-s", "default", "-s", "blank", "-s", "\"prefix("+moduleName+")\"")
+	return sh.Run("gci", "write", ".", "-s", "standard", "-s", "default", "-s", "blank", "-s", "\"prefix("+moduleName+")\"")
 }
 
+// Currently gofumpt conflicts with the wls linter so like.... Just keeping this code block here
+// for future reference
+//
 // // Run Gofumpt Linter
 // func (Linter) Gofumpt() error {
 // 	fmt.Println("Running gofumpt linter")
@@ -120,28 +91,6 @@ func (Linter) Golangci() error {
 	fmt.Println("Version: " + version)
 
 	ok, err := sh.Exec(nil, os.Stdout, os.Stdout, "docker", "run", "--rm", "-v", path+":/app", "-w", "/app", "golangci/golangci-lint:"+version, "golangci-lint", "run")
-
-	if !ok {
-		fmt.Println("Program failed to run")
-
-		return nil
-	}
-	return err
-}
-
-// Start the Server
-func (Server) Run() error {
-	mg.Deps(Compose.Up)
-
-	fmt.Println("Running Server")
-
-	env := map[string]string{
-		"CGO_ENABLED": "0",
-		"PG_URL":      "postgres://user:pass@localhost:5432/postgres?sslmode=disable",
-		"APP_HOST":    "localhost:8082",
-	}
-
-	ok, err := sh.Exec(env, os.Stdout, os.Stderr, "go", "run", "./cmd/app/main.go")
 
 	if !ok {
 		fmt.Println("Program failed to run")

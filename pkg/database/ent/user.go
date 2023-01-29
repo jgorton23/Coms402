@@ -12,7 +12,7 @@ import (
 	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
 )
 
-// User is the model domain for the User schema.
+// User is the model entity for the User schema.
 type User struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -127,12 +127,12 @@ func (u *User) Update() *UserUpdateOne {
 	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
-// Unwrap unwraps the User domain that was returned from a transaction after it was closed,
+// Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
 	_tx, ok := u.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: User is not a transactional domain")
+		panic("ent: User is not a transactional entity")
 	}
 	u.config.driver = _tx.drv
 	return u

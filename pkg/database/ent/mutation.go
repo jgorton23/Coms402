@@ -53,7 +53,7 @@ var _ ent.Mutation = (*AuthorizationPolicyMutation)(nil)
 // authorizationpolicyOption allows management of the mutation configuration using functional options.
 type authorizationpolicyOption func(*AuthorizationPolicyMutation)
 
-// newAuthorizationPolicyMutation creates new mutation for the AuthorizationPolicy domain.
+// newAuthorizationPolicyMutation creates new mutation for the AuthorizationPolicy entity.
 func newAuthorizationPolicyMutation(c config, op Op, opts ...authorizationpolicyOption) *AuthorizationPolicyMutation {
 	m := &AuthorizationPolicyMutation{
 		config:        c,
@@ -127,7 +127,7 @@ func (m *AuthorizationPolicyMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// IDs queries the database and returns the domain ids that match the mutation's predicate.
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
@@ -160,7 +160,7 @@ func (m *AuthorizationPolicyMutation) Ptype() (r string, exists bool) {
 	return *v, true
 }
 
-// OldPtype returns the old "Ptype" field's value of the AuthorizationPolicy domain.
+// OldPtype returns the old "Ptype" field's value of the AuthorizationPolicy entity.
 // If the AuthorizationPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *AuthorizationPolicyMutation) OldPtype(ctx context.Context) (v string, err error) {
@@ -196,7 +196,7 @@ func (m *AuthorizationPolicyMutation) V0() (r string, exists bool) {
 	return *v, true
 }
 
-// OldV0 returns the old "V0" field's value of the AuthorizationPolicy domain.
+// OldV0 returns the old "V0" field's value of the AuthorizationPolicy entity.
 // If the AuthorizationPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *AuthorizationPolicyMutation) OldV0(ctx context.Context) (v string, err error) {
@@ -232,7 +232,7 @@ func (m *AuthorizationPolicyMutation) V1() (r string, exists bool) {
 	return *v, true
 }
 
-// OldV1 returns the old "V1" field's value of the AuthorizationPolicy domain.
+// OldV1 returns the old "V1" field's value of the AuthorizationPolicy entity.
 // If the AuthorizationPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *AuthorizationPolicyMutation) OldV1(ctx context.Context) (v string, err error) {
@@ -268,7 +268,7 @@ func (m *AuthorizationPolicyMutation) V2() (r string, exists bool) {
 	return *v, true
 }
 
-// OldV2 returns the old "V2" field's value of the AuthorizationPolicy domain.
+// OldV2 returns the old "V2" field's value of the AuthorizationPolicy entity.
 // If the AuthorizationPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *AuthorizationPolicyMutation) OldV2(ctx context.Context) (v string, err error) {
@@ -304,7 +304,7 @@ func (m *AuthorizationPolicyMutation) V3() (r string, exists bool) {
 	return *v, true
 }
 
-// OldV3 returns the old "V3" field's value of the AuthorizationPolicy domain.
+// OldV3 returns the old "V3" field's value of the AuthorizationPolicy entity.
 // If the AuthorizationPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *AuthorizationPolicyMutation) OldV3(ctx context.Context) (v string, err error) {
@@ -340,7 +340,7 @@ func (m *AuthorizationPolicyMutation) V4() (r string, exists bool) {
 	return *v, true
 }
 
-// OldV4 returns the old "V4" field's value of the AuthorizationPolicy domain.
+// OldV4 returns the old "V4" field's value of the AuthorizationPolicy entity.
 // If the AuthorizationPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *AuthorizationPolicyMutation) OldV4(ctx context.Context) (v string, err error) {
@@ -376,7 +376,7 @@ func (m *AuthorizationPolicyMutation) V5() (r string, exists bool) {
 	return *v, true
 }
 
-// OldV5 returns the old "V5" field's value of the AuthorizationPolicy domain.
+// OldV5 returns the old "V5" field's value of the AuthorizationPolicy entity.
 // If the AuthorizationPolicy object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *AuthorizationPolicyMutation) OldV5(ctx context.Context) (v string, err error) {
@@ -690,7 +690,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows management of the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for the User domain.
+// newUserMutation creates new mutation for the User entity.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,
@@ -770,7 +770,7 @@ func (m *UserMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// IDs queries the database and returns the domain ids that match the mutation's predicate.
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
@@ -803,7 +803,7 @@ func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the User domain.
+// OldCreatedAt returns the old "created_at" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
@@ -839,7 +839,7 @@ func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the User domain.
+// OldUpdatedAt returns the old "updated_at" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
@@ -875,7 +875,7 @@ func (m *UserMutation) Email() (r string, exists bool) {
 	return *v, true
 }
 
-// OldEmail returns the old "email" field's value of the User domain.
+// OldEmail returns the old "email" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
@@ -911,7 +911,7 @@ func (m *UserMutation) PasswordHash() (r string, exists bool) {
 	return *v, true
 }
 
-// OldPasswordHash returns the old "password_hash" field's value of the User domain.
+// OldPasswordHash returns the old "password_hash" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldPasswordHash(ctx context.Context) (v string, err error) {
@@ -961,7 +961,7 @@ func (m *UserMutation) AttemptCount() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAttemptCount returns the old "attempt_count" field's value of the User domain.
+// OldAttemptCount returns the old "attempt_count" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldAttemptCount(ctx context.Context) (v int, err error) {
@@ -1030,7 +1030,7 @@ func (m *UserMutation) LastAttempt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldLastAttempt returns the old "last_attempt" field's value of the User domain.
+// OldLastAttempt returns the old "last_attempt" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldLastAttempt(ctx context.Context) (v time.Time, err error) {
@@ -1079,7 +1079,7 @@ func (m *UserMutation) Locked() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldLocked returns the old "locked" field's value of the User domain.
+// OldLocked returns the old "locked" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldLocked(ctx context.Context) (v time.Time, err error) {
@@ -1128,7 +1128,7 @@ func (m *UserMutation) Role() (r string, exists bool) {
 	return *v, true
 }
 
-// OldRole returns the old "role" field's value of the User domain.
+// OldRole returns the old "role" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldRole(ctx context.Context) (v string, err error) {

@@ -60,7 +60,7 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// First returns the first User domain from the query.
+// First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(1).All(ctx)
@@ -105,8 +105,8 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single User domain found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one User domain is found.
+// Only returns a single User entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(2).All(ctx)
@@ -262,7 +262,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 //		GroupBy(user.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	grbuild := &UserGroupBy{config: uq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -278,7 +277,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 }
 
 // Select allows the selection one or more fields/columns for the given query,
-// instead of selecting all fields in the domain.
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -289,13 +288,17 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //	client.User.Query().
 //		Select(user.FieldCreatedAt).
 //		Scan(ctx, &v)
-//
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.fields = append(uq.fields, fields...)
 	selbuild := &UserSelect{UserQuery: uq}
 	selbuild.label = user.Label
 	selbuild.flds, selbuild.scan = &uq.fields, selbuild.Scan
 	return selbuild
+}
+
+// Aggregate returns a UserSelect configured with the given aggregations.
+func (uq *UserQuery) Aggregate(fns ...AggregateFunc) *UserSelect {
+	return uq.Select().Aggregate(fns...)
 }
 
 func (uq *UserQuery) prepareQuery(ctx context.Context) error {
@@ -491,8 +494,6 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range ugb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 		for _, f := range ugb.fields {
@@ -512,6 +513,12 @@ type UserSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (us *UserSelect) Aggregate(fns ...AggregateFunc) *UserSelect {
+	us.fns = append(us.fns, fns...)
+	return us
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v any) error {
 	if err := us.prepareQuery(ctx); err != nil {
@@ -522,6 +529,16 @@ func (us *UserSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (us *UserSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(us.fns))
+	for _, fn := range us.fns {
+		aggregation = append(aggregation, fn(us.sql))
+	}
+	switch n := len(*us.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		us.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		us.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := us.sql.Query()
 	if err := us.driver.Query(ctx, query, args, rows); err != nil {

@@ -14,7 +14,7 @@ import (
 	"github.com/MatthewBehnke/apis/pkg/database/ent/predicate"
 )
 
-// AuthorizationPolicyDelete is the builder for deleting a AuthorizationPolicy domain.
+// AuthorizationPolicyDelete is the builder for deleting a AuthorizationPolicy entity.
 type AuthorizationPolicyDelete struct {
 	config
 	hooks    []Hook
@@ -92,7 +92,7 @@ func (apd *AuthorizationPolicyDelete) sqlExec(ctx context.Context) (int, error) 
 	return affected, err
 }
 
-// AuthorizationPolicyDeleteOne is the builder for deleting a single AuthorizationPolicy domain.
+// AuthorizationPolicyDeleteOne is the builder for deleting a single AuthorizationPolicy entity.
 type AuthorizationPolicyDeleteOne struct {
 	apd *AuthorizationPolicyDelete
 }

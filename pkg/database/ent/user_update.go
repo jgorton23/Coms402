@@ -228,84 +228,40 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdatedAt,
-		})
+		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := uu.mutation.Email(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldEmail,
-		})
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.PasswordHash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldPasswordHash,
-		})
+		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
 	}
 	if uu.mutation.PasswordHashCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldPasswordHash,
-		})
+		_spec.ClearField(user.FieldPasswordHash, field.TypeString)
 	}
 	if value, ok := uu.mutation.AttemptCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldAttemptCount,
-		})
+		_spec.SetField(user.FieldAttemptCount, field.TypeInt, value)
 	}
 	if value, ok := uu.mutation.AddedAttemptCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldAttemptCount,
-		})
+		_spec.AddField(user.FieldAttemptCount, field.TypeInt, value)
 	}
 	if uu.mutation.AttemptCountCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: user.FieldAttemptCount,
-		})
+		_spec.ClearField(user.FieldAttemptCount, field.TypeInt)
 	}
 	if value, ok := uu.mutation.LastAttempt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldLastAttempt,
-		})
+		_spec.SetField(user.FieldLastAttempt, field.TypeTime, value)
 	}
 	if uu.mutation.LastAttemptCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: user.FieldLastAttempt,
-		})
+		_spec.ClearField(user.FieldLastAttempt, field.TypeTime)
 	}
 	if value, ok := uu.mutation.Locked(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldLocked,
-		})
+		_spec.SetField(user.FieldLocked, field.TypeTime, value)
 	}
 	if uu.mutation.LockedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: user.FieldLocked,
-		})
+		_spec.ClearField(user.FieldLocked, field.TypeTime)
 	}
 	if value, ok := uu.mutation.Role(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldRole,
-		})
+		_spec.SetField(user.FieldRole, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -318,7 +274,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return n, nil
 }
 
-// UserUpdateOne is the builder for updating a single User domain.
+// UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
 	fields   []string
@@ -452,14 +408,14 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// Select allows selecting one or more fields (columns) of the returned domain.
-// The default is selecting all fields defined in the domain schema.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
 func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 	uuo.fields = append([]string{field}, fields...)
 	return uuo
 }
 
-// Save executes the query and returns the updated User domain.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -506,7 +462,7 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 	return node
 }
 
-// Exec executes the query on the domain.
+// Exec executes the query on the entity.
 func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
 	_, err := uuo.Save(ctx)
 	return err
@@ -555,84 +511,40 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdatedAt,
-		})
+		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := uuo.mutation.Email(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldEmail,
-		})
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.PasswordHash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldPasswordHash,
-		})
+		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
 	}
 	if uuo.mutation.PasswordHashCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldPasswordHash,
-		})
+		_spec.ClearField(user.FieldPasswordHash, field.TypeString)
 	}
 	if value, ok := uuo.mutation.AttemptCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldAttemptCount,
-		})
+		_spec.SetField(user.FieldAttemptCount, field.TypeInt, value)
 	}
 	if value, ok := uuo.mutation.AddedAttemptCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldAttemptCount,
-		})
+		_spec.AddField(user.FieldAttemptCount, field.TypeInt, value)
 	}
 	if uuo.mutation.AttemptCountCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: user.FieldAttemptCount,
-		})
+		_spec.ClearField(user.FieldAttemptCount, field.TypeInt)
 	}
 	if value, ok := uuo.mutation.LastAttempt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldLastAttempt,
-		})
+		_spec.SetField(user.FieldLastAttempt, field.TypeTime, value)
 	}
 	if uuo.mutation.LastAttemptCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: user.FieldLastAttempt,
-		})
+		_spec.ClearField(user.FieldLastAttempt, field.TypeTime)
 	}
 	if value, ok := uuo.mutation.Locked(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldLocked,
-		})
+		_spec.SetField(user.FieldLocked, field.TypeTime, value)
 	}
 	if uuo.mutation.LockedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: user.FieldLocked,
-		})
+		_spec.ClearField(user.FieldLocked, field.TypeTime)
 	}
 	if value, ok := uuo.mutation.Role(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldRole,
-		})
+		_spec.SetField(user.FieldRole, field.TypeString, value)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

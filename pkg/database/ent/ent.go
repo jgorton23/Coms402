@@ -84,7 +84,6 @@ type AggregateFunc func(*sql.Selector) string
 //	GroupBy(field1, field2).
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
-//
 func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.As(fn(s), end)
@@ -171,7 +170,7 @@ func IsValidationError(err error) bool {
 	return errors.As(err, &e)
 }
 
-// NotFoundError returns when trying to fetch a specific domain and it was not found in the database.
+// NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
 type NotFoundError struct {
 	label string
 }
@@ -198,7 +197,7 @@ func MaskNotFound(err error) error {
 	return err
 }
 
-// NotSingularError returns when trying to fetch a singular domain and more then one was found in the database.
+// NotSingularError returns when trying to fetch a singular entity and more then one was found in the database.
 type NotSingularError struct {
 	label string
 }
@@ -267,6 +266,7 @@ func IsConstraintError(err error) bool {
 type selector struct {
 	label string
 	flds  *[]string
+	fns   []AggregateFunc
 	scan  func(context.Context, any) error
 }
 
