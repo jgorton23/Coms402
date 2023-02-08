@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 type loggerFields map[string]interface{}

@@ -1,9 +1,10 @@
 package repo
 
 import (
+	"github.com/ilyakaznacheev/cleanenv"
+
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
-	"github.com/ilyakaznacheev/cleanenv"
 )
 
 // Pattern to verify configCleanenvImplem conforms to the required interfaces

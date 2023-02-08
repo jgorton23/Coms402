@@ -6,13 +6,14 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/casbin/casbin/v2/model"
+	"github.com/casbin/casbin/v2/persist"
+	"github.com/samber/do"
+
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/pkg/database/ent"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/predicate"
-	"github.com/casbin/casbin/v2/model"
-	"github.com/casbin/casbin/v2/persist"
-	"github.com/samber/do"
 )
 
 // Pattern to verify authorizationPolicyDBEntImplem conforms to the required interfaces
@@ -269,8 +270,10 @@ func (a *authorizationPolicyDBEntImplem) WithTx(fn func(tx *ent.Tx) error) error
 }
 
 func loadPolicyLine(line *ent.AuthorizationPolicy, model model.Model) {
-	var p = []string{line.Ptype,
-		line.V0, line.V1, line.V2, line.V3, line.V4, line.V5}
+	p := []string{
+		line.Ptype,
+		line.V0, line.V1, line.V2, line.V3, line.V4, line.V5,
+	}
 
 	var lineText string
 	if line.V5 != "" {

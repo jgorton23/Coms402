@@ -9,6 +9,8 @@ import (
 
 	"github.com/MatthewBehnke/apis/pkg/database/ent"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/migrate"
+
+	// required by schema hooks.
 	_ "github.com/MatthewBehnke/apis/pkg/database/ent/runtime"
 )
 

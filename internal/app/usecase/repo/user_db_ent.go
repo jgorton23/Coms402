@@ -3,11 +3,12 @@ package repo
 import (
 	"context"
 
+	"github.com/samber/do"
+
 	"github.com/MatthewBehnke/apis/internal/app/domain"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/pkg/database/ent"
 	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
-	"github.com/samber/do"
 )
 
 // Pattern to verify userDBEntImplem conforms to the required interfaces
@@ -33,7 +34,6 @@ func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	us, err := ur.Client.User.
 		Query().
 		All(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,6 @@ func (ur *userDBEntImplem) GetById(ctx context.Context, id int) (domain.User, er
 		Query().
 		Where(user.ID(id)).
 		First(ctx)
-
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -65,7 +64,6 @@ func (ur *userDBEntImplem) GetByEmail(ctx context.Context, email string) (domain
 		Query().
 		Where(user.Email(email)).
 		First(ctx)
-
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -79,7 +77,6 @@ func (ur *userDBEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 		Query().
 		Where(user.Email(u)).
 		Exist(ctx)
-
 	if err != nil {
 		return false, err
 	}
@@ -100,7 +97,6 @@ func (ur *userDBEntImplem) Create(ctx context.Context, usr domain.User) (domain.
 		SetLastAttempt(usr.LastAttempt).
 		SetLocked(usr.Locked).
 		Save(ctx)
-
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -121,7 +117,6 @@ func (ur *userDBEntImplem) Update(ctx context.Context, u domain.User) error {
 		SetLastAttempt(u.LastAttempt).
 		SetLocked(u.Locked).
 		Save(ctx)
-
 	if err != nil {
 		return err
 	}

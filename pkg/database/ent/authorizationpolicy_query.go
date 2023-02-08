@@ -60,7 +60,7 @@ func (apq *AuthorizationPolicyQuery) Order(o ...OrderFunc) *AuthorizationPolicyQ
 	return apq
 }
 
-// First returns the first AuthorizationPolicy domain from the query.
+// First returns the first AuthorizationPolicy entity from the query.
 // Returns a *NotFoundError when no AuthorizationPolicy was found.
 func (apq *AuthorizationPolicyQuery) First(ctx context.Context) (*AuthorizationPolicy, error) {
 	nodes, err := apq.Limit(1).All(ctx)
@@ -105,8 +105,8 @@ func (apq *AuthorizationPolicyQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single AuthorizationPolicy domain found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one AuthorizationPolicy domain is found.
+// Only returns a single AuthorizationPolicy entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one AuthorizationPolicy entity is found.
 // Returns a *NotFoundError when no AuthorizationPolicy entities are found.
 func (apq *AuthorizationPolicyQuery) Only(ctx context.Context) (*AuthorizationPolicy, error) {
 	nodes, err := apq.Limit(2).All(ctx)
@@ -262,7 +262,6 @@ func (apq *AuthorizationPolicyQuery) Clone() *AuthorizationPolicyQuery {
 //		GroupBy(authorizationpolicy.FieldPtype).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (apq *AuthorizationPolicyQuery) GroupBy(field string, fields ...string) *AuthorizationPolicyGroupBy {
 	grbuild := &AuthorizationPolicyGroupBy{config: apq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -278,7 +277,7 @@ func (apq *AuthorizationPolicyQuery) GroupBy(field string, fields ...string) *Au
 }
 
 // Select allows the selection one or more fields/columns for the given query,
-// instead of selecting all fields in the domain.
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -289,13 +288,17 @@ func (apq *AuthorizationPolicyQuery) GroupBy(field string, fields ...string) *Au
 //	client.AuthorizationPolicy.Query().
 //		Select(authorizationpolicy.FieldPtype).
 //		Scan(ctx, &v)
-//
 func (apq *AuthorizationPolicyQuery) Select(fields ...string) *AuthorizationPolicySelect {
 	apq.fields = append(apq.fields, fields...)
 	selbuild := &AuthorizationPolicySelect{AuthorizationPolicyQuery: apq}
 	selbuild.label = authorizationpolicy.Label
 	selbuild.flds, selbuild.scan = &apq.fields, selbuild.Scan
 	return selbuild
+}
+
+// Aggregate returns a AuthorizationPolicySelect configured with the given aggregations.
+func (apq *AuthorizationPolicyQuery) Aggregate(fns ...AggregateFunc) *AuthorizationPolicySelect {
+	return apq.Select().Aggregate(fns...)
 }
 
 func (apq *AuthorizationPolicyQuery) prepareQuery(ctx context.Context) error {
@@ -491,8 +494,6 @@ func (apgb *AuthorizationPolicyGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range apgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(apgb.fields)+len(apgb.fns))
 		for _, f := range apgb.fields {
@@ -512,6 +513,12 @@ type AuthorizationPolicySelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (aps *AuthorizationPolicySelect) Aggregate(fns ...AggregateFunc) *AuthorizationPolicySelect {
+	aps.fns = append(aps.fns, fns...)
+	return aps
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (aps *AuthorizationPolicySelect) Scan(ctx context.Context, v any) error {
 	if err := aps.prepareQuery(ctx); err != nil {
@@ -522,6 +529,16 @@ func (aps *AuthorizationPolicySelect) Scan(ctx context.Context, v any) error {
 }
 
 func (aps *AuthorizationPolicySelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(aps.fns))
+	for _, fn := range aps.fns {
+		aggregation = append(aggregation, fn(aps.sql))
+	}
+	switch n := len(*aps.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		aps.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		aps.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := aps.sql.Query()
 	if err := aps.driver.Query(ctx, query, args, rows); err != nil {

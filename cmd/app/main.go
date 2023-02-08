@@ -7,10 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	v1 "github.com/MatthewBehnke/apis/internal/app/http/v1"
+	"github.com/samber/do"
+
+	v1 "github.com/MatthewBehnke/apis/internal/app/controller/http/v1"
 	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/MatthewBehnke/apis/internal/app/usecase/repo"
-	"github.com/samber/do"
 )
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 	do.Provide(injector, usecase.NewAuthBossServer)
 	do.Provide(injector, usecase.NewHTTPAuthorization)
 
-	//HTTP stuff
+	// HTTP stuff
 	do.Provide(injector, v1.NewHttpAuthenticator)
 	do.Provide(injector, v1.NewHttpV1)
 	do.Provide(injector, v1.NewHttpV1Router)

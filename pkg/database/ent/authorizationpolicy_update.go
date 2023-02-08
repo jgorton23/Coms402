@@ -204,53 +204,25 @@ func (apu *AuthorizationPolicyUpdate) sqlSave(ctx context.Context) (n int, err e
 		}
 	}
 	if value, ok := apu.mutation.Ptype(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldPtype,
-		})
+		_spec.SetField(authorizationpolicy.FieldPtype, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.V0(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV0,
-		})
+		_spec.SetField(authorizationpolicy.FieldV0, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.V1(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV1,
-		})
+		_spec.SetField(authorizationpolicy.FieldV1, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.V2(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV2,
-		})
+		_spec.SetField(authorizationpolicy.FieldV2, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.V3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV3,
-		})
+		_spec.SetField(authorizationpolicy.FieldV3, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.V4(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV4,
-		})
+		_spec.SetField(authorizationpolicy.FieldV4, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.V5(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV5,
-		})
+		_spec.SetField(authorizationpolicy.FieldV5, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, apu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -263,7 +235,7 @@ func (apu *AuthorizationPolicyUpdate) sqlSave(ctx context.Context) (n int, err e
 	return n, nil
 }
 
-// AuthorizationPolicyUpdateOne is the builder for updating a single AuthorizationPolicy domain.
+// AuthorizationPolicyUpdateOne is the builder for updating a single AuthorizationPolicy entity.
 type AuthorizationPolicyUpdateOne struct {
 	config
 	fields   []string
@@ -374,14 +346,14 @@ func (apuo *AuthorizationPolicyUpdateOne) Mutation() *AuthorizationPolicyMutatio
 	return apuo.mutation
 }
 
-// Select allows selecting one or more fields (columns) of the returned domain.
-// The default is selecting all fields defined in the domain schema.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
 func (apuo *AuthorizationPolicyUpdateOne) Select(field string, fields ...string) *AuthorizationPolicyUpdateOne {
 	apuo.fields = append([]string{field}, fields...)
 	return apuo
 }
 
-// Save executes the query and returns the updated AuthorizationPolicy domain.
+// Save executes the query and returns the updated AuthorizationPolicy entity.
 func (apuo *AuthorizationPolicyUpdateOne) Save(ctx context.Context) (*AuthorizationPolicy, error) {
 	var (
 		err  error
@@ -428,7 +400,7 @@ func (apuo *AuthorizationPolicyUpdateOne) SaveX(ctx context.Context) *Authorizat
 	return node
 }
 
-// Exec executes the query on the domain.
+// Exec executes the query on the entity.
 func (apuo *AuthorizationPolicyUpdateOne) Exec(ctx context.Context) error {
 	_, err := apuo.Save(ctx)
 	return err
@@ -477,53 +449,25 @@ func (apuo *AuthorizationPolicyUpdateOne) sqlSave(ctx context.Context) (_node *A
 		}
 	}
 	if value, ok := apuo.mutation.Ptype(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldPtype,
-		})
+		_spec.SetField(authorizationpolicy.FieldPtype, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.V0(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV0,
-		})
+		_spec.SetField(authorizationpolicy.FieldV0, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.V1(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV1,
-		})
+		_spec.SetField(authorizationpolicy.FieldV1, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.V2(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV2,
-		})
+		_spec.SetField(authorizationpolicy.FieldV2, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.V3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV3,
-		})
+		_spec.SetField(authorizationpolicy.FieldV3, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.V4(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV4,
-		})
+		_spec.SetField(authorizationpolicy.FieldV4, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.V5(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: authorizationpolicy.FieldV5,
-		})
+		_spec.SetField(authorizationpolicy.FieldV5, field.TypeString, value)
 	}
 	_node = &AuthorizationPolicy{config: apuo.config}
 	_spec.Assign = _node.assignValues

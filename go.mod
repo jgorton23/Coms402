@@ -7,14 +7,17 @@ require (
 	github.com/casbin/casbin/v2 v2.56.0
 	github.com/deepmap/oapi-codegen v1.12.2
 	github.com/go-chi/chi/v5 v5.0.7
+	github.com/google/go-github/v50 v50.0.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/ilyakaznacheev/cleanenv v1.4.0
 	github.com/lib/pq v1.10.7
+	github.com/magefile/mage v1.14.0
 	github.com/prometheus/client_golang v1.13.1
 	github.com/samber/do v1.4.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/volatiletech/authboss-clientstate v0.0.0-20200826024349-8d4e74078241
 	github.com/volatiletech/authboss/v3 v3.2.1
+	golang.org/x/mod v0.6.0
 	logur.dev/logur v0.17.0
 )
 
@@ -31,6 +34,7 @@ require (
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.14.1 // indirect
@@ -43,7 +47,6 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/zclconf/go-cty v1.12.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect

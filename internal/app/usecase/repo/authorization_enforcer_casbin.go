@@ -1,10 +1,11 @@
 package repo
 
 import (
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/samber/do"
+
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Pattern to verify _assertAuthorizationEnforcerCasbinImplem conforms to the required interfaces
@@ -19,8 +20,7 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.AuthorizationEnforcerRepo
 		authorizationPolicy: do.MustInvoke[usecase.AuthorizationPolicyRepo](i),
 	}
 
-	text :=
-		`
+	text := `
 		[request_definition]
 		r = sub, obj, act
 		
@@ -37,7 +37,6 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.AuthorizationEnforcerRepo
 
 	// Create the enforcer.
 	enforcer, err := casbin.NewEnforcer(m, authorizationEnforcer.authorizationPolicy)
-
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +60,6 @@ type authorizationEnforcerCasbinImplem struct {
 
 func (a authorizationEnforcerCasbinImplem) ReloadPolicy() error {
 	err := a.enforcer.LoadPolicy()
-
 	if err != nil {
 		return err
 	}

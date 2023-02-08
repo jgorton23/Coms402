@@ -14,7 +14,7 @@ import (
 var (
 	// WithGlobalUniqueID sets the universal ids options to the migration.
 	// If this option is enabled, ent migration will allocate a 1<<32 range
-	// for the ids of each domain (table).
+	// for the ids of each entity (table).
 	// Note that this option cannot be applied on tables that already exist.
 	WithGlobalUniqueID = schema.WithGlobalUniqueID
 	// WithDropColumn sets the drop column option to the migration.
@@ -56,10 +56,9 @@ func Create(ctx context.Context, s *Schema, tables []*schema.Table, opts ...sche
 
 // WriteTo writes the schema changes to w instead of running them against the database.
 //
-// 	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {
+//	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {
 //		log.Fatal(err)
-// 	}
-//
+//	}
 func (s *Schema) WriteTo(ctx context.Context, w io.Writer, opts ...schema.MigrateOption) error {
 	return Create(ctx, &Schema{drv: &schema.WriteDriver{Writer: w, Driver: s.drv}}, Tables, opts...)
 }

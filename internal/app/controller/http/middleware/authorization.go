@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/volatiletech/authboss/v3"
+
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Authorizer Authz is a middleware that controls the access to the HTTP service, it is based
@@ -46,7 +47,6 @@ func Authorizer(httpAuthorization *usecase.HTTPAuthorization, a *authboss.Authbo
 			path := r.URL.Path
 
 			ok, err := httpAuthorization.EnforceUser(user, path, method)
-
 			if err != nil {
 				log.Error(err.Error())
 				http.Error(w, err.Error(), http.StatusInternalServerError)

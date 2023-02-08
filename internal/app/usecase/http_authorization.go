@@ -29,7 +29,6 @@ func (a HTTPAuthorization) EnforceUser(user, path, method string) (bool, error) 
 
 	if user != role {
 		ok, err := a.userRepo.Exists(context.Background(), user)
-
 		if err != nil {
 			return false, err
 		}
@@ -40,7 +39,6 @@ func (a HTTPAuthorization) EnforceUser(user, path, method string) (bool, error) 
 		}
 
 		u, err := a.userRepo.GetByEmail(context.Background(), user)
-
 		if err != nil {
 			return false, err
 		}
@@ -54,7 +52,6 @@ func (a HTTPAuthorization) EnforceUser(user, path, method string) (bool, error) 
 	}
 
 	enf, err := a.authorizationEnforcer.EnforceRolePathMethod(role, path, method)
-
 	if err != nil {
 		return false, err
 	}

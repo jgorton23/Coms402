@@ -1,10 +1,11 @@
-package v1
+package http
 
 import (
 	"net/http"
 
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
 	"github.com/samber/do"
+
+	"github.com/MatthewBehnke/apis/internal/app/usecase"
 )
 
 // Pattern used to verify UseCase conforms to required interfaces
@@ -18,14 +19,14 @@ var (
 func NewHttpV1(i *do.Injector) (ServerInterface, error) {
 	httpV1 := &httpV1Implem{
 		logger: do.MustInvoke[*usecase.Logger](i).WithSubsystem("controller http v1"),
-		//userRepo: do.MustInvoke[domain.UserRepo](i),
+		// userRepo: do.MustInvoke[domain.UserRepo](i),
 	}
 
 	return httpV1, nil
 }
 
 type httpV1Implem struct {
-	//userRepo domain.UserRepo
+	// userRepo domain.UserRepo
 	logger *usecase.Logger
 }
 
