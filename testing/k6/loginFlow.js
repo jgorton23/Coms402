@@ -2,17 +2,22 @@ import http from 'k6/http';
 import { check, group, sleep, fail } from 'k6';
 
 export const options = {
-  vus: 1, // 1 user looping for 1 minute
-  duration: '1m',
-
+  stages: [
+    { duration: '20m', target: 10 }, // simulate ramp-up of traffic from 1 to 100 users over 5 minutes.
+    { duration: '30m', target: 10 }, // stay at 100 users for 10 minutes
+    { duration: '10m', target: 0 }, // ramp-down to 0 users
+  ],
   thresholds: {
-    http_req_duration: ['p(99)<1500'], // 99% of requests must complete below 1.5s
+    'http_req_duration': ['p(99)<1500'], // 99% of requests must complete below 1.5s
+    // 'logged in successfully': ['p(99)<1500'], // 99% of requests must complete below 1.5s
+    // 'logged out successfully': ['p(99)<1500'], // 99% of requests must complete below 1.5s
+
   },
 };
 
 const BASE_URL = 'http://localhost:8082';
 const EMAIL = 'test@test.com';
-const PASSWORD = 'testTest@Test';
+const PASSWORD = 'Test@test22';
 
 export default () => {
 
@@ -36,7 +41,5 @@ export default () => {
     'logged out successfully': (resp) => resp.json('status') == 'success',
   });
 
-
-
-  sleep(.1);
+  sleep(1);
 };
