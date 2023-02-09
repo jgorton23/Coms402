@@ -9,7 +9,7 @@ import (
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 
-	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
 var (

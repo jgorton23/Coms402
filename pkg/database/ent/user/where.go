@@ -7,7 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"github.com/MatthewBehnke/apis/pkg/database/ent/predicate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

@@ -11,8 +11,8 @@ import (
 	"github.com/volatiletech/authboss/v3"
 	"github.com/volatiletech/authboss/v3/defaults"
 
-	"github.com/MatthewBehnke/apis/internal/app/domain"
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
 
 func NewHttpAuthenticator(i *do.Injector) (*authboss.Authboss, error) {

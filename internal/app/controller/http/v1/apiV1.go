@@ -5,7 +5,7 @@ import (
 
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
 
 // Pattern used to verify UseCase conforms to required interfaces

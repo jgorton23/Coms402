@@ -5,10 +5,10 @@ import (
 
 	"github.com/samber/do"
 
-	"github.com/MatthewBehnke/apis/internal/app/domain"
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
-	"github.com/MatthewBehnke/apis/pkg/database/ent"
-	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 )
 
 // Pattern to verify userDBEntImplem conforms to the required interfaces

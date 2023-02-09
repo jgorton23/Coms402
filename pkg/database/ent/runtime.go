@@ -5,9 +5,9 @@ package ent
 import (
 	"time"
 
-	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
-	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
-	"github.com/MatthewBehnke/apis/pkg/database/models"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/models"
 )
 
 // The init function reads all schema descriptors with runtime code

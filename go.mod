@@ -1,4 +1,4 @@
-module github.com/MatthewBehnke/apis
+module git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend
 
 go 1.18
 

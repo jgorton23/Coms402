@@ -6,7 +6,7 @@ import (
 
 	"github.com/casbin/casbin/v2/model"
 
-	"github.com/MatthewBehnke/apis/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
