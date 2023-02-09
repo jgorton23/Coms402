@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/MatthewBehnke/apis/pkg/database/ent"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent"
 )
 
 // The AuthorizationPolicyFunc type is an adapter to allow the use of ordinary

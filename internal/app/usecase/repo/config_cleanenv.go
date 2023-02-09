@@ -3,8 +3,8 @@ package repo
 import (
 	"github.com/ilyakaznacheev/cleanenv"
 
-	"github.com/MatthewBehnke/apis/internal/app/domain"
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
 
 // Pattern to verify configCleanenvImplem conforms to the required interfaces

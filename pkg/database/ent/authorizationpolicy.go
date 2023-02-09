@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"github.com/MatthewBehnke/apis/pkg/database/ent/authorizationpolicy"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 )
 
 // AuthorizationPolicy is the model entity for the AuthorizationPolicy schema.

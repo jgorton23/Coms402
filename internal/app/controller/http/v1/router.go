@@ -11,10 +11,10 @@ import (
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 
-	"github.com/MatthewBehnke/apis/internal/app/controller/http/middleware"
-	"github.com/MatthewBehnke/apis/internal/app/domain"
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
-	"github.com/MatthewBehnke/apis/pkg/httpserver"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/controller/http/middleware"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/httpserver"
 
 	_ "github.com/volatiletech/authboss/v3/auth"
 	_ "github.com/volatiletech/authboss/v3/logout"

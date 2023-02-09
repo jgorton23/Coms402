@@ -9,9 +9,9 @@ import (
 
 	"github.com/samber/do"
 
-	v1 "github.com/MatthewBehnke/apis/internal/app/controller/http/v1"
-	"github.com/MatthewBehnke/apis/internal/app/usecase"
-	"github.com/MatthewBehnke/apis/internal/app/usecase/repo"
+	v1 "git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/controller/http/v1"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase/repo"
 )
 
 func main() {

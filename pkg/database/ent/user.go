@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 
-	"github.com/MatthewBehnke/apis/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 )
 
 // User is the model entity for the User schema.

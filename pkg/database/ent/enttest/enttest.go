@@ -7,11 +7,11 @@ import (
 
 	"entgo.io/ent/dialect/sql/schema"
 
-	"github.com/MatthewBehnke/apis/pkg/database/ent"
-	"github.com/MatthewBehnke/apis/pkg/database/ent/migrate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/migrate"
 
 	// required by schema hooks.
-	_ "github.com/MatthewBehnke/apis/pkg/database/ent/runtime"
+	_ "git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/runtime"
 )
 
 type (
