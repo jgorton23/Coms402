@@ -8,12 +8,24 @@ import (
 	"fmt"
 	"log"
 
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/migrate"
+	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/migrate"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -21,10 +33,28 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Attribute is the client for interacting with the Attribute builders.
+	Attribute *AttributeClient
+	// AttributeType is the client for interacting with the AttributeType builders.
+	AttributeType *AttributeTypeClient
+	// AttributeTypesToTemplates is the client for interacting with the AttributeTypesToTemplates builders.
+	AttributeTypesToTemplates *AttributeTypesToTemplatesClient
 	// AuthorizationPolicy is the client for interacting with the AuthorizationPolicy builders.
 	AuthorizationPolicy *AuthorizationPolicyClient
+	// Certification is the client for interacting with the Certification builders.
+	Certification *CertificationClient
+	// CertificationTemplate is the client for interacting with the CertificationTemplate builders.
+	CertificationTemplate *CertificationTemplateClient
+	// Company is the client for interacting with the Company builders.
+	Company *CompanyClient
+	// ItemBatch is the client for interacting with the ItemBatch builders.
+	ItemBatch *ItemBatchClient
+	// ItemBatchToItemBatch is the client for interacting with the ItemBatchToItemBatch builders.
+	ItemBatchToItemBatch *ItemBatchToItemBatchClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UsersToCompany is the client for interacting with the UsersToCompany builders.
+	UsersToCompany *UsersToCompanyClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -38,8 +68,17 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Attribute = NewAttributeClient(c.config)
+	c.AttributeType = NewAttributeTypeClient(c.config)
+	c.AttributeTypesToTemplates = NewAttributeTypesToTemplatesClient(c.config)
 	c.AuthorizationPolicy = NewAuthorizationPolicyClient(c.config)
+	c.Certification = NewCertificationClient(c.config)
+	c.CertificationTemplate = NewCertificationTemplateClient(c.config)
+	c.Company = NewCompanyClient(c.config)
+	c.ItemBatch = NewItemBatchClient(c.config)
+	c.ItemBatchToItemBatch = NewItemBatchToItemBatchClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UsersToCompany = NewUsersToCompanyClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -71,10 +110,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		AuthorizationPolicy: NewAuthorizationPolicyClient(cfg),
-		User:                NewUserClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		Attribute:                 NewAttributeClient(cfg),
+		AttributeType:             NewAttributeTypeClient(cfg),
+		AttributeTypesToTemplates: NewAttributeTypesToTemplatesClient(cfg),
+		AuthorizationPolicy:       NewAuthorizationPolicyClient(cfg),
+		Certification:             NewCertificationClient(cfg),
+		CertificationTemplate:     NewCertificationTemplateClient(cfg),
+		Company:                   NewCompanyClient(cfg),
+		ItemBatch:                 NewItemBatchClient(cfg),
+		ItemBatchToItemBatch:      NewItemBatchToItemBatchClient(cfg),
+		User:                      NewUserClient(cfg),
+		UsersToCompany:            NewUsersToCompanyClient(cfg),
 	}, nil
 }
 
@@ -92,17 +140,26 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		AuthorizationPolicy: NewAuthorizationPolicyClient(cfg),
-		User:                NewUserClient(cfg),
+		ctx:                       ctx,
+		config:                    cfg,
+		Attribute:                 NewAttributeClient(cfg),
+		AttributeType:             NewAttributeTypeClient(cfg),
+		AttributeTypesToTemplates: NewAttributeTypesToTemplatesClient(cfg),
+		AuthorizationPolicy:       NewAuthorizationPolicyClient(cfg),
+		Certification:             NewCertificationClient(cfg),
+		CertificationTemplate:     NewCertificationTemplateClient(cfg),
+		Company:                   NewCompanyClient(cfg),
+		ItemBatch:                 NewItemBatchClient(cfg),
+		ItemBatchToItemBatch:      NewItemBatchToItemBatchClient(cfg),
+		User:                      NewUserClient(cfg),
+		UsersToCompany:            NewUsersToCompanyClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		AuthorizationPolicy.
+//		Attribute.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -124,8 +181,367 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Attribute.Use(hooks...)
+	c.AttributeType.Use(hooks...)
+	c.AttributeTypesToTemplates.Use(hooks...)
 	c.AuthorizationPolicy.Use(hooks...)
+	c.Certification.Use(hooks...)
+	c.CertificationTemplate.Use(hooks...)
+	c.Company.Use(hooks...)
+	c.ItemBatch.Use(hooks...)
+	c.ItemBatchToItemBatch.Use(hooks...)
 	c.User.Use(hooks...)
+	c.UsersToCompany.Use(hooks...)
+}
+
+// AttributeClient is a client for the Attribute schema.
+type AttributeClient struct {
+	config
+}
+
+// NewAttributeClient returns a client for the Attribute from the given config.
+func NewAttributeClient(c config) *AttributeClient {
+	return &AttributeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `attribute.Hooks(f(g(h())))`.
+func (c *AttributeClient) Use(hooks ...Hook) {
+	c.hooks.Attribute = append(c.hooks.Attribute, hooks...)
+}
+
+// Create returns a builder for creating a Attribute entity.
+func (c *AttributeClient) Create() *AttributeCreate {
+	mutation := newAttributeMutation(c.config, OpCreate)
+	return &AttributeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Attribute entities.
+func (c *AttributeClient) CreateBulk(builders ...*AttributeCreate) *AttributeCreateBulk {
+	return &AttributeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Attribute.
+func (c *AttributeClient) Update() *AttributeUpdate {
+	mutation := newAttributeMutation(c.config, OpUpdate)
+	return &AttributeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AttributeClient) UpdateOne(a *Attribute) *AttributeUpdateOne {
+	mutation := newAttributeMutation(c.config, OpUpdateOne, withAttribute(a))
+	return &AttributeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AttributeClient) UpdateOneID(id uuid.UUID) *AttributeUpdateOne {
+	mutation := newAttributeMutation(c.config, OpUpdateOne, withAttributeID(id))
+	return &AttributeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Attribute.
+func (c *AttributeClient) Delete() *AttributeDelete {
+	mutation := newAttributeMutation(c.config, OpDelete)
+	return &AttributeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AttributeClient) DeleteOne(a *Attribute) *AttributeDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AttributeClient) DeleteOneID(id uuid.UUID) *AttributeDeleteOne {
+	builder := c.Delete().Where(attribute.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AttributeDeleteOne{builder}
+}
+
+// Query returns a query builder for Attribute.
+func (c *AttributeClient) Query() *AttributeQuery {
+	return &AttributeQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Attribute entity by its id.
+func (c *AttributeClient) Get(ctx context.Context, id uuid.UUID) (*Attribute, error) {
+	return c.Query().Where(attribute.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AttributeClient) GetX(ctx context.Context, id uuid.UUID) *Attribute {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCertification queries the certification edge of a Attribute.
+func (c *AttributeClient) QueryCertification(a *Attribute) *CertificationQuery {
+	query := &CertificationQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attribute.Table, attribute.FieldID, id),
+			sqlgraph.To(certification.Table, certification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attribute.CertificationTable, attribute.CertificationColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAttributeType queries the attributeType edge of a Attribute.
+func (c *AttributeClient) QueryAttributeType(a *Attribute) *AttributeTypeQuery {
+	query := &AttributeTypeQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attribute.Table, attribute.FieldID, id),
+			sqlgraph.To(attributetype.Table, attributetype.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attribute.AttributeTypeTable, attribute.AttributeTypeColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AttributeClient) Hooks() []Hook {
+	return c.hooks.Attribute
+}
+
+// AttributeTypeClient is a client for the AttributeType schema.
+type AttributeTypeClient struct {
+	config
+}
+
+// NewAttributeTypeClient returns a client for the AttributeType from the given config.
+func NewAttributeTypeClient(c config) *AttributeTypeClient {
+	return &AttributeTypeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `attributetype.Hooks(f(g(h())))`.
+func (c *AttributeTypeClient) Use(hooks ...Hook) {
+	c.hooks.AttributeType = append(c.hooks.AttributeType, hooks...)
+}
+
+// Create returns a builder for creating a AttributeType entity.
+func (c *AttributeTypeClient) Create() *AttributeTypeCreate {
+	mutation := newAttributeTypeMutation(c.config, OpCreate)
+	return &AttributeTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AttributeType entities.
+func (c *AttributeTypeClient) CreateBulk(builders ...*AttributeTypeCreate) *AttributeTypeCreateBulk {
+	return &AttributeTypeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AttributeType.
+func (c *AttributeTypeClient) Update() *AttributeTypeUpdate {
+	mutation := newAttributeTypeMutation(c.config, OpUpdate)
+	return &AttributeTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AttributeTypeClient) UpdateOne(at *AttributeType) *AttributeTypeUpdateOne {
+	mutation := newAttributeTypeMutation(c.config, OpUpdateOne, withAttributeType(at))
+	return &AttributeTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AttributeTypeClient) UpdateOneID(id uuid.UUID) *AttributeTypeUpdateOne {
+	mutation := newAttributeTypeMutation(c.config, OpUpdateOne, withAttributeTypeID(id))
+	return &AttributeTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AttributeType.
+func (c *AttributeTypeClient) Delete() *AttributeTypeDelete {
+	mutation := newAttributeTypeMutation(c.config, OpDelete)
+	return &AttributeTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AttributeTypeClient) DeleteOne(at *AttributeType) *AttributeTypeDeleteOne {
+	return c.DeleteOneID(at.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AttributeTypeClient) DeleteOneID(id uuid.UUID) *AttributeTypeDeleteOne {
+	builder := c.Delete().Where(attributetype.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AttributeTypeDeleteOne{builder}
+}
+
+// Query returns a query builder for AttributeType.
+func (c *AttributeTypeClient) Query() *AttributeTypeQuery {
+	return &AttributeTypeQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a AttributeType entity by its id.
+func (c *AttributeTypeClient) Get(ctx context.Context, id uuid.UUID) (*AttributeType, error) {
+	return c.Query().Where(attributetype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AttributeTypeClient) GetX(ctx context.Context, id uuid.UUID) *AttributeType {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCompany queries the company edge of a AttributeType.
+func (c *AttributeTypeClient) QueryCompany(at *AttributeType) *CompanyQuery {
+	query := &CompanyQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := at.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attributetype.Table, attributetype.FieldID, id),
+			sqlgraph.To(company.Table, company.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attributetype.CompanyTable, attributetype.CompanyColumn),
+		)
+		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AttributeTypeClient) Hooks() []Hook {
+	return c.hooks.AttributeType
+}
+
+// AttributeTypesToTemplatesClient is a client for the AttributeTypesToTemplates schema.
+type AttributeTypesToTemplatesClient struct {
+	config
+}
+
+// NewAttributeTypesToTemplatesClient returns a client for the AttributeTypesToTemplates from the given config.
+func NewAttributeTypesToTemplatesClient(c config) *AttributeTypesToTemplatesClient {
+	return &AttributeTypesToTemplatesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `attributetypestotemplates.Hooks(f(g(h())))`.
+func (c *AttributeTypesToTemplatesClient) Use(hooks ...Hook) {
+	c.hooks.AttributeTypesToTemplates = append(c.hooks.AttributeTypesToTemplates, hooks...)
+}
+
+// Create returns a builder for creating a AttributeTypesToTemplates entity.
+func (c *AttributeTypesToTemplatesClient) Create() *AttributeTypesToTemplatesCreate {
+	mutation := newAttributeTypesToTemplatesMutation(c.config, OpCreate)
+	return &AttributeTypesToTemplatesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AttributeTypesToTemplates entities.
+func (c *AttributeTypesToTemplatesClient) CreateBulk(builders ...*AttributeTypesToTemplatesCreate) *AttributeTypesToTemplatesCreateBulk {
+	return &AttributeTypesToTemplatesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AttributeTypesToTemplates.
+func (c *AttributeTypesToTemplatesClient) Update() *AttributeTypesToTemplatesUpdate {
+	mutation := newAttributeTypesToTemplatesMutation(c.config, OpUpdate)
+	return &AttributeTypesToTemplatesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AttributeTypesToTemplatesClient) UpdateOne(attt *AttributeTypesToTemplates) *AttributeTypesToTemplatesUpdateOne {
+	mutation := newAttributeTypesToTemplatesMutation(c.config, OpUpdateOne, withAttributeTypesToTemplates(attt))
+	return &AttributeTypesToTemplatesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AttributeTypesToTemplatesClient) UpdateOneID(id uuid.UUID) *AttributeTypesToTemplatesUpdateOne {
+	mutation := newAttributeTypesToTemplatesMutation(c.config, OpUpdateOne, withAttributeTypesToTemplatesID(id))
+	return &AttributeTypesToTemplatesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AttributeTypesToTemplates.
+func (c *AttributeTypesToTemplatesClient) Delete() *AttributeTypesToTemplatesDelete {
+	mutation := newAttributeTypesToTemplatesMutation(c.config, OpDelete)
+	return &AttributeTypesToTemplatesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AttributeTypesToTemplatesClient) DeleteOne(attt *AttributeTypesToTemplates) *AttributeTypesToTemplatesDeleteOne {
+	return c.DeleteOneID(attt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AttributeTypesToTemplatesClient) DeleteOneID(id uuid.UUID) *AttributeTypesToTemplatesDeleteOne {
+	builder := c.Delete().Where(attributetypestotemplates.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AttributeTypesToTemplatesDeleteOne{builder}
+}
+
+// Query returns a query builder for AttributeTypesToTemplates.
+func (c *AttributeTypesToTemplatesClient) Query() *AttributeTypesToTemplatesQuery {
+	return &AttributeTypesToTemplatesQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a AttributeTypesToTemplates entity by its id.
+func (c *AttributeTypesToTemplatesClient) Get(ctx context.Context, id uuid.UUID) (*AttributeTypesToTemplates, error) {
+	return c.Query().Where(attributetypestotemplates.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AttributeTypesToTemplatesClient) GetX(ctx context.Context, id uuid.UUID) *AttributeTypesToTemplates {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAttribute queries the attribute edge of a AttributeTypesToTemplates.
+func (c *AttributeTypesToTemplatesClient) QueryAttribute(attt *AttributeTypesToTemplates) *AttributeTypeQuery {
+	query := &AttributeTypeQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := attt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attributetypestotemplates.Table, attributetypestotemplates.FieldID, id),
+			sqlgraph.To(attributetype.Table, attributetype.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attributetypestotemplates.AttributeTable, attributetypestotemplates.AttributeColumn),
+		)
+		fromV = sqlgraph.Neighbors(attt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTemplate queries the template edge of a AttributeTypesToTemplates.
+func (c *AttributeTypesToTemplatesClient) QueryTemplate(attt *AttributeTypesToTemplates) *CertificationTemplateQuery {
+	query := &CertificationTemplateQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := attt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attributetypestotemplates.Table, attributetypestotemplates.FieldID, id),
+			sqlgraph.To(certificationtemplate.Table, certificationtemplate.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attributetypestotemplates.TemplateTable, attributetypestotemplates.TemplateColumn),
+		)
+		fromV = sqlgraph.Neighbors(attt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AttributeTypesToTemplatesClient) Hooks() []Hook {
+	return c.hooks.AttributeTypesToTemplates
 }
 
 // AuthorizationPolicyClient is a client for the AuthorizationPolicy schema.
@@ -218,6 +634,568 @@ func (c *AuthorizationPolicyClient) Hooks() []Hook {
 	return c.hooks.AuthorizationPolicy
 }
 
+// CertificationClient is a client for the Certification schema.
+type CertificationClient struct {
+	config
+}
+
+// NewCertificationClient returns a client for the Certification from the given config.
+func NewCertificationClient(c config) *CertificationClient {
+	return &CertificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certification.Hooks(f(g(h())))`.
+func (c *CertificationClient) Use(hooks ...Hook) {
+	c.hooks.Certification = append(c.hooks.Certification, hooks...)
+}
+
+// Create returns a builder for creating a Certification entity.
+func (c *CertificationClient) Create() *CertificationCreate {
+	mutation := newCertificationMutation(c.config, OpCreate)
+	return &CertificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Certification entities.
+func (c *CertificationClient) CreateBulk(builders ...*CertificationCreate) *CertificationCreateBulk {
+	return &CertificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Certification.
+func (c *CertificationClient) Update() *CertificationUpdate {
+	mutation := newCertificationMutation(c.config, OpUpdate)
+	return &CertificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertificationClient) UpdateOne(ce *Certification) *CertificationUpdateOne {
+	mutation := newCertificationMutation(c.config, OpUpdateOne, withCertification(ce))
+	return &CertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertificationClient) UpdateOneID(id uuid.UUID) *CertificationUpdateOne {
+	mutation := newCertificationMutation(c.config, OpUpdateOne, withCertificationID(id))
+	return &CertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Certification.
+func (c *CertificationClient) Delete() *CertificationDelete {
+	mutation := newCertificationMutation(c.config, OpDelete)
+	return &CertificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertificationClient) DeleteOne(ce *Certification) *CertificationDeleteOne {
+	return c.DeleteOneID(ce.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertificationClient) DeleteOneID(id uuid.UUID) *CertificationDeleteOne {
+	builder := c.Delete().Where(certification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertificationDeleteOne{builder}
+}
+
+// Query returns a query builder for Certification.
+func (c *CertificationClient) Query() *CertificationQuery {
+	return &CertificationQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Certification entity by its id.
+func (c *CertificationClient) Get(ctx context.Context, id uuid.UUID) (*Certification, error) {
+	return c.Query().Where(certification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertificationClient) GetX(ctx context.Context, id uuid.UUID) *Certification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCompany queries the company edge of a Certification.
+func (c *CertificationClient) QueryCompany(ce *Certification) *CompanyQuery {
+	query := &CompanyQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ce.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, id),
+			sqlgraph.To(company.Table, company.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.CompanyTable, certification.CompanyColumn),
+		)
+		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryItemBatch queries the itemBatch edge of a Certification.
+func (c *CertificationClient) QueryItemBatch(ce *Certification) *ItemBatchQuery {
+	query := &ItemBatchQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ce.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, id),
+			sqlgraph.To(itembatch.Table, itembatch.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.ItemBatchTable, certification.ItemBatchColumn),
+		)
+		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTemplate queries the template edge of a Certification.
+func (c *CertificationClient) QueryTemplate(ce *Certification) *CertificationTemplateQuery {
+	query := &CertificationTemplateQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ce.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certification.Table, certification.FieldID, id),
+			sqlgraph.To(certificationtemplate.Table, certificationtemplate.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certification.TemplateTable, certification.TemplateColumn),
+		)
+		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CertificationClient) Hooks() []Hook {
+	return c.hooks.Certification
+}
+
+// CertificationTemplateClient is a client for the CertificationTemplate schema.
+type CertificationTemplateClient struct {
+	config
+}
+
+// NewCertificationTemplateClient returns a client for the CertificationTemplate from the given config.
+func NewCertificationTemplateClient(c config) *CertificationTemplateClient {
+	return &CertificationTemplateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certificationtemplate.Hooks(f(g(h())))`.
+func (c *CertificationTemplateClient) Use(hooks ...Hook) {
+	c.hooks.CertificationTemplate = append(c.hooks.CertificationTemplate, hooks...)
+}
+
+// Create returns a builder for creating a CertificationTemplate entity.
+func (c *CertificationTemplateClient) Create() *CertificationTemplateCreate {
+	mutation := newCertificationTemplateMutation(c.config, OpCreate)
+	return &CertificationTemplateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CertificationTemplate entities.
+func (c *CertificationTemplateClient) CreateBulk(builders ...*CertificationTemplateCreate) *CertificationTemplateCreateBulk {
+	return &CertificationTemplateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CertificationTemplate.
+func (c *CertificationTemplateClient) Update() *CertificationTemplateUpdate {
+	mutation := newCertificationTemplateMutation(c.config, OpUpdate)
+	return &CertificationTemplateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertificationTemplateClient) UpdateOne(ct *CertificationTemplate) *CertificationTemplateUpdateOne {
+	mutation := newCertificationTemplateMutation(c.config, OpUpdateOne, withCertificationTemplate(ct))
+	return &CertificationTemplateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertificationTemplateClient) UpdateOneID(id uuid.UUID) *CertificationTemplateUpdateOne {
+	mutation := newCertificationTemplateMutation(c.config, OpUpdateOne, withCertificationTemplateID(id))
+	return &CertificationTemplateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CertificationTemplate.
+func (c *CertificationTemplateClient) Delete() *CertificationTemplateDelete {
+	mutation := newCertificationTemplateMutation(c.config, OpDelete)
+	return &CertificationTemplateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertificationTemplateClient) DeleteOne(ct *CertificationTemplate) *CertificationTemplateDeleteOne {
+	return c.DeleteOneID(ct.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertificationTemplateClient) DeleteOneID(id uuid.UUID) *CertificationTemplateDeleteOne {
+	builder := c.Delete().Where(certificationtemplate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertificationTemplateDeleteOne{builder}
+}
+
+// Query returns a query builder for CertificationTemplate.
+func (c *CertificationTemplateClient) Query() *CertificationTemplateQuery {
+	return &CertificationTemplateQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a CertificationTemplate entity by its id.
+func (c *CertificationTemplateClient) Get(ctx context.Context, id uuid.UUID) (*CertificationTemplate, error) {
+	return c.Query().Where(certificationtemplate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertificationTemplateClient) GetX(ctx context.Context, id uuid.UUID) *CertificationTemplate {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCompany queries the company edge of a CertificationTemplate.
+func (c *CertificationTemplateClient) QueryCompany(ct *CertificationTemplate) *CompanyQuery {
+	query := &CompanyQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ct.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(certificationtemplate.Table, certificationtemplate.FieldID, id),
+			sqlgraph.To(company.Table, company.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, certificationtemplate.CompanyTable, certificationtemplate.CompanyColumn),
+		)
+		fromV = sqlgraph.Neighbors(ct.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CertificationTemplateClient) Hooks() []Hook {
+	return c.hooks.CertificationTemplate
+}
+
+// CompanyClient is a client for the Company schema.
+type CompanyClient struct {
+	config
+}
+
+// NewCompanyClient returns a client for the Company from the given config.
+func NewCompanyClient(c config) *CompanyClient {
+	return &CompanyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `company.Hooks(f(g(h())))`.
+func (c *CompanyClient) Use(hooks ...Hook) {
+	c.hooks.Company = append(c.hooks.Company, hooks...)
+}
+
+// Create returns a builder for creating a Company entity.
+func (c *CompanyClient) Create() *CompanyCreate {
+	mutation := newCompanyMutation(c.config, OpCreate)
+	return &CompanyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Company entities.
+func (c *CompanyClient) CreateBulk(builders ...*CompanyCreate) *CompanyCreateBulk {
+	return &CompanyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Company.
+func (c *CompanyClient) Update() *CompanyUpdate {
+	mutation := newCompanyMutation(c.config, OpUpdate)
+	return &CompanyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CompanyClient) UpdateOne(co *Company) *CompanyUpdateOne {
+	mutation := newCompanyMutation(c.config, OpUpdateOne, withCompany(co))
+	return &CompanyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CompanyClient) UpdateOneID(id uuid.UUID) *CompanyUpdateOne {
+	mutation := newCompanyMutation(c.config, OpUpdateOne, withCompanyID(id))
+	return &CompanyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Company.
+func (c *CompanyClient) Delete() *CompanyDelete {
+	mutation := newCompanyMutation(c.config, OpDelete)
+	return &CompanyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CompanyClient) DeleteOne(co *Company) *CompanyDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CompanyClient) DeleteOneID(id uuid.UUID) *CompanyDeleteOne {
+	builder := c.Delete().Where(company.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CompanyDeleteOne{builder}
+}
+
+// Query returns a query builder for Company.
+func (c *CompanyClient) Query() *CompanyQuery {
+	return &CompanyQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Company entity by its id.
+func (c *CompanyClient) Get(ctx context.Context, id uuid.UUID) (*Company, error) {
+	return c.Query().Where(company.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CompanyClient) GetX(ctx context.Context, id uuid.UUID) *Company {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CompanyClient) Hooks() []Hook {
+	return c.hooks.Company
+}
+
+// ItemBatchClient is a client for the ItemBatch schema.
+type ItemBatchClient struct {
+	config
+}
+
+// NewItemBatchClient returns a client for the ItemBatch from the given config.
+func NewItemBatchClient(c config) *ItemBatchClient {
+	return &ItemBatchClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `itembatch.Hooks(f(g(h())))`.
+func (c *ItemBatchClient) Use(hooks ...Hook) {
+	c.hooks.ItemBatch = append(c.hooks.ItemBatch, hooks...)
+}
+
+// Create returns a builder for creating a ItemBatch entity.
+func (c *ItemBatchClient) Create() *ItemBatchCreate {
+	mutation := newItemBatchMutation(c.config, OpCreate)
+	return &ItemBatchCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ItemBatch entities.
+func (c *ItemBatchClient) CreateBulk(builders ...*ItemBatchCreate) *ItemBatchCreateBulk {
+	return &ItemBatchCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ItemBatch.
+func (c *ItemBatchClient) Update() *ItemBatchUpdate {
+	mutation := newItemBatchMutation(c.config, OpUpdate)
+	return &ItemBatchUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemBatchClient) UpdateOne(ib *ItemBatch) *ItemBatchUpdateOne {
+	mutation := newItemBatchMutation(c.config, OpUpdateOne, withItemBatch(ib))
+	return &ItemBatchUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemBatchClient) UpdateOneID(id uuid.UUID) *ItemBatchUpdateOne {
+	mutation := newItemBatchMutation(c.config, OpUpdateOne, withItemBatchID(id))
+	return &ItemBatchUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ItemBatch.
+func (c *ItemBatchClient) Delete() *ItemBatchDelete {
+	mutation := newItemBatchMutation(c.config, OpDelete)
+	return &ItemBatchDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ItemBatchClient) DeleteOne(ib *ItemBatch) *ItemBatchDeleteOne {
+	return c.DeleteOneID(ib.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ItemBatchClient) DeleteOneID(id uuid.UUID) *ItemBatchDeleteOne {
+	builder := c.Delete().Where(itembatch.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ItemBatchDeleteOne{builder}
+}
+
+// Query returns a query builder for ItemBatch.
+func (c *ItemBatchClient) Query() *ItemBatchQuery {
+	return &ItemBatchQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ItemBatch entity by its id.
+func (c *ItemBatchClient) Get(ctx context.Context, id uuid.UUID) (*ItemBatch, error) {
+	return c.Query().Where(itembatch.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemBatchClient) GetX(ctx context.Context, id uuid.UUID) *ItemBatch {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCompany queries the company edge of a ItemBatch.
+func (c *ItemBatchClient) QueryCompany(ib *ItemBatch) *CompanyQuery {
+	query := &CompanyQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ib.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(itembatch.Table, itembatch.FieldID, id),
+			sqlgraph.To(company.Table, company.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, itembatch.CompanyTable, itembatch.CompanyColumn),
+		)
+		fromV = sqlgraph.Neighbors(ib.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ItemBatchClient) Hooks() []Hook {
+	return c.hooks.ItemBatch
+}
+
+// ItemBatchToItemBatchClient is a client for the ItemBatchToItemBatch schema.
+type ItemBatchToItemBatchClient struct {
+	config
+}
+
+// NewItemBatchToItemBatchClient returns a client for the ItemBatchToItemBatch from the given config.
+func NewItemBatchToItemBatchClient(c config) *ItemBatchToItemBatchClient {
+	return &ItemBatchToItemBatchClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `itembatchtoitembatch.Hooks(f(g(h())))`.
+func (c *ItemBatchToItemBatchClient) Use(hooks ...Hook) {
+	c.hooks.ItemBatchToItemBatch = append(c.hooks.ItemBatchToItemBatch, hooks...)
+}
+
+// Create returns a builder for creating a ItemBatchToItemBatch entity.
+func (c *ItemBatchToItemBatchClient) Create() *ItemBatchToItemBatchCreate {
+	mutation := newItemBatchToItemBatchMutation(c.config, OpCreate)
+	return &ItemBatchToItemBatchCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ItemBatchToItemBatch entities.
+func (c *ItemBatchToItemBatchClient) CreateBulk(builders ...*ItemBatchToItemBatchCreate) *ItemBatchToItemBatchCreateBulk {
+	return &ItemBatchToItemBatchCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ItemBatchToItemBatch.
+func (c *ItemBatchToItemBatchClient) Update() *ItemBatchToItemBatchUpdate {
+	mutation := newItemBatchToItemBatchMutation(c.config, OpUpdate)
+	return &ItemBatchToItemBatchUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemBatchToItemBatchClient) UpdateOne(ibtib *ItemBatchToItemBatch) *ItemBatchToItemBatchUpdateOne {
+	mutation := newItemBatchToItemBatchMutation(c.config, OpUpdateOne, withItemBatchToItemBatch(ibtib))
+	return &ItemBatchToItemBatchUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemBatchToItemBatchClient) UpdateOneID(id uuid.UUID) *ItemBatchToItemBatchUpdateOne {
+	mutation := newItemBatchToItemBatchMutation(c.config, OpUpdateOne, withItemBatchToItemBatchID(id))
+	return &ItemBatchToItemBatchUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ItemBatchToItemBatch.
+func (c *ItemBatchToItemBatchClient) Delete() *ItemBatchToItemBatchDelete {
+	mutation := newItemBatchToItemBatchMutation(c.config, OpDelete)
+	return &ItemBatchToItemBatchDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ItemBatchToItemBatchClient) DeleteOne(ibtib *ItemBatchToItemBatch) *ItemBatchToItemBatchDeleteOne {
+	return c.DeleteOneID(ibtib.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ItemBatchToItemBatchClient) DeleteOneID(id uuid.UUID) *ItemBatchToItemBatchDeleteOne {
+	builder := c.Delete().Where(itembatchtoitembatch.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ItemBatchToItemBatchDeleteOne{builder}
+}
+
+// Query returns a query builder for ItemBatchToItemBatch.
+func (c *ItemBatchToItemBatchClient) Query() *ItemBatchToItemBatchQuery {
+	return &ItemBatchToItemBatchQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ItemBatchToItemBatch entity by its id.
+func (c *ItemBatchToItemBatchClient) Get(ctx context.Context, id uuid.UUID) (*ItemBatchToItemBatch, error) {
+	return c.Query().Where(itembatchtoitembatch.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemBatchToItemBatchClient) GetX(ctx context.Context, id uuid.UUID) *ItemBatchToItemBatch {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryParent queries the parent edge of a ItemBatchToItemBatch.
+func (c *ItemBatchToItemBatchClient) QueryParent(ibtib *ItemBatchToItemBatch) *ItemBatchQuery {
+	query := &ItemBatchQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ibtib.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(itembatchtoitembatch.Table, itembatchtoitembatch.FieldID, id),
+			sqlgraph.To(itembatch.Table, itembatch.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, itembatchtoitembatch.ParentTable, itembatchtoitembatch.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(ibtib.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChild queries the child edge of a ItemBatchToItemBatch.
+func (c *ItemBatchToItemBatchClient) QueryChild(ibtib *ItemBatchToItemBatch) *ItemBatchQuery {
+	query := &ItemBatchQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ibtib.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(itembatchtoitembatch.Table, itembatchtoitembatch.FieldID, id),
+			sqlgraph.To(itembatch.Table, itembatch.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, itembatchtoitembatch.ChildTable, itembatchtoitembatch.ChildColumn),
+		)
+		fromV = sqlgraph.Neighbors(ibtib.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ItemBatchToItemBatchClient) Hooks() []Hook {
+	return c.hooks.ItemBatchToItemBatch
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -306,4 +1284,126 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// UsersToCompanyClient is a client for the UsersToCompany schema.
+type UsersToCompanyClient struct {
+	config
+}
+
+// NewUsersToCompanyClient returns a client for the UsersToCompany from the given config.
+func NewUsersToCompanyClient(c config) *UsersToCompanyClient {
+	return &UsersToCompanyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userstocompany.Hooks(f(g(h())))`.
+func (c *UsersToCompanyClient) Use(hooks ...Hook) {
+	c.hooks.UsersToCompany = append(c.hooks.UsersToCompany, hooks...)
+}
+
+// Create returns a builder for creating a UsersToCompany entity.
+func (c *UsersToCompanyClient) Create() *UsersToCompanyCreate {
+	mutation := newUsersToCompanyMutation(c.config, OpCreate)
+	return &UsersToCompanyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UsersToCompany entities.
+func (c *UsersToCompanyClient) CreateBulk(builders ...*UsersToCompanyCreate) *UsersToCompanyCreateBulk {
+	return &UsersToCompanyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UsersToCompany.
+func (c *UsersToCompanyClient) Update() *UsersToCompanyUpdate {
+	mutation := newUsersToCompanyMutation(c.config, OpUpdate)
+	return &UsersToCompanyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UsersToCompanyClient) UpdateOne(utc *UsersToCompany) *UsersToCompanyUpdateOne {
+	mutation := newUsersToCompanyMutation(c.config, OpUpdateOne, withUsersToCompany(utc))
+	return &UsersToCompanyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UsersToCompanyClient) UpdateOneID(id uuid.UUID) *UsersToCompanyUpdateOne {
+	mutation := newUsersToCompanyMutation(c.config, OpUpdateOne, withUsersToCompanyID(id))
+	return &UsersToCompanyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UsersToCompany.
+func (c *UsersToCompanyClient) Delete() *UsersToCompanyDelete {
+	mutation := newUsersToCompanyMutation(c.config, OpDelete)
+	return &UsersToCompanyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UsersToCompanyClient) DeleteOne(utc *UsersToCompany) *UsersToCompanyDeleteOne {
+	return c.DeleteOneID(utc.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UsersToCompanyClient) DeleteOneID(id uuid.UUID) *UsersToCompanyDeleteOne {
+	builder := c.Delete().Where(userstocompany.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UsersToCompanyDeleteOne{builder}
+}
+
+// Query returns a query builder for UsersToCompany.
+func (c *UsersToCompanyClient) Query() *UsersToCompanyQuery {
+	return &UsersToCompanyQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a UsersToCompany entity by its id.
+func (c *UsersToCompanyClient) Get(ctx context.Context, id uuid.UUID) (*UsersToCompany, error) {
+	return c.Query().Where(userstocompany.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UsersToCompanyClient) GetX(ctx context.Context, id uuid.UUID) *UsersToCompany {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a UsersToCompany.
+func (c *UsersToCompanyClient) QueryUser(utc *UsersToCompany) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := utc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userstocompany.Table, userstocompany.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, userstocompany.UserTable, userstocompany.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(utc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCompany queries the company edge of a UsersToCompany.
+func (c *UsersToCompanyClient) QueryCompany(utc *UsersToCompany) *CompanyQuery {
+	query := &CompanyQuery{config: c.config}
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := utc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userstocompany.Table, userstocompany.FieldID, id),
+			sqlgraph.To(company.Table, company.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, userstocompany.CompanyTable, userstocompany.CompanyColumn),
+		)
+		fromV = sqlgraph.Neighbors(utc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UsersToCompanyClient) Hooks() []Hook {
+	return c.hooks.UsersToCompany
 }

@@ -4,7 +4,6 @@ package authorizationpolicy
 
 import (
 	"entgo.io/ent/dialect/sql"
-
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
 

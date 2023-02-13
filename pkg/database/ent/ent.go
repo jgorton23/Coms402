@@ -10,9 +10,17 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -33,8 +41,17 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		authorizationpolicy.Table: authorizationpolicy.ValidColumn,
-		user.Table:                user.ValidColumn,
+		attribute.Table:                 attribute.ValidColumn,
+		attributetype.Table:             attributetype.ValidColumn,
+		attributetypestotemplates.Table: attributetypestotemplates.ValidColumn,
+		authorizationpolicy.Table:       authorizationpolicy.ValidColumn,
+		certification.Table:             certification.ValidColumn,
+		certificationtemplate.Table:     certificationtemplate.ValidColumn,
+		company.Table:                   company.ValidColumn,
+		itembatch.Table:                 itembatch.ValidColumn,
+		itembatchtoitembatch.Table:      itembatchtoitembatch.ValidColumn,
+		user.Table:                      user.ValidColumn,
+		userstocompany.Table:            userstocompany.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

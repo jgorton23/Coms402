@@ -6,8 +6,35 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Attribute is the predicate function for attribute builders.
+type Attribute func(*sql.Selector)
+
+// AttributeType is the predicate function for attributetype builders.
+type AttributeType func(*sql.Selector)
+
+// AttributeTypesToTemplates is the predicate function for attributetypestotemplates builders.
+type AttributeTypesToTemplates func(*sql.Selector)
+
 // AuthorizationPolicy is the predicate function for authorizationpolicy builders.
 type AuthorizationPolicy func(*sql.Selector)
 
+// Certification is the predicate function for certification builders.
+type Certification func(*sql.Selector)
+
+// CertificationTemplate is the predicate function for certificationtemplate builders.
+type CertificationTemplate func(*sql.Selector)
+
+// Company is the predicate function for company builders.
+type Company func(*sql.Selector)
+
+// ItemBatch is the predicate function for itembatch builders.
+type ItemBatch func(*sql.Selector)
+
+// ItemBatchToItemBatch is the predicate function for itembatchtoitembatch builders.
+type ItemBatchToItemBatch func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// UsersToCompany is the predicate function for userstocompany builders.
+type UsersToCompany func(*sql.Selector)

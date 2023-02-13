@@ -5,15 +5,43 @@ package ent
 import (
 	"time"
 
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/models"
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	attributeFields := models.Attribute{}.Fields()
+	_ = attributeFields
+	// attributeDescID is the schema descriptor for id field.
+	attributeDescID := attributeFields[0].Descriptor()
+	// attribute.DefaultID holds the default value on creation for the id field.
+	attribute.DefaultID = attributeDescID.Default.(func() uuid.UUID)
+	attributetypeFields := models.AttributeType{}.Fields()
+	_ = attributetypeFields
+	// attributetypeDescID is the schema descriptor for id field.
+	attributetypeDescID := attributetypeFields[0].Descriptor()
+	// attributetype.DefaultID holds the default value on creation for the id field.
+	attributetype.DefaultID = attributetypeDescID.Default.(func() uuid.UUID)
+	attributetypestotemplatesFields := models.AttributeTypesToTemplates{}.Fields()
+	_ = attributetypestotemplatesFields
+	// attributetypestotemplatesDescID is the schema descriptor for id field.
+	attributetypestotemplatesDescID := attributetypestotemplatesFields[0].Descriptor()
+	// attributetypestotemplates.DefaultID holds the default value on creation for the id field.
+	attributetypestotemplates.DefaultID = attributetypestotemplatesDescID.Default.(func() uuid.UUID)
 	authorizationpolicyFields := models.AuthorizationPolicy{}.Fields()
 	_ = authorizationpolicyFields
 	// authorizationpolicyDescPtype is the schema descriptor for Ptype field.
@@ -44,22 +72,62 @@ func init() {
 	authorizationpolicyDescV5 := authorizationpolicyFields[6].Descriptor()
 	// authorizationpolicy.DefaultV5 holds the default value on creation for the V5 field.
 	authorizationpolicy.DefaultV5 = authorizationpolicyDescV5.Default.(string)
+	certificationFields := models.Certification{}.Fields()
+	_ = certificationFields
+	// certificationDescID is the schema descriptor for id field.
+	certificationDescID := certificationFields[0].Descriptor()
+	// certification.DefaultID holds the default value on creation for the id field.
+	certification.DefaultID = certificationDescID.Default.(func() uuid.UUID)
+	certificationtemplateFields := models.CertificationTemplate{}.Fields()
+	_ = certificationtemplateFields
+	// certificationtemplateDescID is the schema descriptor for id field.
+	certificationtemplateDescID := certificationtemplateFields[0].Descriptor()
+	// certificationtemplate.DefaultID holds the default value on creation for the id field.
+	certificationtemplate.DefaultID = certificationtemplateDescID.Default.(func() uuid.UUID)
+	companyFields := models.Company{}.Fields()
+	_ = companyFields
+	// companyDescID is the schema descriptor for id field.
+	companyDescID := companyFields[0].Descriptor()
+	// company.DefaultID holds the default value on creation for the id field.
+	company.DefaultID = companyDescID.Default.(func() uuid.UUID)
+	itembatchFields := models.ItemBatch{}.Fields()
+	_ = itembatchFields
+	// itembatchDescID is the schema descriptor for id field.
+	itembatchDescID := itembatchFields[0].Descriptor()
+	// itembatch.DefaultID holds the default value on creation for the id field.
+	itembatch.DefaultID = itembatchDescID.Default.(func() uuid.UUID)
+	itembatchtoitembatchFields := models.ItemBatchToItemBatch{}.Fields()
+	_ = itembatchtoitembatchFields
+	// itembatchtoitembatchDescID is the schema descriptor for id field.
+	itembatchtoitembatchDescID := itembatchtoitembatchFields[0].Descriptor()
+	// itembatchtoitembatch.DefaultID holds the default value on creation for the id field.
+	itembatchtoitembatch.DefaultID = itembatchtoitembatchDescID.Default.(func() uuid.UUID)
 	userFields := models.User{}.Fields()
 	_ = userFields
+	// userDescUUID is the schema descriptor for UUID field.
+	userDescUUID := userFields[1].Descriptor()
+	// user.DefaultUUID holds the default value on creation for the UUID field.
+	user.DefaultUUID = userDescUUID.Default.(func() uuid.UUID)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[1].Descriptor()
+	userDescCreatedAt := userFields[2].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescUpdatedAt is the schema descriptor for updated_at field.
-	userDescUpdatedAt := userFields[2].Descriptor()
+	userDescUpdatedAt := userFields[3].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(time.Time)
 	// userDescRole is the schema descriptor for role field.
-	userDescRole := userFields[8].Descriptor()
+	userDescRole := userFields[9].Descriptor()
 	// user.DefaultRole holds the default value on creation for the role field.
 	user.DefaultRole = userDescRole.Default.(string)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	user.IDValidator = userDescID.Validators[0].(func(int) error)
+	userstocompanyFields := models.UsersToCompany{}.Fields()
+	_ = userstocompanyFields
+	// userstocompanyDescID is the schema descriptor for id field.
+	userstocompanyDescID := userstocompanyFields[0].Descriptor()
+	// userstocompany.DefaultID holds the default value on creation for the id field.
+	userstocompany.DefaultID = userstocompanyDescID.Default.(func() uuid.UUID)
 }
