@@ -5,13 +5,12 @@ package enttest
 import (
 	"context"
 
-	"entgo.io/ent/dialect/sql/schema"
-
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/migrate"
-
 	// required by schema hooks.
 	_ "git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/runtime"
+
+	"entgo.io/ent/dialect/sql/schema"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/migrate"
 )
 
 type (

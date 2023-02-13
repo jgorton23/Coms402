@@ -5,6 +5,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // User holds the schema definition for the User domain.
@@ -17,6 +18,9 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
 			Positive().
+			Unique(),
+		field.UUID("UUID", uuid.UUID{}).
+			Default(uuid.New).
 			Unique(),
 		field.Time("created_at").
 			Default(time.Now).

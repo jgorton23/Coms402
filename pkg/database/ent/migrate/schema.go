@@ -8,6 +8,80 @@ import (
 )
 
 var (
+	// AttributesColumns holds the columns for the "attributes" table.
+	AttributesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "key", Type: field.TypeString},
+		{Name: "value", Type: field.TypeString},
+		{Name: "cert_uuid", Type: field.TypeUUID},
+		{Name: "attribute_type_uuid", Type: field.TypeUUID},
+	}
+	// AttributesTable holds the schema information for the "attributes" table.
+	AttributesTable = &schema.Table{
+		Name:       "attributes",
+		Columns:    AttributesColumns,
+		PrimaryKey: []*schema.Column{AttributesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "attributes_certifications_certification",
+				Columns:    []*schema.Column{AttributesColumns[3]},
+				RefColumns: []*schema.Column{CertificationsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "attributes_attribute_types_attributeType",
+				Columns:    []*schema.Column{AttributesColumns[4]},
+				RefColumns: []*schema.Column{AttributeTypesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// AttributeTypesColumns holds the columns for the "attribute_types" table.
+	AttributeTypesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "key", Type: field.TypeString},
+		{Name: "company_uuid", Type: field.TypeUUID},
+	}
+	// AttributeTypesTable holds the schema information for the "attribute_types" table.
+	AttributeTypesTable = &schema.Table{
+		Name:       "attribute_types",
+		Columns:    AttributeTypesColumns,
+		PrimaryKey: []*schema.Column{AttributeTypesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "attribute_types_companies_company",
+				Columns:    []*schema.Column{AttributeTypesColumns[2]},
+				RefColumns: []*schema.Column{CompaniesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// AttributeTypesToTemplatesColumns holds the columns for the "attribute_types_to_templates" table.
+	AttributeTypesToTemplatesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "attribute_type_uuid", Type: field.TypeUUID},
+		{Name: "template_uuid", Type: field.TypeUUID},
+	}
+	// AttributeTypesToTemplatesTable holds the schema information for the "attribute_types_to_templates" table.
+	AttributeTypesToTemplatesTable = &schema.Table{
+		Name:       "attribute_types_to_templates",
+		Columns:    AttributeTypesToTemplatesColumns,
+		PrimaryKey: []*schema.Column{AttributeTypesToTemplatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "attribute_types_to_templates_attribute_types_attribute",
+				Columns:    []*schema.Column{AttributeTypesToTemplatesColumns[1]},
+				RefColumns: []*schema.Column{AttributeTypesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "attribute_types_to_templates_certification_templates_template",
+				Columns:    []*schema.Column{AttributeTypesToTemplatesColumns[2]},
+				RefColumns: []*schema.Column{CertificationTemplatesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// AuthorizationPoliciesColumns holds the columns for the "authorization_policies" table.
 	AuthorizationPoliciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -25,9 +99,123 @@ var (
 		Columns:    AuthorizationPoliciesColumns,
 		PrimaryKey: []*schema.Column{AuthorizationPoliciesColumns[0]},
 	}
+	// CertificationsColumns holds the columns for the "certifications" table.
+	CertificationsColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "primary_attribute", Type: field.TypeString},
+		{Name: "image_uuid", Type: field.TypeUUID},
+		{Name: "company_uuid", Type: field.TypeUUID},
+		{Name: "item_batch_uuid", Type: field.TypeUUID},
+		{Name: "template_uuid", Type: field.TypeUUID, Nullable: true},
+	}
+	// CertificationsTable holds the schema information for the "certifications" table.
+	CertificationsTable = &schema.Table{
+		Name:       "certifications",
+		Columns:    CertificationsColumns,
+		PrimaryKey: []*schema.Column{CertificationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certifications_companies_company",
+				Columns:    []*schema.Column{CertificationsColumns[3]},
+				RefColumns: []*schema.Column{CompaniesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "certifications_item_batches_itemBatch",
+				Columns:    []*schema.Column{CertificationsColumns[4]},
+				RefColumns: []*schema.Column{ItemBatchesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "certifications_certification_templates_template",
+				Columns:    []*schema.Column{CertificationsColumns[5]},
+				RefColumns: []*schema.Column{CertificationTemplatesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// CertificationTemplatesColumns holds the columns for the "certification_templates" table.
+	CertificationTemplatesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "description", Type: field.TypeString},
+		{Name: "company_uuid", Type: field.TypeUUID},
+	}
+	// CertificationTemplatesTable holds the schema information for the "certification_templates" table.
+	CertificationTemplatesTable = &schema.Table{
+		Name:       "certification_templates",
+		Columns:    CertificationTemplatesColumns,
+		PrimaryKey: []*schema.Column{CertificationTemplatesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "certification_templates_companies_company",
+				Columns:    []*schema.Column{CertificationTemplatesColumns[2]},
+				RefColumns: []*schema.Column{CompaniesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// CompaniesColumns holds the columns for the "companies" table.
+	CompaniesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID, Unique: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// CompaniesTable holds the schema information for the "companies" table.
+	CompaniesTable = &schema.Table{
+		Name:       "companies",
+		Columns:    CompaniesColumns,
+		PrimaryKey: []*schema.Column{CompaniesColumns[0]},
+	}
+	// ItemBatchesColumns holds the columns for the "item_batches" table.
+	ItemBatchesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "item_number", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "company_uuid", Type: field.TypeUUID},
+	}
+	// ItemBatchesTable holds the schema information for the "item_batches" table.
+	ItemBatchesTable = &schema.Table{
+		Name:       "item_batches",
+		Columns:    ItemBatchesColumns,
+		PrimaryKey: []*schema.Column{ItemBatchesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "item_batches_companies_company",
+				Columns:    []*schema.Column{ItemBatchesColumns[3]},
+				RefColumns: []*schema.Column{CompaniesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// ItemBatchToItemBatchesColumns holds the columns for the "item_batch_to_item_batches" table.
+	ItemBatchToItemBatchesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "parent_uuid", Type: field.TypeUUID},
+		{Name: "child_uuid", Type: field.TypeUUID},
+	}
+	// ItemBatchToItemBatchesTable holds the schema information for the "item_batch_to_item_batches" table.
+	ItemBatchToItemBatchesTable = &schema.Table{
+		Name:       "item_batch_to_item_batches",
+		Columns:    ItemBatchToItemBatchesColumns,
+		PrimaryKey: []*schema.Column{ItemBatchToItemBatchesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "item_batch_to_item_batches_item_batches_parent",
+				Columns:    []*schema.Column{ItemBatchToItemBatchesColumns[1]},
+				RefColumns: []*schema.Column{ItemBatchesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "item_batch_to_item_batches_item_batches_child",
+				Columns:    []*schema.Column{ItemBatchToItemBatchesColumns[2]},
+				RefColumns: []*schema.Column{ItemBatchesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "uuid", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "email", Type: field.TypeString, Unique: true},
@@ -43,12 +231,63 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UsersToCompaniesColumns holds the columns for the "users_to_companies" table.
+	UsersToCompaniesColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID, Unique: true},
+		{Name: "role_type", Type: field.TypeString},
+		{Name: "approved", Type: field.TypeBool},
+		{Name: "user_uuid", Type: field.TypeInt},
+		{Name: "company_uuid", Type: field.TypeUUID},
+	}
+	// UsersToCompaniesTable holds the schema information for the "users_to_companies" table.
+	UsersToCompaniesTable = &schema.Table{
+		Name:       "users_to_companies",
+		Columns:    UsersToCompaniesColumns,
+		PrimaryKey: []*schema.Column{UsersToCompaniesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_to_companies_users_user",
+				Columns:    []*schema.Column{UsersToCompaniesColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "users_to_companies_companies_company",
+				Columns:    []*schema.Column{UsersToCompaniesColumns[4]},
+				RefColumns: []*schema.Column{CompaniesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AttributesTable,
+		AttributeTypesTable,
+		AttributeTypesToTemplatesTable,
 		AuthorizationPoliciesTable,
+		CertificationsTable,
+		CertificationTemplatesTable,
+		CompaniesTable,
+		ItemBatchesTable,
+		ItemBatchToItemBatchesTable,
 		UsersTable,
+		UsersToCompaniesTable,
 	}
 )
 
 func init() {
+	AttributesTable.ForeignKeys[0].RefTable = CertificationsTable
+	AttributesTable.ForeignKeys[1].RefTable = AttributeTypesTable
+	AttributeTypesTable.ForeignKeys[0].RefTable = CompaniesTable
+	AttributeTypesToTemplatesTable.ForeignKeys[0].RefTable = AttributeTypesTable
+	AttributeTypesToTemplatesTable.ForeignKeys[1].RefTable = CertificationTemplatesTable
+	CertificationsTable.ForeignKeys[0].RefTable = CompaniesTable
+	CertificationsTable.ForeignKeys[1].RefTable = ItemBatchesTable
+	CertificationsTable.ForeignKeys[2].RefTable = CertificationTemplatesTable
+	CertificationTemplatesTable.ForeignKeys[0].RefTable = CompaniesTable
+	ItemBatchesTable.ForeignKeys[0].RefTable = CompaniesTable
+	ItemBatchToItemBatchesTable.ForeignKeys[0].RefTable = ItemBatchesTable
+	ItemBatchToItemBatchesTable.ForeignKeys[1].RefTable = ItemBatchesTable
+	UsersToCompaniesTable.ForeignKeys[0].RefTable = UsersTable
+	UsersToCompaniesTable.ForeignKeys[1].RefTable = CompaniesTable
 }

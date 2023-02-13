@@ -9,6 +9,45 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent"
 )
 
+// The AttributeFunc type is an adapter to allow the use of ordinary
+// function as Attribute mutator.
+type AttributeFunc func(context.Context, *ent.AttributeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttributeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AttributeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The AttributeTypeFunc type is an adapter to allow the use of ordinary
+// function as AttributeType mutator.
+type AttributeTypeFunc func(context.Context, *ent.AttributeTypeMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttributeTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AttributeTypeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeTypeMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The AttributeTypesToTemplatesFunc type is an adapter to allow the use of ordinary
+// function as AttributeTypesToTemplates mutator.
+type AttributeTypesToTemplatesFunc func(context.Context, *ent.AttributeTypesToTemplatesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttributeTypesToTemplatesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AttributeTypesToTemplatesMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeTypesToTemplatesMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The AuthorizationPolicyFunc type is an adapter to allow the use of ordinary
 // function as AuthorizationPolicy mutator.
 type AuthorizationPolicyFunc func(context.Context, *ent.AuthorizationPolicyMutation) (ent.Value, error)
@@ -22,6 +61,71 @@ func (f AuthorizationPolicyFunc) Mutate(ctx context.Context, m ent.Mutation) (en
 	return f(ctx, mv)
 }
 
+// The CertificationFunc type is an adapter to allow the use of ordinary
+// function as Certification mutator.
+type CertificationFunc func(context.Context, *ent.CertificationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CertificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CertificationMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The CertificationTemplateFunc type is an adapter to allow the use of ordinary
+// function as CertificationTemplate mutator.
+type CertificationTemplateFunc func(context.Context, *ent.CertificationTemplateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CertificationTemplateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CertificationTemplateMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationTemplateMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The CompanyFunc type is an adapter to allow the use of ordinary
+// function as Company mutator.
+type CompanyFunc func(context.Context, *ent.CompanyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CompanyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CompanyMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CompanyMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ItemBatchFunc type is an adapter to allow the use of ordinary
+// function as ItemBatch mutator.
+type ItemBatchFunc func(context.Context, *ent.ItemBatchMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ItemBatchFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ItemBatchMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemBatchMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The ItemBatchToItemBatchFunc type is an adapter to allow the use of ordinary
+// function as ItemBatchToItemBatch mutator.
+type ItemBatchToItemBatchFunc func(context.Context, *ent.ItemBatchToItemBatchMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ItemBatchToItemBatchFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ItemBatchToItemBatchMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemBatchToItemBatchMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
@@ -31,6 +135,19 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	mv, ok := m.(*ent.UserMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The UsersToCompanyFunc type is an adapter to allow the use of ordinary
+// function as UsersToCompany mutator.
+type UsersToCompanyFunc func(context.Context, *ent.UsersToCompanyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UsersToCompanyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.UsersToCompanyMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UsersToCompanyMutation", m)
 	}
 	return f(ctx, mv)
 }
