@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 )
 
@@ -17,6 +19,7 @@ type AuthorizationPolicyCreate struct {
 	config
 	mutation *AuthorizationPolicyMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetPtype sets the "Ptype" field.
@@ -124,50 +127,8 @@ func (apc *AuthorizationPolicyCreate) Mutation() *AuthorizationPolicyMutation {
 
 // Save creates the AuthorizationPolicy in the database.
 func (apc *AuthorizationPolicyCreate) Save(ctx context.Context) (*AuthorizationPolicy, error) {
-	var (
-		err  error
-		node *AuthorizationPolicy
-	)
 	apc.defaults()
-	if len(apc.hooks) == 0 {
-		if err = apc.check(); err != nil {
-			return nil, err
-		}
-		node, err = apc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AuthorizationPolicyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = apc.check(); err != nil {
-				return nil, err
-			}
-			apc.mutation = mutation
-			if node, err = apc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(apc.hooks) - 1; i >= 0; i-- {
-			if apc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = apc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, apc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*AuthorizationPolicy)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AuthorizationPolicyMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*AuthorizationPolicy, AuthorizationPolicyMutation](ctx, apc.sqlSave, apc.mutation, apc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -251,6 +212,9 @@ func (apc *AuthorizationPolicyCreate) check() error {
 }
 
 func (apc *AuthorizationPolicyCreate) sqlSave(ctx context.Context) (*AuthorizationPolicy, error) {
+	if err := apc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := apc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, apc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -260,20 +224,17 @@ func (apc *AuthorizationPolicyCreate) sqlSave(ctx context.Context) (*Authorizati
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	apc.mutation.id = &_node.ID
+	apc.mutation.done = true
 	return _node, nil
 }
 
 func (apc *AuthorizationPolicyCreate) createSpec() (*AuthorizationPolicy, *sqlgraph.CreateSpec) {
 	var (
 		_node = &AuthorizationPolicy{config: apc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: authorizationpolicy.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: authorizationpolicy.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(authorizationpolicy.Table, sqlgraph.NewFieldSpec(authorizationpolicy.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = apc.conflict
 	if value, ok := apc.mutation.Ptype(); ok {
 		_spec.SetField(authorizationpolicy.FieldPtype, field.TypeString, value)
 		_node.Ptype = value
@@ -305,10 +266,315 @@ func (apc *AuthorizationPolicyCreate) createSpec() (*AuthorizationPolicy, *sqlgr
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.AuthorizationPolicy.Create().
+//		SetPtype(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.AuthorizationPolicyUpsert) {
+//			SetPtype(v+v).
+//		}).
+//		Exec(ctx)
+func (apc *AuthorizationPolicyCreate) OnConflict(opts ...sql.ConflictOption) *AuthorizationPolicyUpsertOne {
+	apc.conflict = opts
+	return &AuthorizationPolicyUpsertOne{
+		create: apc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.AuthorizationPolicy.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (apc *AuthorizationPolicyCreate) OnConflictColumns(columns ...string) *AuthorizationPolicyUpsertOne {
+	apc.conflict = append(apc.conflict, sql.ConflictColumns(columns...))
+	return &AuthorizationPolicyUpsertOne{
+		create: apc,
+	}
+}
+
+type (
+	// AuthorizationPolicyUpsertOne is the builder for "upsert"-ing
+	//  one AuthorizationPolicy node.
+	AuthorizationPolicyUpsertOne struct {
+		create *AuthorizationPolicyCreate
+	}
+
+	// AuthorizationPolicyUpsert is the "OnConflict" setter.
+	AuthorizationPolicyUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetPtype sets the "Ptype" field.
+func (u *AuthorizationPolicyUpsert) SetPtype(v string) *AuthorizationPolicyUpsert {
+	u.Set(authorizationpolicy.FieldPtype, v)
+	return u
+}
+
+// UpdatePtype sets the "Ptype" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsert) UpdatePtype() *AuthorizationPolicyUpsert {
+	u.SetExcluded(authorizationpolicy.FieldPtype)
+	return u
+}
+
+// SetV0 sets the "V0" field.
+func (u *AuthorizationPolicyUpsert) SetV0(v string) *AuthorizationPolicyUpsert {
+	u.Set(authorizationpolicy.FieldV0, v)
+	return u
+}
+
+// UpdateV0 sets the "V0" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsert) UpdateV0() *AuthorizationPolicyUpsert {
+	u.SetExcluded(authorizationpolicy.FieldV0)
+	return u
+}
+
+// SetV1 sets the "V1" field.
+func (u *AuthorizationPolicyUpsert) SetV1(v string) *AuthorizationPolicyUpsert {
+	u.Set(authorizationpolicy.FieldV1, v)
+	return u
+}
+
+// UpdateV1 sets the "V1" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsert) UpdateV1() *AuthorizationPolicyUpsert {
+	u.SetExcluded(authorizationpolicy.FieldV1)
+	return u
+}
+
+// SetV2 sets the "V2" field.
+func (u *AuthorizationPolicyUpsert) SetV2(v string) *AuthorizationPolicyUpsert {
+	u.Set(authorizationpolicy.FieldV2, v)
+	return u
+}
+
+// UpdateV2 sets the "V2" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsert) UpdateV2() *AuthorizationPolicyUpsert {
+	u.SetExcluded(authorizationpolicy.FieldV2)
+	return u
+}
+
+// SetV3 sets the "V3" field.
+func (u *AuthorizationPolicyUpsert) SetV3(v string) *AuthorizationPolicyUpsert {
+	u.Set(authorizationpolicy.FieldV3, v)
+	return u
+}
+
+// UpdateV3 sets the "V3" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsert) UpdateV3() *AuthorizationPolicyUpsert {
+	u.SetExcluded(authorizationpolicy.FieldV3)
+	return u
+}
+
+// SetV4 sets the "V4" field.
+func (u *AuthorizationPolicyUpsert) SetV4(v string) *AuthorizationPolicyUpsert {
+	u.Set(authorizationpolicy.FieldV4, v)
+	return u
+}
+
+// UpdateV4 sets the "V4" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsert) UpdateV4() *AuthorizationPolicyUpsert {
+	u.SetExcluded(authorizationpolicy.FieldV4)
+	return u
+}
+
+// SetV5 sets the "V5" field.
+func (u *AuthorizationPolicyUpsert) SetV5(v string) *AuthorizationPolicyUpsert {
+	u.Set(authorizationpolicy.FieldV5, v)
+	return u
+}
+
+// UpdateV5 sets the "V5" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsert) UpdateV5() *AuthorizationPolicyUpsert {
+	u.SetExcluded(authorizationpolicy.FieldV5)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.AuthorizationPolicy.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *AuthorizationPolicyUpsertOne) UpdateNewValues() *AuthorizationPolicyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.AuthorizationPolicy.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *AuthorizationPolicyUpsertOne) Ignore() *AuthorizationPolicyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *AuthorizationPolicyUpsertOne) DoNothing() *AuthorizationPolicyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the AuthorizationPolicyCreate.OnConflict
+// documentation for more info.
+func (u *AuthorizationPolicyUpsertOne) Update(set func(*AuthorizationPolicyUpsert)) *AuthorizationPolicyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&AuthorizationPolicyUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetPtype sets the "Ptype" field.
+func (u *AuthorizationPolicyUpsertOne) SetPtype(v string) *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetPtype(v)
+	})
+}
+
+// UpdatePtype sets the "Ptype" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertOne) UpdatePtype() *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdatePtype()
+	})
+}
+
+// SetV0 sets the "V0" field.
+func (u *AuthorizationPolicyUpsertOne) SetV0(v string) *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV0(v)
+	})
+}
+
+// UpdateV0 sets the "V0" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertOne) UpdateV0() *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV0()
+	})
+}
+
+// SetV1 sets the "V1" field.
+func (u *AuthorizationPolicyUpsertOne) SetV1(v string) *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV1(v)
+	})
+}
+
+// UpdateV1 sets the "V1" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertOne) UpdateV1() *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV1()
+	})
+}
+
+// SetV2 sets the "V2" field.
+func (u *AuthorizationPolicyUpsertOne) SetV2(v string) *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV2(v)
+	})
+}
+
+// UpdateV2 sets the "V2" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertOne) UpdateV2() *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV2()
+	})
+}
+
+// SetV3 sets the "V3" field.
+func (u *AuthorizationPolicyUpsertOne) SetV3(v string) *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV3(v)
+	})
+}
+
+// UpdateV3 sets the "V3" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertOne) UpdateV3() *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV3()
+	})
+}
+
+// SetV4 sets the "V4" field.
+func (u *AuthorizationPolicyUpsertOne) SetV4(v string) *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV4(v)
+	})
+}
+
+// UpdateV4 sets the "V4" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertOne) UpdateV4() *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV4()
+	})
+}
+
+// SetV5 sets the "V5" field.
+func (u *AuthorizationPolicyUpsertOne) SetV5(v string) *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV5(v)
+	})
+}
+
+// UpdateV5 sets the "V5" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertOne) UpdateV5() *AuthorizationPolicyUpsertOne {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV5()
+	})
+}
+
+// Exec executes the query.
+func (u *AuthorizationPolicyUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for AuthorizationPolicyCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *AuthorizationPolicyUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *AuthorizationPolicyUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *AuthorizationPolicyUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // AuthorizationPolicyCreateBulk is the builder for creating many AuthorizationPolicy entities in bulk.
 type AuthorizationPolicyCreateBulk struct {
 	config
 	builders []*AuthorizationPolicyCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the AuthorizationPolicy entities in the database.
@@ -335,6 +601,7 @@ func (apcb *AuthorizationPolicyCreateBulk) Save(ctx context.Context) ([]*Authori
 					_, err = mutators[i+1].Mutate(root, apcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = apcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, apcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -385,6 +652,205 @@ func (apcb *AuthorizationPolicyCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (apcb *AuthorizationPolicyCreateBulk) ExecX(ctx context.Context) {
 	if err := apcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.AuthorizationPolicy.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.AuthorizationPolicyUpsert) {
+//			SetPtype(v+v).
+//		}).
+//		Exec(ctx)
+func (apcb *AuthorizationPolicyCreateBulk) OnConflict(opts ...sql.ConflictOption) *AuthorizationPolicyUpsertBulk {
+	apcb.conflict = opts
+	return &AuthorizationPolicyUpsertBulk{
+		create: apcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.AuthorizationPolicy.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (apcb *AuthorizationPolicyCreateBulk) OnConflictColumns(columns ...string) *AuthorizationPolicyUpsertBulk {
+	apcb.conflict = append(apcb.conflict, sql.ConflictColumns(columns...))
+	return &AuthorizationPolicyUpsertBulk{
+		create: apcb,
+	}
+}
+
+// AuthorizationPolicyUpsertBulk is the builder for "upsert"-ing
+// a bulk of AuthorizationPolicy nodes.
+type AuthorizationPolicyUpsertBulk struct {
+	create *AuthorizationPolicyCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.AuthorizationPolicy.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *AuthorizationPolicyUpsertBulk) UpdateNewValues() *AuthorizationPolicyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.AuthorizationPolicy.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *AuthorizationPolicyUpsertBulk) Ignore() *AuthorizationPolicyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *AuthorizationPolicyUpsertBulk) DoNothing() *AuthorizationPolicyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the AuthorizationPolicyCreateBulk.OnConflict
+// documentation for more info.
+func (u *AuthorizationPolicyUpsertBulk) Update(set func(*AuthorizationPolicyUpsert)) *AuthorizationPolicyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&AuthorizationPolicyUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetPtype sets the "Ptype" field.
+func (u *AuthorizationPolicyUpsertBulk) SetPtype(v string) *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetPtype(v)
+	})
+}
+
+// UpdatePtype sets the "Ptype" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertBulk) UpdatePtype() *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdatePtype()
+	})
+}
+
+// SetV0 sets the "V0" field.
+func (u *AuthorizationPolicyUpsertBulk) SetV0(v string) *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV0(v)
+	})
+}
+
+// UpdateV0 sets the "V0" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertBulk) UpdateV0() *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV0()
+	})
+}
+
+// SetV1 sets the "V1" field.
+func (u *AuthorizationPolicyUpsertBulk) SetV1(v string) *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV1(v)
+	})
+}
+
+// UpdateV1 sets the "V1" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertBulk) UpdateV1() *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV1()
+	})
+}
+
+// SetV2 sets the "V2" field.
+func (u *AuthorizationPolicyUpsertBulk) SetV2(v string) *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV2(v)
+	})
+}
+
+// UpdateV2 sets the "V2" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertBulk) UpdateV2() *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV2()
+	})
+}
+
+// SetV3 sets the "V3" field.
+func (u *AuthorizationPolicyUpsertBulk) SetV3(v string) *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV3(v)
+	})
+}
+
+// UpdateV3 sets the "V3" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertBulk) UpdateV3() *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV3()
+	})
+}
+
+// SetV4 sets the "V4" field.
+func (u *AuthorizationPolicyUpsertBulk) SetV4(v string) *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV4(v)
+	})
+}
+
+// UpdateV4 sets the "V4" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertBulk) UpdateV4() *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV4()
+	})
+}
+
+// SetV5 sets the "V5" field.
+func (u *AuthorizationPolicyUpsertBulk) SetV5(v string) *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.SetV5(v)
+	})
+}
+
+// UpdateV5 sets the "V5" field to the value that was provided on create.
+func (u *AuthorizationPolicyUpsertBulk) UpdateV5() *AuthorizationPolicyUpsertBulk {
+	return u.Update(func(s *AuthorizationPolicyUpsert) {
+		s.UpdateV5()
+	})
+}
+
+// Exec executes the query.
+func (u *AuthorizationPolicyUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AuthorizationPolicyCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for AuthorizationPolicyCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *AuthorizationPolicyUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

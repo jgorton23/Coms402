@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
-	"github.com/google/uuid"
 )
 
 // AttributeType is the model entity for the AttributeType schema.
@@ -97,14 +98,14 @@ func (at *AttributeType) assignValues(columns []string, values []any) error {
 
 // QueryCompany queries the "company" edge of the AttributeType entity.
 func (at *AttributeType) QueryCompany() *CompanyQuery {
-	return (&AttributeTypeClient{config: at.config}).QueryCompany(at)
+	return NewAttributeTypeClient(at.config).QueryCompany(at)
 }
 
 // Update returns a builder for updating this AttributeType.
 // Note that you need to call AttributeType.Unwrap() before calling this method if this AttributeType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (at *AttributeType) Update() *AttributeTypeUpdateOne {
-	return (&AttributeTypeClient{config: at.config}).UpdateOne(at)
+	return NewAttributeTypeClient(at.config).UpdateOne(at)
 }
 
 // Unwrap unwraps the AttributeType entity that was returned from a transaction after it was closed,
@@ -134,9 +135,3 @@ func (at *AttributeType) String() string {
 
 // AttributeTypes is a parsable slice of AttributeType.
 type AttributeTypes []*AttributeType
-
-func (at AttributeTypes) config(cfg config) {
-	for _i := range at {
-		at[_i].config = cfg
-	}
-}

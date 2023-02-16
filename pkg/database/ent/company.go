@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 )
 
 // Company is the model entity for the Company schema.
@@ -65,7 +66,7 @@ func (c *Company) assignValues(columns []string, values []any) error {
 // Note that you need to call Company.Unwrap() before calling this method if this Company
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Company) Update() *CompanyUpdateOne {
-	return (&CompanyClient{config: c.config}).UpdateOne(c)
+	return NewCompanyClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Company entity that was returned from a transaction after it was closed,
@@ -92,9 +93,3 @@ func (c *Company) String() string {
 
 // Companies is a parsable slice of Company.
 type Companies []*Company
-
-func (c Companies) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

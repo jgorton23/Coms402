@@ -30,6 +30,8 @@ type Tx struct {
 	ItemBatch *ItemBatchClient
 	// ItemBatchToItemBatch is the client for interacting with the ItemBatchToItemBatch builders.
 	ItemBatchToItemBatch *ItemBatchToItemBatchClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UsersToCompany is the client for interacting with the UsersToCompany builders.
@@ -174,6 +176,7 @@ func (tx *Tx) init() {
 	tx.Company = NewCompanyClient(tx.config)
 	tx.ItemBatch = NewItemBatchClient(tx.config)
 	tx.ItemBatchToItemBatch = NewItemBatchToItemBatchClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UsersToCompany = NewUsersToCompanyClient(tx.config)
 }

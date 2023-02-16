@@ -5,6 +5,8 @@ package ent
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
@@ -14,10 +16,10 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/session"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/models"
-	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -102,6 +104,12 @@ func init() {
 	itembatchtoitembatchDescID := itembatchtoitembatchFields[0].Descriptor()
 	// itembatchtoitembatch.DefaultID holds the default value on creation for the id field.
 	itembatchtoitembatch.DefaultID = itembatchtoitembatchDescID.Default.(func() uuid.UUID)
+	sessionFields := models.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescData is the schema descriptor for data field.
+	sessionDescData := sessionFields[1].Descriptor()
+	// session.DataValidator is a validator for the "data" field. It is called by the builders before save.
+	session.DataValidator = sessionDescData.Validators[0].(func([]byte) error)
 	userFields := models.User{}.Fields()
 	_ = userFields
 	// userDescUUID is the schema descriptor for UUID field.

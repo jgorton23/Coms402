@@ -7,11 +7,14 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
-	"github.com/google/uuid"
 )
 
 // ItemBatchToItemBatchCreate is the builder for creating a ItemBatchToItemBatch entity.
@@ -19,6 +22,7 @@ type ItemBatchToItemBatchCreate struct {
 	config
 	mutation *ItemBatchToItemBatchMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetChildUUID sets the "childUUID" field.
@@ -76,50 +80,8 @@ func (ibtibc *ItemBatchToItemBatchCreate) Mutation() *ItemBatchToItemBatchMutati
 
 // Save creates the ItemBatchToItemBatch in the database.
 func (ibtibc *ItemBatchToItemBatchCreate) Save(ctx context.Context) (*ItemBatchToItemBatch, error) {
-	var (
-		err  error
-		node *ItemBatchToItemBatch
-	)
 	ibtibc.defaults()
-	if len(ibtibc.hooks) == 0 {
-		if err = ibtibc.check(); err != nil {
-			return nil, err
-		}
-		node, err = ibtibc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemBatchToItemBatchMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ibtibc.check(); err != nil {
-				return nil, err
-			}
-			ibtibc.mutation = mutation
-			if node, err = ibtibc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ibtibc.hooks) - 1; i >= 0; i-- {
-			if ibtibc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ibtibc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ibtibc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*ItemBatchToItemBatch)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ItemBatchToItemBatchMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*ItemBatchToItemBatch, ItemBatchToItemBatchMutation](ctx, ibtibc.sqlSave, ibtibc.mutation, ibtibc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -170,6 +132,9 @@ func (ibtibc *ItemBatchToItemBatchCreate) check() error {
 }
 
 func (ibtibc *ItemBatchToItemBatchCreate) sqlSave(ctx context.Context) (*ItemBatchToItemBatch, error) {
+	if err := ibtibc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ibtibc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ibtibc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -184,20 +149,17 @@ func (ibtibc *ItemBatchToItemBatchCreate) sqlSave(ctx context.Context) (*ItemBat
 			return nil, err
 		}
 	}
+	ibtibc.mutation.id = &_node.ID
+	ibtibc.mutation.done = true
 	return _node, nil
 }
 
 func (ibtibc *ItemBatchToItemBatchCreate) createSpec() (*ItemBatchToItemBatch, *sqlgraph.CreateSpec) {
 	var (
 		_node = &ItemBatchToItemBatch{config: ibtibc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: itembatchtoitembatch.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: itembatchtoitembatch.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(itembatchtoitembatch.Table, sqlgraph.NewFieldSpec(itembatchtoitembatch.FieldID, field.TypeUUID))
 	)
+	_spec.OnConflict = ibtibc.conflict
 	if id, ok := ibtibc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
@@ -245,10 +207,198 @@ func (ibtibc *ItemBatchToItemBatchCreate) createSpec() (*ItemBatchToItemBatch, *
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.ItemBatchToItemBatch.Create().
+//		SetChildUUID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ItemBatchToItemBatchUpsert) {
+//			SetChildUUID(v+v).
+//		}).
+//		Exec(ctx)
+func (ibtibc *ItemBatchToItemBatchCreate) OnConflict(opts ...sql.ConflictOption) *ItemBatchToItemBatchUpsertOne {
+	ibtibc.conflict = opts
+	return &ItemBatchToItemBatchUpsertOne{
+		create: ibtibc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.ItemBatchToItemBatch.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (ibtibc *ItemBatchToItemBatchCreate) OnConflictColumns(columns ...string) *ItemBatchToItemBatchUpsertOne {
+	ibtibc.conflict = append(ibtibc.conflict, sql.ConflictColumns(columns...))
+	return &ItemBatchToItemBatchUpsertOne{
+		create: ibtibc,
+	}
+}
+
+type (
+	// ItemBatchToItemBatchUpsertOne is the builder for "upsert"-ing
+	//  one ItemBatchToItemBatch node.
+	ItemBatchToItemBatchUpsertOne struct {
+		create *ItemBatchToItemBatchCreate
+	}
+
+	// ItemBatchToItemBatchUpsert is the "OnConflict" setter.
+	ItemBatchToItemBatchUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetChildUUID sets the "childUUID" field.
+func (u *ItemBatchToItemBatchUpsert) SetChildUUID(v uuid.UUID) *ItemBatchToItemBatchUpsert {
+	u.Set(itembatchtoitembatch.FieldChildUUID, v)
+	return u
+}
+
+// UpdateChildUUID sets the "childUUID" field to the value that was provided on create.
+func (u *ItemBatchToItemBatchUpsert) UpdateChildUUID() *ItemBatchToItemBatchUpsert {
+	u.SetExcluded(itembatchtoitembatch.FieldChildUUID)
+	return u
+}
+
+// SetParentUUID sets the "parentUUID" field.
+func (u *ItemBatchToItemBatchUpsert) SetParentUUID(v uuid.UUID) *ItemBatchToItemBatchUpsert {
+	u.Set(itembatchtoitembatch.FieldParentUUID, v)
+	return u
+}
+
+// UpdateParentUUID sets the "parentUUID" field to the value that was provided on create.
+func (u *ItemBatchToItemBatchUpsert) UpdateParentUUID() *ItemBatchToItemBatchUpsert {
+	u.SetExcluded(itembatchtoitembatch.FieldParentUUID)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.ItemBatchToItemBatch.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(itembatchtoitembatch.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *ItemBatchToItemBatchUpsertOne) UpdateNewValues() *ItemBatchToItemBatchUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(itembatchtoitembatch.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.ItemBatchToItemBatch.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *ItemBatchToItemBatchUpsertOne) Ignore() *ItemBatchToItemBatchUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ItemBatchToItemBatchUpsertOne) DoNothing() *ItemBatchToItemBatchUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ItemBatchToItemBatchCreate.OnConflict
+// documentation for more info.
+func (u *ItemBatchToItemBatchUpsertOne) Update(set func(*ItemBatchToItemBatchUpsert)) *ItemBatchToItemBatchUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ItemBatchToItemBatchUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetChildUUID sets the "childUUID" field.
+func (u *ItemBatchToItemBatchUpsertOne) SetChildUUID(v uuid.UUID) *ItemBatchToItemBatchUpsertOne {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.SetChildUUID(v)
+	})
+}
+
+// UpdateChildUUID sets the "childUUID" field to the value that was provided on create.
+func (u *ItemBatchToItemBatchUpsertOne) UpdateChildUUID() *ItemBatchToItemBatchUpsertOne {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.UpdateChildUUID()
+	})
+}
+
+// SetParentUUID sets the "parentUUID" field.
+func (u *ItemBatchToItemBatchUpsertOne) SetParentUUID(v uuid.UUID) *ItemBatchToItemBatchUpsertOne {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.SetParentUUID(v)
+	})
+}
+
+// UpdateParentUUID sets the "parentUUID" field to the value that was provided on create.
+func (u *ItemBatchToItemBatchUpsertOne) UpdateParentUUID() *ItemBatchToItemBatchUpsertOne {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.UpdateParentUUID()
+	})
+}
+
+// Exec executes the query.
+func (u *ItemBatchToItemBatchUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ItemBatchToItemBatchCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ItemBatchToItemBatchUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *ItemBatchToItemBatchUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: ItemBatchToItemBatchUpsertOne.ID is not supported by MySQL driver. Use ItemBatchToItemBatchUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *ItemBatchToItemBatchUpsertOne) IDX(ctx context.Context) uuid.UUID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // ItemBatchToItemBatchCreateBulk is the builder for creating many ItemBatchToItemBatch entities in bulk.
 type ItemBatchToItemBatchCreateBulk struct {
 	config
 	builders []*ItemBatchToItemBatchCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the ItemBatchToItemBatch entities in the database.
@@ -275,6 +425,7 @@ func (ibtibcb *ItemBatchToItemBatchCreateBulk) Save(ctx context.Context) ([]*Ite
 					_, err = mutators[i+1].Mutate(root, ibtibcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = ibtibcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ibtibcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -321,6 +472,145 @@ func (ibtibcb *ItemBatchToItemBatchCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (ibtibcb *ItemBatchToItemBatchCreateBulk) ExecX(ctx context.Context) {
 	if err := ibtibcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.ItemBatchToItemBatch.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ItemBatchToItemBatchUpsert) {
+//			SetChildUUID(v+v).
+//		}).
+//		Exec(ctx)
+func (ibtibcb *ItemBatchToItemBatchCreateBulk) OnConflict(opts ...sql.ConflictOption) *ItemBatchToItemBatchUpsertBulk {
+	ibtibcb.conflict = opts
+	return &ItemBatchToItemBatchUpsertBulk{
+		create: ibtibcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.ItemBatchToItemBatch.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (ibtibcb *ItemBatchToItemBatchCreateBulk) OnConflictColumns(columns ...string) *ItemBatchToItemBatchUpsertBulk {
+	ibtibcb.conflict = append(ibtibcb.conflict, sql.ConflictColumns(columns...))
+	return &ItemBatchToItemBatchUpsertBulk{
+		create: ibtibcb,
+	}
+}
+
+// ItemBatchToItemBatchUpsertBulk is the builder for "upsert"-ing
+// a bulk of ItemBatchToItemBatch nodes.
+type ItemBatchToItemBatchUpsertBulk struct {
+	create *ItemBatchToItemBatchCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.ItemBatchToItemBatch.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(itembatchtoitembatch.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *ItemBatchToItemBatchUpsertBulk) UpdateNewValues() *ItemBatchToItemBatchUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(itembatchtoitembatch.FieldID)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.ItemBatchToItemBatch.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *ItemBatchToItemBatchUpsertBulk) Ignore() *ItemBatchToItemBatchUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ItemBatchToItemBatchUpsertBulk) DoNothing() *ItemBatchToItemBatchUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ItemBatchToItemBatchCreateBulk.OnConflict
+// documentation for more info.
+func (u *ItemBatchToItemBatchUpsertBulk) Update(set func(*ItemBatchToItemBatchUpsert)) *ItemBatchToItemBatchUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ItemBatchToItemBatchUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetChildUUID sets the "childUUID" field.
+func (u *ItemBatchToItemBatchUpsertBulk) SetChildUUID(v uuid.UUID) *ItemBatchToItemBatchUpsertBulk {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.SetChildUUID(v)
+	})
+}
+
+// UpdateChildUUID sets the "childUUID" field to the value that was provided on create.
+func (u *ItemBatchToItemBatchUpsertBulk) UpdateChildUUID() *ItemBatchToItemBatchUpsertBulk {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.UpdateChildUUID()
+	})
+}
+
+// SetParentUUID sets the "parentUUID" field.
+func (u *ItemBatchToItemBatchUpsertBulk) SetParentUUID(v uuid.UUID) *ItemBatchToItemBatchUpsertBulk {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.SetParentUUID(v)
+	})
+}
+
+// UpdateParentUUID sets the "parentUUID" field to the value that was provided on create.
+func (u *ItemBatchToItemBatchUpsertBulk) UpdateParentUUID() *ItemBatchToItemBatchUpsertBulk {
+	return u.Update(func(s *ItemBatchToItemBatchUpsert) {
+		s.UpdateParentUUID()
+	})
+}
+
+// Exec executes the query.
+func (u *ItemBatchToItemBatchUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ItemBatchToItemBatchCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ItemBatchToItemBatchCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ItemBatchToItemBatchUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -5,228 +5,149 @@ package attributetype
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.AttributeType(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.AttributeType(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.AttributeType(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.AttributeType(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.AttributeType(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.AttributeType(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.AttributeType(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.AttributeType(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.AttributeType(sql.FieldLTE(FieldID, id))
 }
 
 // Key applies equality check predicate on the "key" field. It's identical to KeyEQ.
 func Key(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldEQ(FieldKey, v))
 }
 
 // CompanyUUID applies equality check predicate on the "companyUUID" field. It's identical to CompanyUUIDEQ.
 func CompanyUUID(v uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.AttributeType(sql.FieldEQ(FieldCompanyUUID, v))
 }
 
 // KeyEQ applies the EQ predicate on the "key" field.
 func KeyEQ(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldEQ(FieldKey, v))
 }
 
 // KeyNEQ applies the NEQ predicate on the "key" field.
 func KeyNEQ(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldNEQ(FieldKey, v))
 }
 
 // KeyIn applies the In predicate on the "key" field.
 func KeyIn(vs ...string) predicate.AttributeType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldKey), v...))
-	})
+	return predicate.AttributeType(sql.FieldIn(FieldKey, vs...))
 }
 
 // KeyNotIn applies the NotIn predicate on the "key" field.
 func KeyNotIn(vs ...string) predicate.AttributeType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldKey), v...))
-	})
+	return predicate.AttributeType(sql.FieldNotIn(FieldKey, vs...))
 }
 
 // KeyGT applies the GT predicate on the "key" field.
 func KeyGT(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldGT(FieldKey, v))
 }
 
 // KeyGTE applies the GTE predicate on the "key" field.
 func KeyGTE(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldGTE(FieldKey, v))
 }
 
 // KeyLT applies the LT predicate on the "key" field.
 func KeyLT(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldLT(FieldKey, v))
 }
 
 // KeyLTE applies the LTE predicate on the "key" field.
 func KeyLTE(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldLTE(FieldKey, v))
 }
 
 // KeyContains applies the Contains predicate on the "key" field.
 func KeyContains(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldContains(FieldKey, v))
 }
 
 // KeyHasPrefix applies the HasPrefix predicate on the "key" field.
 func KeyHasPrefix(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldHasPrefix(FieldKey, v))
 }
 
 // KeyHasSuffix applies the HasSuffix predicate on the "key" field.
 func KeyHasSuffix(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldHasSuffix(FieldKey, v))
 }
 
 // KeyEqualFold applies the EqualFold predicate on the "key" field.
 func KeyEqualFold(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldEqualFold(FieldKey, v))
 }
 
 // KeyContainsFold applies the ContainsFold predicate on the "key" field.
 func KeyContainsFold(v string) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldKey), v))
-	})
+	return predicate.AttributeType(sql.FieldContainsFold(FieldKey, v))
 }
 
 // CompanyUUIDEQ applies the EQ predicate on the "companyUUID" field.
 func CompanyUUIDEQ(v uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.AttributeType(sql.FieldEQ(FieldCompanyUUID, v))
 }
 
 // CompanyUUIDNEQ applies the NEQ predicate on the "companyUUID" field.
 func CompanyUUIDNEQ(v uuid.UUID) predicate.AttributeType {
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.AttributeType(sql.FieldNEQ(FieldCompanyUUID, v))
 }
 
 // CompanyUUIDIn applies the In predicate on the "companyUUID" field.
 func CompanyUUIDIn(vs ...uuid.UUID) predicate.AttributeType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCompanyUUID), v...))
-	})
+	return predicate.AttributeType(sql.FieldIn(FieldCompanyUUID, vs...))
 }
 
 // CompanyUUIDNotIn applies the NotIn predicate on the "companyUUID" field.
 func CompanyUUIDNotIn(vs ...uuid.UUID) predicate.AttributeType {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeType(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCompanyUUID), v...))
-	})
+	return predicate.AttributeType(sql.FieldNotIn(FieldCompanyUUID, vs...))
 }
 
 // HasCompany applies the HasEdge predicate on the "company" edge.
@@ -234,7 +155,6 @@ func HasCompany() predicate.AttributeType {
 	return predicate.AttributeType(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CompanyTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, CompanyTable, CompanyColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

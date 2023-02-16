@@ -7,25 +7,26 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // AttributeTypeQuery is the builder for querying AttributeType entities.
 type AttributeTypeQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
+	ctx         *QueryContext
 	order       []OrderFunc
-	fields      []string
+	inters      []Interceptor
 	predicates  []predicate.AttributeType
 	withCompany *CompanyQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -37,26 +38,26 @@ func (atq *AttributeTypeQuery) Where(ps ...predicate.AttributeType) *AttributeTy
 	return atq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (atq *AttributeTypeQuery) Limit(limit int) *AttributeTypeQuery {
-	atq.limit = &limit
+	atq.ctx.Limit = &limit
 	return atq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (atq *AttributeTypeQuery) Offset(offset int) *AttributeTypeQuery {
-	atq.offset = &offset
+	atq.ctx.Offset = &offset
 	return atq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (atq *AttributeTypeQuery) Unique(unique bool) *AttributeTypeQuery {
-	atq.unique = &unique
+	atq.ctx.Unique = &unique
 	return atq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (atq *AttributeTypeQuery) Order(o ...OrderFunc) *AttributeTypeQuery {
 	atq.order = append(atq.order, o...)
 	return atq
@@ -64,7 +65,7 @@ func (atq *AttributeTypeQuery) Order(o ...OrderFunc) *AttributeTypeQuery {
 
 // QueryCompany chains the current query on the "company" edge.
 func (atq *AttributeTypeQuery) QueryCompany() *CompanyQuery {
-	query := &CompanyQuery{config: atq.config}
+	query := (&CompanyClient{config: atq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := atq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -87,7 +88,7 @@ func (atq *AttributeTypeQuery) QueryCompany() *CompanyQuery {
 // First returns the first AttributeType entity from the query.
 // Returns a *NotFoundError when no AttributeType was found.
 func (atq *AttributeTypeQuery) First(ctx context.Context) (*AttributeType, error) {
-	nodes, err := atq.Limit(1).All(ctx)
+	nodes, err := atq.Limit(1).All(setContextOp(ctx, atq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func (atq *AttributeTypeQuery) FirstX(ctx context.Context) *AttributeType {
 // Returns a *NotFoundError when no AttributeType ID was found.
 func (atq *AttributeTypeQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = atq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = atq.Limit(1).IDs(setContextOp(ctx, atq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -133,7 +134,7 @@ func (atq *AttributeTypeQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one AttributeType entity is found.
 // Returns a *NotFoundError when no AttributeType entities are found.
 func (atq *AttributeTypeQuery) Only(ctx context.Context) (*AttributeType, error) {
-	nodes, err := atq.Limit(2).All(ctx)
+	nodes, err := atq.Limit(2).All(setContextOp(ctx, atq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +162,7 @@ func (atq *AttributeTypeQuery) OnlyX(ctx context.Context) *AttributeType {
 // Returns a *NotFoundError when no entities are found.
 func (atq *AttributeTypeQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = atq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = atq.Limit(2).IDs(setContextOp(ctx, atq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -186,10 +187,12 @@ func (atq *AttributeTypeQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of AttributeTypes.
 func (atq *AttributeTypeQuery) All(ctx context.Context) ([]*AttributeType, error) {
+	ctx = setContextOp(ctx, atq.ctx, "All")
 	if err := atq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return atq.sqlAll(ctx)
+	qr := querierAll[[]*AttributeType, *AttributeTypeQuery]()
+	return withInterceptors[[]*AttributeType](ctx, atq, qr, atq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -202,9 +205,12 @@ func (atq *AttributeTypeQuery) AllX(ctx context.Context) []*AttributeType {
 }
 
 // IDs executes the query and returns a list of AttributeType IDs.
-func (atq *AttributeTypeQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := atq.Select(attributetype.FieldID).Scan(ctx, &ids); err != nil {
+func (atq *AttributeTypeQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if atq.ctx.Unique == nil && atq.path != nil {
+		atq.Unique(true)
+	}
+	ctx = setContextOp(ctx, atq.ctx, "IDs")
+	if err = atq.Select(attributetype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -221,10 +227,11 @@ func (atq *AttributeTypeQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (atq *AttributeTypeQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, atq.ctx, "Count")
 	if err := atq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return atq.sqlCount(ctx)
+	return withInterceptors[int](ctx, atq, querierCount[*AttributeTypeQuery](), atq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -238,10 +245,15 @@ func (atq *AttributeTypeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (atq *AttributeTypeQuery) Exist(ctx context.Context) (bool, error) {
-	if err := atq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, atq.ctx, "Exist")
+	switch _, err := atq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return atq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -261,22 +273,21 @@ func (atq *AttributeTypeQuery) Clone() *AttributeTypeQuery {
 	}
 	return &AttributeTypeQuery{
 		config:      atq.config,
-		limit:       atq.limit,
-		offset:      atq.offset,
+		ctx:         atq.ctx.Clone(),
 		order:       append([]OrderFunc{}, atq.order...),
+		inters:      append([]Interceptor{}, atq.inters...),
 		predicates:  append([]predicate.AttributeType{}, atq.predicates...),
 		withCompany: atq.withCompany.Clone(),
 		// clone intermediate query.
-		sql:    atq.sql.Clone(),
-		path:   atq.path,
-		unique: atq.unique,
+		sql:  atq.sql.Clone(),
+		path: atq.path,
 	}
 }
 
 // WithCompany tells the query-builder to eager-load the nodes that are connected to
 // the "company" edge. The optional arguments are used to configure the query builder of the edge.
 func (atq *AttributeTypeQuery) WithCompany(opts ...func(*CompanyQuery)) *AttributeTypeQuery {
-	query := &CompanyQuery{config: atq.config}
+	query := (&CompanyClient{config: atq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -299,16 +310,11 @@ func (atq *AttributeTypeQuery) WithCompany(opts ...func(*CompanyQuery)) *Attribu
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (atq *AttributeTypeQuery) GroupBy(field string, fields ...string) *AttributeTypeGroupBy {
-	grbuild := &AttributeTypeGroupBy{config: atq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := atq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return atq.sqlQuery(ctx), nil
-	}
+	atq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &AttributeTypeGroupBy{build: atq}
+	grbuild.flds = &atq.ctx.Fields
 	grbuild.label = attributetype.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -325,11 +331,11 @@ func (atq *AttributeTypeQuery) GroupBy(field string, fields ...string) *Attribut
 //		Select(attributetype.FieldKey).
 //		Scan(ctx, &v)
 func (atq *AttributeTypeQuery) Select(fields ...string) *AttributeTypeSelect {
-	atq.fields = append(atq.fields, fields...)
-	selbuild := &AttributeTypeSelect{AttributeTypeQuery: atq}
-	selbuild.label = attributetype.Label
-	selbuild.flds, selbuild.scan = &atq.fields, selbuild.Scan
-	return selbuild
+	atq.ctx.Fields = append(atq.ctx.Fields, fields...)
+	sbuild := &AttributeTypeSelect{AttributeTypeQuery: atq}
+	sbuild.label = attributetype.Label
+	sbuild.flds, sbuild.scan = &atq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a AttributeTypeSelect configured with the given aggregations.
@@ -338,7 +344,17 @@ func (atq *AttributeTypeQuery) Aggregate(fns ...AggregateFunc) *AttributeTypeSel
 }
 
 func (atq *AttributeTypeQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range atq.fields {
+	for _, inter := range atq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, atq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range atq.ctx.Fields {
 		if !attributetype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -370,6 +386,9 @@ func (atq *AttributeTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(atq.modifiers) > 0 {
+		_spec.Modifiers = atq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -398,6 +417,9 @@ func (atq *AttributeTypeQuery) loadCompany(ctx context.Context, query *CompanyQu
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(company.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -417,41 +439,25 @@ func (atq *AttributeTypeQuery) loadCompany(ctx context.Context, query *CompanyQu
 
 func (atq *AttributeTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := atq.querySpec()
-	_spec.Node.Columns = atq.fields
-	if len(atq.fields) > 0 {
-		_spec.Unique = atq.unique != nil && *atq.unique
+	if len(atq.modifiers) > 0 {
+		_spec.Modifiers = atq.modifiers
+	}
+	_spec.Node.Columns = atq.ctx.Fields
+	if len(atq.ctx.Fields) > 0 {
+		_spec.Unique = atq.ctx.Unique != nil && *atq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, atq.driver, _spec)
 }
 
-func (atq *AttributeTypeQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := atq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (atq *AttributeTypeQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   attributetype.Table,
-			Columns: attributetype.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attributetype.FieldID,
-			},
-		},
-		From:   atq.sql,
-		Unique: true,
-	}
-	if unique := atq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(attributetype.Table, attributetype.Columns, sqlgraph.NewFieldSpec(attributetype.FieldID, field.TypeUUID))
+	_spec.From = atq.sql
+	if unique := atq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if atq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := atq.fields; len(fields) > 0 {
+	if fields := atq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, attributetype.FieldID)
 		for i := range fields {
@@ -467,10 +473,10 @@ func (atq *AttributeTypeQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := atq.limit; limit != nil {
+	if limit := atq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := atq.offset; offset != nil {
+	if offset := atq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := atq.order; len(ps) > 0 {
@@ -486,7 +492,7 @@ func (atq *AttributeTypeQuery) querySpec() *sqlgraph.QuerySpec {
 func (atq *AttributeTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(atq.driver.Dialect())
 	t1 := builder.Table(attributetype.Table)
-	columns := atq.fields
+	columns := atq.ctx.Fields
 	if len(columns) == 0 {
 		columns = attributetype.Columns
 	}
@@ -495,8 +501,11 @@ func (atq *AttributeTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = atq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if atq.unique != nil && *atq.unique {
+	if atq.ctx.Unique != nil && *atq.ctx.Unique {
 		selector.Distinct()
+	}
+	for _, m := range atq.modifiers {
+		m(selector)
 	}
 	for _, p := range atq.predicates {
 		p(selector)
@@ -504,26 +513,47 @@ func (atq *AttributeTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range atq.order {
 		p(selector)
 	}
-	if offset := atq.offset; offset != nil {
+	if offset := atq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := atq.limit; limit != nil {
+	if limit := atq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
 }
 
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (atq *AttributeTypeQuery) ForUpdate(opts ...sql.LockOption) *AttributeTypeQuery {
+	if atq.driver.Dialect() == dialect.Postgres {
+		atq.Unique(false)
+	}
+	atq.modifiers = append(atq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return atq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (atq *AttributeTypeQuery) ForShare(opts ...sql.LockOption) *AttributeTypeQuery {
+	if atq.driver.Dialect() == dialect.Postgres {
+		atq.Unique(false)
+	}
+	atq.modifiers = append(atq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return atq
+}
+
 // AttributeTypeGroupBy is the group-by builder for AttributeType entities.
 type AttributeTypeGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *AttributeTypeQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -532,58 +562,46 @@ func (atgb *AttributeTypeGroupBy) Aggregate(fns ...AggregateFunc) *AttributeType
 	return atgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (atgb *AttributeTypeGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := atgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, atgb.build.ctx, "GroupBy")
+	if err := atgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	atgb.sql = query
-	return atgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*AttributeTypeQuery, *AttributeTypeGroupBy](ctx, atgb.build, atgb, atgb.build.inters, v)
 }
 
-func (atgb *AttributeTypeGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range atgb.fields {
-		if !attributetype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (atgb *AttributeTypeGroupBy) sqlScan(ctx context.Context, root *AttributeTypeQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(atgb.fns))
+	for _, fn := range atgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := atgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*atgb.flds)+len(atgb.fns))
+		for _, f := range *atgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*atgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := atgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := atgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (atgb *AttributeTypeGroupBy) sqlQuery() *sql.Selector {
-	selector := atgb.sql.Select()
-	aggregation := make([]string, 0, len(atgb.fns))
-	for _, fn := range atgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(atgb.fields)+len(atgb.fns))
-		for _, f := range atgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(atgb.fields...)...)
-}
-
 // AttributeTypeSelect is the builder for selecting fields of AttributeType entities.
 type AttributeTypeSelect struct {
 	*AttributeTypeQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -594,26 +612,27 @@ func (ats *AttributeTypeSelect) Aggregate(fns ...AggregateFunc) *AttributeTypeSe
 
 // Scan applies the selector query and scans the result into the given value.
 func (ats *AttributeTypeSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ats.ctx, "Select")
 	if err := ats.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ats.sql = ats.AttributeTypeQuery.sqlQuery(ctx)
-	return ats.sqlScan(ctx, v)
+	return scanWithInterceptors[*AttributeTypeQuery, *AttributeTypeSelect](ctx, ats.AttributeTypeQuery, ats, ats.inters, v)
 }
 
-func (ats *AttributeTypeSelect) sqlScan(ctx context.Context, v any) error {
+func (ats *AttributeTypeSelect) sqlScan(ctx context.Context, root *AttributeTypeQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ats.fns))
 	for _, fn := range ats.fns {
-		aggregation = append(aggregation, fn(ats.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ats.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ats.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ats.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ats.sql.Query()
+	query, args := selector.Query()
 	if err := ats.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

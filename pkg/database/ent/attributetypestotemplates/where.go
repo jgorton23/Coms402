@@ -5,165 +5,104 @@ package attributetypestotemplates
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldLTE(FieldID, id))
 }
 
 // AttributeTypeUUID applies equality check predicate on the "attributeTypeUUID" field. It's identical to AttributeTypeUUIDEQ.
 func AttributeTypeUUID(v uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAttributeTypeUUID), v))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldEQ(FieldAttributeTypeUUID, v))
 }
 
 // TemplateUUID applies equality check predicate on the "templateUUID" field. It's identical to TemplateUUIDEQ.
 func TemplateUUID(v uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemplateUUID), v))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldEQ(FieldTemplateUUID, v))
 }
 
 // AttributeTypeUUIDEQ applies the EQ predicate on the "attributeTypeUUID" field.
 func AttributeTypeUUIDEQ(v uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAttributeTypeUUID), v))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldEQ(FieldAttributeTypeUUID, v))
 }
 
 // AttributeTypeUUIDNEQ applies the NEQ predicate on the "attributeTypeUUID" field.
 func AttributeTypeUUIDNEQ(v uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAttributeTypeUUID), v))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldNEQ(FieldAttributeTypeUUID, v))
 }
 
 // AttributeTypeUUIDIn applies the In predicate on the "attributeTypeUUID" field.
 func AttributeTypeUUIDIn(vs ...uuid.UUID) predicate.AttributeTypesToTemplates {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAttributeTypeUUID), v...))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldIn(FieldAttributeTypeUUID, vs...))
 }
 
 // AttributeTypeUUIDNotIn applies the NotIn predicate on the "attributeTypeUUID" field.
 func AttributeTypeUUIDNotIn(vs ...uuid.UUID) predicate.AttributeTypesToTemplates {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAttributeTypeUUID), v...))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldNotIn(FieldAttributeTypeUUID, vs...))
 }
 
 // TemplateUUIDEQ applies the EQ predicate on the "templateUUID" field.
 func TemplateUUIDEQ(v uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemplateUUID), v))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldEQ(FieldTemplateUUID, v))
 }
 
 // TemplateUUIDNEQ applies the NEQ predicate on the "templateUUID" field.
 func TemplateUUIDNEQ(v uuid.UUID) predicate.AttributeTypesToTemplates {
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTemplateUUID), v))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldNEQ(FieldTemplateUUID, v))
 }
 
 // TemplateUUIDIn applies the In predicate on the "templateUUID" field.
 func TemplateUUIDIn(vs ...uuid.UUID) predicate.AttributeTypesToTemplates {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTemplateUUID), v...))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldIn(FieldTemplateUUID, vs...))
 }
 
 // TemplateUUIDNotIn applies the NotIn predicate on the "templateUUID" field.
 func TemplateUUIDNotIn(vs ...uuid.UUID) predicate.AttributeTypesToTemplates {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTemplateUUID), v...))
-	})
+	return predicate.AttributeTypesToTemplates(sql.FieldNotIn(FieldTemplateUUID, vs...))
 }
 
 // HasAttribute applies the HasEdge predicate on the "attribute" edge.
@@ -171,7 +110,6 @@ func HasAttribute() predicate.AttributeTypesToTemplates {
 	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AttributeTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, AttributeTable, AttributeColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -199,7 +137,6 @@ func HasTemplate() predicate.AttributeTypesToTemplates {
 	return predicate.AttributeTypesToTemplates(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TemplateTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, TemplateTable, TemplateColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

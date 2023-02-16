@@ -4,11 +4,11 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
 )
@@ -28,34 +28,7 @@ func (utcd *UsersToCompanyDelete) Where(ps ...predicate.UsersToCompany) *UsersTo
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (utcd *UsersToCompanyDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(utcd.hooks) == 0 {
-		affected, err = utcd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UsersToCompanyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			utcd.mutation = mutation
-			affected, err = utcd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(utcd.hooks) - 1; i >= 0; i-- {
-			if utcd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utcd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, utcd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, UsersToCompanyMutation](ctx, utcd.sqlExec, utcd.mutation, utcd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +41,7 @@ func (utcd *UsersToCompanyDelete) ExecX(ctx context.Context) int {
 }
 
 func (utcd *UsersToCompanyDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: userstocompany.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: userstocompany.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(userstocompany.Table, sqlgraph.NewFieldSpec(userstocompany.FieldID, field.TypeUUID))
 	if ps := utcd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +53,19 @@ func (utcd *UsersToCompanyDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	utcd.mutation.done = true
 	return affected, err
 }
 
 // UsersToCompanyDeleteOne is the builder for deleting a single UsersToCompany entity.
 type UsersToCompanyDeleteOne struct {
 	utcd *UsersToCompanyDelete
+}
+
+// Where appends a list predicates to the UsersToCompanyDelete builder.
+func (utcdo *UsersToCompanyDeleteOne) Where(ps ...predicate.UsersToCompany) *UsersToCompanyDeleteOne {
+	utcdo.utcd.mutation.Where(ps...)
+	return utcdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +83,7 @@ func (utcdo *UsersToCompanyDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (utcdo *UsersToCompanyDeleteOne) ExecX(ctx context.Context) {
-	utcdo.utcd.ExecX(ctx)
+	if err := utcdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

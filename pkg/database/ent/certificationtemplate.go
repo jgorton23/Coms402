@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
-	"github.com/google/uuid"
 )
 
 // CertificationTemplate is the model entity for the CertificationTemplate schema.
@@ -97,14 +98,14 @@ func (ct *CertificationTemplate) assignValues(columns []string, values []any) er
 
 // QueryCompany queries the "company" edge of the CertificationTemplate entity.
 func (ct *CertificationTemplate) QueryCompany() *CompanyQuery {
-	return (&CertificationTemplateClient{config: ct.config}).QueryCompany(ct)
+	return NewCertificationTemplateClient(ct.config).QueryCompany(ct)
 }
 
 // Update returns a builder for updating this CertificationTemplate.
 // Note that you need to call CertificationTemplate.Unwrap() before calling this method if this CertificationTemplate
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ct *CertificationTemplate) Update() *CertificationTemplateUpdateOne {
-	return (&CertificationTemplateClient{config: ct.config}).UpdateOne(ct)
+	return NewCertificationTemplateClient(ct.config).UpdateOne(ct)
 }
 
 // Unwrap unwraps the CertificationTemplate entity that was returned from a transaction after it was closed,
@@ -134,9 +135,3 @@ func (ct *CertificationTemplate) String() string {
 
 // CertificationTemplates is a parsable slice of CertificationTemplate.
 type CertificationTemplates []*CertificationTemplate
-
-func (ct CertificationTemplates) config(cfg config) {
-	for _i := range ct {
-		ct[_i].config = cfg
-	}
-}

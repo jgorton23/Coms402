@@ -7,12 +7,15 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
-	"github.com/google/uuid"
 )
 
 // AttributeTypesToTemplatesCreate is the builder for creating a AttributeTypesToTemplates entity.
@@ -20,6 +23,7 @@ type AttributeTypesToTemplatesCreate struct {
 	config
 	mutation *AttributeTypesToTemplatesMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetAttributeTypeUUID sets the "attributeTypeUUID" field.
@@ -77,50 +81,8 @@ func (atttc *AttributeTypesToTemplatesCreate) Mutation() *AttributeTypesToTempla
 
 // Save creates the AttributeTypesToTemplates in the database.
 func (atttc *AttributeTypesToTemplatesCreate) Save(ctx context.Context) (*AttributeTypesToTemplates, error) {
-	var (
-		err  error
-		node *AttributeTypesToTemplates
-	)
 	atttc.defaults()
-	if len(atttc.hooks) == 0 {
-		if err = atttc.check(); err != nil {
-			return nil, err
-		}
-		node, err = atttc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AttributeTypesToTemplatesMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = atttc.check(); err != nil {
-				return nil, err
-			}
-			atttc.mutation = mutation
-			if node, err = atttc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(atttc.hooks) - 1; i >= 0; i-- {
-			if atttc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = atttc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, atttc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*AttributeTypesToTemplates)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AttributeTypesToTemplatesMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*AttributeTypesToTemplates, AttributeTypesToTemplatesMutation](ctx, atttc.sqlSave, atttc.mutation, atttc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -171,6 +133,9 @@ func (atttc *AttributeTypesToTemplatesCreate) check() error {
 }
 
 func (atttc *AttributeTypesToTemplatesCreate) sqlSave(ctx context.Context) (*AttributeTypesToTemplates, error) {
+	if err := atttc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := atttc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, atttc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -185,20 +150,17 @@ func (atttc *AttributeTypesToTemplatesCreate) sqlSave(ctx context.Context) (*Att
 			return nil, err
 		}
 	}
+	atttc.mutation.id = &_node.ID
+	atttc.mutation.done = true
 	return _node, nil
 }
 
 func (atttc *AttributeTypesToTemplatesCreate) createSpec() (*AttributeTypesToTemplates, *sqlgraph.CreateSpec) {
 	var (
 		_node = &AttributeTypesToTemplates{config: atttc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: attributetypestotemplates.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attributetypestotemplates.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(attributetypestotemplates.Table, sqlgraph.NewFieldSpec(attributetypestotemplates.FieldID, field.TypeUUID))
 	)
+	_spec.OnConflict = atttc.conflict
 	if id, ok := atttc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
@@ -246,10 +208,198 @@ func (atttc *AttributeTypesToTemplatesCreate) createSpec() (*AttributeTypesToTem
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.AttributeTypesToTemplates.Create().
+//		SetAttributeTypeUUID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.AttributeTypesToTemplatesUpsert) {
+//			SetAttributeTypeUUID(v+v).
+//		}).
+//		Exec(ctx)
+func (atttc *AttributeTypesToTemplatesCreate) OnConflict(opts ...sql.ConflictOption) *AttributeTypesToTemplatesUpsertOne {
+	atttc.conflict = opts
+	return &AttributeTypesToTemplatesUpsertOne{
+		create: atttc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.AttributeTypesToTemplates.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (atttc *AttributeTypesToTemplatesCreate) OnConflictColumns(columns ...string) *AttributeTypesToTemplatesUpsertOne {
+	atttc.conflict = append(atttc.conflict, sql.ConflictColumns(columns...))
+	return &AttributeTypesToTemplatesUpsertOne{
+		create: atttc,
+	}
+}
+
+type (
+	// AttributeTypesToTemplatesUpsertOne is the builder for "upsert"-ing
+	//  one AttributeTypesToTemplates node.
+	AttributeTypesToTemplatesUpsertOne struct {
+		create *AttributeTypesToTemplatesCreate
+	}
+
+	// AttributeTypesToTemplatesUpsert is the "OnConflict" setter.
+	AttributeTypesToTemplatesUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetAttributeTypeUUID sets the "attributeTypeUUID" field.
+func (u *AttributeTypesToTemplatesUpsert) SetAttributeTypeUUID(v uuid.UUID) *AttributeTypesToTemplatesUpsert {
+	u.Set(attributetypestotemplates.FieldAttributeTypeUUID, v)
+	return u
+}
+
+// UpdateAttributeTypeUUID sets the "attributeTypeUUID" field to the value that was provided on create.
+func (u *AttributeTypesToTemplatesUpsert) UpdateAttributeTypeUUID() *AttributeTypesToTemplatesUpsert {
+	u.SetExcluded(attributetypestotemplates.FieldAttributeTypeUUID)
+	return u
+}
+
+// SetTemplateUUID sets the "templateUUID" field.
+func (u *AttributeTypesToTemplatesUpsert) SetTemplateUUID(v uuid.UUID) *AttributeTypesToTemplatesUpsert {
+	u.Set(attributetypestotemplates.FieldTemplateUUID, v)
+	return u
+}
+
+// UpdateTemplateUUID sets the "templateUUID" field to the value that was provided on create.
+func (u *AttributeTypesToTemplatesUpsert) UpdateTemplateUUID() *AttributeTypesToTemplatesUpsert {
+	u.SetExcluded(attributetypestotemplates.FieldTemplateUUID)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.AttributeTypesToTemplates.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(attributetypestotemplates.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *AttributeTypesToTemplatesUpsertOne) UpdateNewValues() *AttributeTypesToTemplatesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(attributetypestotemplates.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.AttributeTypesToTemplates.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *AttributeTypesToTemplatesUpsertOne) Ignore() *AttributeTypesToTemplatesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *AttributeTypesToTemplatesUpsertOne) DoNothing() *AttributeTypesToTemplatesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the AttributeTypesToTemplatesCreate.OnConflict
+// documentation for more info.
+func (u *AttributeTypesToTemplatesUpsertOne) Update(set func(*AttributeTypesToTemplatesUpsert)) *AttributeTypesToTemplatesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&AttributeTypesToTemplatesUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAttributeTypeUUID sets the "attributeTypeUUID" field.
+func (u *AttributeTypesToTemplatesUpsertOne) SetAttributeTypeUUID(v uuid.UUID) *AttributeTypesToTemplatesUpsertOne {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.SetAttributeTypeUUID(v)
+	})
+}
+
+// UpdateAttributeTypeUUID sets the "attributeTypeUUID" field to the value that was provided on create.
+func (u *AttributeTypesToTemplatesUpsertOne) UpdateAttributeTypeUUID() *AttributeTypesToTemplatesUpsertOne {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.UpdateAttributeTypeUUID()
+	})
+}
+
+// SetTemplateUUID sets the "templateUUID" field.
+func (u *AttributeTypesToTemplatesUpsertOne) SetTemplateUUID(v uuid.UUID) *AttributeTypesToTemplatesUpsertOne {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.SetTemplateUUID(v)
+	})
+}
+
+// UpdateTemplateUUID sets the "templateUUID" field to the value that was provided on create.
+func (u *AttributeTypesToTemplatesUpsertOne) UpdateTemplateUUID() *AttributeTypesToTemplatesUpsertOne {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.UpdateTemplateUUID()
+	})
+}
+
+// Exec executes the query.
+func (u *AttributeTypesToTemplatesUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for AttributeTypesToTemplatesCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *AttributeTypesToTemplatesUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *AttributeTypesToTemplatesUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: AttributeTypesToTemplatesUpsertOne.ID is not supported by MySQL driver. Use AttributeTypesToTemplatesUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *AttributeTypesToTemplatesUpsertOne) IDX(ctx context.Context) uuid.UUID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // AttributeTypesToTemplatesCreateBulk is the builder for creating many AttributeTypesToTemplates entities in bulk.
 type AttributeTypesToTemplatesCreateBulk struct {
 	config
 	builders []*AttributeTypesToTemplatesCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the AttributeTypesToTemplates entities in the database.
@@ -276,6 +426,7 @@ func (atttcb *AttributeTypesToTemplatesCreateBulk) Save(ctx context.Context) ([]
 					_, err = mutators[i+1].Mutate(root, atttcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = atttcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, atttcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -322,6 +473,145 @@ func (atttcb *AttributeTypesToTemplatesCreateBulk) Exec(ctx context.Context) err
 // ExecX is like Exec, but panics if an error occurs.
 func (atttcb *AttributeTypesToTemplatesCreateBulk) ExecX(ctx context.Context) {
 	if err := atttcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.AttributeTypesToTemplates.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.AttributeTypesToTemplatesUpsert) {
+//			SetAttributeTypeUUID(v+v).
+//		}).
+//		Exec(ctx)
+func (atttcb *AttributeTypesToTemplatesCreateBulk) OnConflict(opts ...sql.ConflictOption) *AttributeTypesToTemplatesUpsertBulk {
+	atttcb.conflict = opts
+	return &AttributeTypesToTemplatesUpsertBulk{
+		create: atttcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.AttributeTypesToTemplates.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (atttcb *AttributeTypesToTemplatesCreateBulk) OnConflictColumns(columns ...string) *AttributeTypesToTemplatesUpsertBulk {
+	atttcb.conflict = append(atttcb.conflict, sql.ConflictColumns(columns...))
+	return &AttributeTypesToTemplatesUpsertBulk{
+		create: atttcb,
+	}
+}
+
+// AttributeTypesToTemplatesUpsertBulk is the builder for "upsert"-ing
+// a bulk of AttributeTypesToTemplates nodes.
+type AttributeTypesToTemplatesUpsertBulk struct {
+	create *AttributeTypesToTemplatesCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.AttributeTypesToTemplates.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(attributetypestotemplates.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *AttributeTypesToTemplatesUpsertBulk) UpdateNewValues() *AttributeTypesToTemplatesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(attributetypestotemplates.FieldID)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.AttributeTypesToTemplates.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *AttributeTypesToTemplatesUpsertBulk) Ignore() *AttributeTypesToTemplatesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *AttributeTypesToTemplatesUpsertBulk) DoNothing() *AttributeTypesToTemplatesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the AttributeTypesToTemplatesCreateBulk.OnConflict
+// documentation for more info.
+func (u *AttributeTypesToTemplatesUpsertBulk) Update(set func(*AttributeTypesToTemplatesUpsert)) *AttributeTypesToTemplatesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&AttributeTypesToTemplatesUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetAttributeTypeUUID sets the "attributeTypeUUID" field.
+func (u *AttributeTypesToTemplatesUpsertBulk) SetAttributeTypeUUID(v uuid.UUID) *AttributeTypesToTemplatesUpsertBulk {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.SetAttributeTypeUUID(v)
+	})
+}
+
+// UpdateAttributeTypeUUID sets the "attributeTypeUUID" field to the value that was provided on create.
+func (u *AttributeTypesToTemplatesUpsertBulk) UpdateAttributeTypeUUID() *AttributeTypesToTemplatesUpsertBulk {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.UpdateAttributeTypeUUID()
+	})
+}
+
+// SetTemplateUUID sets the "templateUUID" field.
+func (u *AttributeTypesToTemplatesUpsertBulk) SetTemplateUUID(v uuid.UUID) *AttributeTypesToTemplatesUpsertBulk {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.SetTemplateUUID(v)
+	})
+}
+
+// UpdateTemplateUUID sets the "templateUUID" field to the value that was provided on create.
+func (u *AttributeTypesToTemplatesUpsertBulk) UpdateTemplateUUID() *AttributeTypesToTemplatesUpsertBulk {
+	return u.Update(func(s *AttributeTypesToTemplatesUpsert) {
+		s.UpdateTemplateUUID()
+	})
+}
+
+// Exec executes the query.
+func (u *AttributeTypesToTemplatesUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AttributeTypesToTemplatesCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for AttributeTypesToTemplatesCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *AttributeTypesToTemplatesUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

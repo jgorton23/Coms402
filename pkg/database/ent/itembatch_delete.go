@@ -4,11 +4,11 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
@@ -28,34 +28,7 @@ func (ibd *ItemBatchDelete) Where(ps ...predicate.ItemBatch) *ItemBatchDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ibd *ItemBatchDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ibd.hooks) == 0 {
-		affected, err = ibd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemBatchMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ibd.mutation = mutation
-			affected, err = ibd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ibd.hooks) - 1; i >= 0; i-- {
-			if ibd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ibd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ibd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ItemBatchMutation](ctx, ibd.sqlExec, ibd.mutation, ibd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +41,7 @@ func (ibd *ItemBatchDelete) ExecX(ctx context.Context) int {
 }
 
 func (ibd *ItemBatchDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: itembatch.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: itembatch.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(itembatch.Table, sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID))
 	if ps := ibd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +53,19 @@ func (ibd *ItemBatchDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	ibd.mutation.done = true
 	return affected, err
 }
 
 // ItemBatchDeleteOne is the builder for deleting a single ItemBatch entity.
 type ItemBatchDeleteOne struct {
 	ibd *ItemBatchDelete
+}
+
+// Where appends a list predicates to the ItemBatchDelete builder.
+func (ibdo *ItemBatchDeleteOne) Where(ps ...predicate.ItemBatch) *ItemBatchDeleteOne {
+	ibdo.ibd.mutation.Where(ps...)
+	return ibdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +83,7 @@ func (ibdo *ItemBatchDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ibdo *ItemBatchDeleteOne) ExecX(ctx context.Context) {
-	ibdo.ibd.ExecX(ctx)
+	if err := ibdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

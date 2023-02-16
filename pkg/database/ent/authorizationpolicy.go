@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 )
 
@@ -112,7 +113,7 @@ func (ap *AuthorizationPolicy) assignValues(columns []string, values []any) erro
 // Note that you need to call AuthorizationPolicy.Unwrap() before calling this method if this AuthorizationPolicy
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ap *AuthorizationPolicy) Update() *AuthorizationPolicyUpdateOne {
-	return (&AuthorizationPolicyClient{config: ap.config}).UpdateOne(ap)
+	return NewAuthorizationPolicyClient(ap.config).UpdateOne(ap)
 }
 
 // Unwrap unwraps the AuthorizationPolicy entity that was returned from a transaction after it was closed,
@@ -157,9 +158,3 @@ func (ap *AuthorizationPolicy) String() string {
 
 // AuthorizationPolicies is a parsable slice of AuthorizationPolicy.
 type AuthorizationPolicies []*AuthorizationPolicy
-
-func (ap AuthorizationPolicies) config(cfg config) {
-	for _i := range ap {
-		ap[_i].config = cfg
-	}
-}

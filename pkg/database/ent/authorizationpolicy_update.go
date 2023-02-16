@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
@@ -132,34 +133,7 @@ func (apu *AuthorizationPolicyUpdate) Mutation() *AuthorizationPolicyMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (apu *AuthorizationPolicyUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(apu.hooks) == 0 {
-		affected, err = apu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AuthorizationPolicyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			apu.mutation = mutation
-			affected, err = apu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(apu.hooks) - 1; i >= 0; i-- {
-			if apu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = apu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, apu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, AuthorizationPolicyMutation](ctx, apu.sqlSave, apu.mutation, apu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -185,16 +159,7 @@ func (apu *AuthorizationPolicyUpdate) ExecX(ctx context.Context) {
 }
 
 func (apu *AuthorizationPolicyUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   authorizationpolicy.Table,
-			Columns: authorizationpolicy.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: authorizationpolicy.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(authorizationpolicy.Table, authorizationpolicy.Columns, sqlgraph.NewFieldSpec(authorizationpolicy.FieldID, field.TypeInt))
 	if ps := apu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -231,6 +196,7 @@ func (apu *AuthorizationPolicyUpdate) sqlSave(ctx context.Context) (n int, err e
 		}
 		return 0, err
 	}
+	apu.mutation.done = true
 	return n, nil
 }
 
@@ -345,6 +311,12 @@ func (apuo *AuthorizationPolicyUpdateOne) Mutation() *AuthorizationPolicyMutatio
 	return apuo.mutation
 }
 
+// Where appends a list predicates to the AuthorizationPolicyUpdate builder.
+func (apuo *AuthorizationPolicyUpdateOne) Where(ps ...predicate.AuthorizationPolicy) *AuthorizationPolicyUpdateOne {
+	apuo.mutation.Where(ps...)
+	return apuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (apuo *AuthorizationPolicyUpdateOne) Select(field string, fields ...string) *AuthorizationPolicyUpdateOne {
@@ -354,40 +326,7 @@ func (apuo *AuthorizationPolicyUpdateOne) Select(field string, fields ...string)
 
 // Save executes the query and returns the updated AuthorizationPolicy entity.
 func (apuo *AuthorizationPolicyUpdateOne) Save(ctx context.Context) (*AuthorizationPolicy, error) {
-	var (
-		err  error
-		node *AuthorizationPolicy
-	)
-	if len(apuo.hooks) == 0 {
-		node, err = apuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AuthorizationPolicyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			apuo.mutation = mutation
-			node, err = apuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(apuo.hooks) - 1; i >= 0; i-- {
-			if apuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = apuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, apuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*AuthorizationPolicy)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AuthorizationPolicyMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*AuthorizationPolicy, AuthorizationPolicyMutation](ctx, apuo.sqlSave, apuo.mutation, apuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -413,16 +352,7 @@ func (apuo *AuthorizationPolicyUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (apuo *AuthorizationPolicyUpdateOne) sqlSave(ctx context.Context) (_node *AuthorizationPolicy, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   authorizationpolicy.Table,
-			Columns: authorizationpolicy.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: authorizationpolicy.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(authorizationpolicy.Table, authorizationpolicy.Columns, sqlgraph.NewFieldSpec(authorizationpolicy.FieldID, field.TypeInt))
 	id, ok := apuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AuthorizationPolicy.id" for update`)}
@@ -479,5 +409,6 @@ func (apuo *AuthorizationPolicyUpdateOne) sqlSave(ctx context.Context) (_node *A
 		}
 		return nil, err
 	}
+	apuo.mutation.done = true
 	return _node, nil
 }

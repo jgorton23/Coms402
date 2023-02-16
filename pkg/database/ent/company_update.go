@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
@@ -40,34 +41,7 @@ func (cu *CompanyUpdate) Mutation() *CompanyMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CompanyUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(cu.hooks) == 0 {
-		affected, err = cu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CompanyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			cu.mutation = mutation
-			affected, err = cu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(cu.hooks) - 1; i >= 0; i-- {
-			if cu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, CompanyMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -93,16 +67,7 @@ func (cu *CompanyUpdate) ExecX(ctx context.Context) {
 }
 
 func (cu *CompanyUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   company.Table,
-			Columns: company.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: company.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(company.Table, company.Columns, sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID))
 	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -121,6 +86,7 @@ func (cu *CompanyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	cu.mutation.done = true
 	return n, nil
 }
 
@@ -143,6 +109,12 @@ func (cuo *CompanyUpdateOne) Mutation() *CompanyMutation {
 	return cuo.mutation
 }
 
+// Where appends a list predicates to the CompanyUpdate builder.
+func (cuo *CompanyUpdateOne) Where(ps ...predicate.Company) *CompanyUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *CompanyUpdateOne) Select(field string, fields ...string) *CompanyUpdateOne {
@@ -152,40 +124,7 @@ func (cuo *CompanyUpdateOne) Select(field string, fields ...string) *CompanyUpda
 
 // Save executes the query and returns the updated Company entity.
 func (cuo *CompanyUpdateOne) Save(ctx context.Context) (*Company, error) {
-	var (
-		err  error
-		node *Company
-	)
-	if len(cuo.hooks) == 0 {
-		node, err = cuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CompanyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			cuo.mutation = mutation
-			node, err = cuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cuo.hooks) - 1; i >= 0; i-- {
-			if cuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Company)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from CompanyMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Company, CompanyMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -211,16 +150,7 @@ func (cuo *CompanyUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (cuo *CompanyUpdateOne) sqlSave(ctx context.Context) (_node *Company, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   company.Table,
-			Columns: company.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: company.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(company.Table, company.Columns, sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID))
 	id, ok := cuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Company.id" for update`)}
@@ -259,5 +189,6 @@ func (cuo *CompanyUpdateOne) sqlSave(ctx context.Context) (_node *Company, err e
 		}
 		return nil, err
 	}
+	cuo.mutation.done = true
 	return _node, nil
 }

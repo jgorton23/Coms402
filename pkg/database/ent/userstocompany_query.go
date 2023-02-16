@@ -7,27 +7,28 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
-	"github.com/google/uuid"
 )
 
 // UsersToCompanyQuery is the builder for querying UsersToCompany entities.
 type UsersToCompanyQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
+	ctx         *QueryContext
 	order       []OrderFunc
-	fields      []string
+	inters      []Interceptor
 	predicates  []predicate.UsersToCompany
 	withUser    *UserQuery
 	withCompany *CompanyQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -39,26 +40,26 @@ func (utcq *UsersToCompanyQuery) Where(ps ...predicate.UsersToCompany) *UsersToC
 	return utcq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (utcq *UsersToCompanyQuery) Limit(limit int) *UsersToCompanyQuery {
-	utcq.limit = &limit
+	utcq.ctx.Limit = &limit
 	return utcq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (utcq *UsersToCompanyQuery) Offset(offset int) *UsersToCompanyQuery {
-	utcq.offset = &offset
+	utcq.ctx.Offset = &offset
 	return utcq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (utcq *UsersToCompanyQuery) Unique(unique bool) *UsersToCompanyQuery {
-	utcq.unique = &unique
+	utcq.ctx.Unique = &unique
 	return utcq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (utcq *UsersToCompanyQuery) Order(o ...OrderFunc) *UsersToCompanyQuery {
 	utcq.order = append(utcq.order, o...)
 	return utcq
@@ -66,7 +67,7 @@ func (utcq *UsersToCompanyQuery) Order(o ...OrderFunc) *UsersToCompanyQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (utcq *UsersToCompanyQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: utcq.config}
+	query := (&UserClient{config: utcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := utcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -88,7 +89,7 @@ func (utcq *UsersToCompanyQuery) QueryUser() *UserQuery {
 
 // QueryCompany chains the current query on the "company" edge.
 func (utcq *UsersToCompanyQuery) QueryCompany() *CompanyQuery {
-	query := &CompanyQuery{config: utcq.config}
+	query := (&CompanyClient{config: utcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := utcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -111,7 +112,7 @@ func (utcq *UsersToCompanyQuery) QueryCompany() *CompanyQuery {
 // First returns the first UsersToCompany entity from the query.
 // Returns a *NotFoundError when no UsersToCompany was found.
 func (utcq *UsersToCompanyQuery) First(ctx context.Context) (*UsersToCompany, error) {
-	nodes, err := utcq.Limit(1).All(ctx)
+	nodes, err := utcq.Limit(1).All(setContextOp(ctx, utcq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,7 @@ func (utcq *UsersToCompanyQuery) FirstX(ctx context.Context) *UsersToCompany {
 // Returns a *NotFoundError when no UsersToCompany ID was found.
 func (utcq *UsersToCompanyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = utcq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = utcq.Limit(1).IDs(setContextOp(ctx, utcq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -157,7 +158,7 @@ func (utcq *UsersToCompanyQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one UsersToCompany entity is found.
 // Returns a *NotFoundError when no UsersToCompany entities are found.
 func (utcq *UsersToCompanyQuery) Only(ctx context.Context) (*UsersToCompany, error) {
-	nodes, err := utcq.Limit(2).All(ctx)
+	nodes, err := utcq.Limit(2).All(setContextOp(ctx, utcq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (utcq *UsersToCompanyQuery) OnlyX(ctx context.Context) *UsersToCompany {
 // Returns a *NotFoundError when no entities are found.
 func (utcq *UsersToCompanyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = utcq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = utcq.Limit(2).IDs(setContextOp(ctx, utcq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -210,10 +211,12 @@ func (utcq *UsersToCompanyQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of UsersToCompanies.
 func (utcq *UsersToCompanyQuery) All(ctx context.Context) ([]*UsersToCompany, error) {
+	ctx = setContextOp(ctx, utcq.ctx, "All")
 	if err := utcq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return utcq.sqlAll(ctx)
+	qr := querierAll[[]*UsersToCompany, *UsersToCompanyQuery]()
+	return withInterceptors[[]*UsersToCompany](ctx, utcq, qr, utcq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -226,9 +229,12 @@ func (utcq *UsersToCompanyQuery) AllX(ctx context.Context) []*UsersToCompany {
 }
 
 // IDs executes the query and returns a list of UsersToCompany IDs.
-func (utcq *UsersToCompanyQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := utcq.Select(userstocompany.FieldID).Scan(ctx, &ids); err != nil {
+func (utcq *UsersToCompanyQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if utcq.ctx.Unique == nil && utcq.path != nil {
+		utcq.Unique(true)
+	}
+	ctx = setContextOp(ctx, utcq.ctx, "IDs")
+	if err = utcq.Select(userstocompany.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -245,10 +251,11 @@ func (utcq *UsersToCompanyQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (utcq *UsersToCompanyQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, utcq.ctx, "Count")
 	if err := utcq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return utcq.sqlCount(ctx)
+	return withInterceptors[int](ctx, utcq, querierCount[*UsersToCompanyQuery](), utcq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -262,10 +269,15 @@ func (utcq *UsersToCompanyQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (utcq *UsersToCompanyQuery) Exist(ctx context.Context) (bool, error) {
-	if err := utcq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, utcq.ctx, "Exist")
+	switch _, err := utcq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return utcq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -285,23 +297,22 @@ func (utcq *UsersToCompanyQuery) Clone() *UsersToCompanyQuery {
 	}
 	return &UsersToCompanyQuery{
 		config:      utcq.config,
-		limit:       utcq.limit,
-		offset:      utcq.offset,
+		ctx:         utcq.ctx.Clone(),
 		order:       append([]OrderFunc{}, utcq.order...),
+		inters:      append([]Interceptor{}, utcq.inters...),
 		predicates:  append([]predicate.UsersToCompany{}, utcq.predicates...),
 		withUser:    utcq.withUser.Clone(),
 		withCompany: utcq.withCompany.Clone(),
 		// clone intermediate query.
-		sql:    utcq.sql.Clone(),
-		path:   utcq.path,
-		unique: utcq.unique,
+		sql:  utcq.sql.Clone(),
+		path: utcq.path,
 	}
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (utcq *UsersToCompanyQuery) WithUser(opts ...func(*UserQuery)) *UsersToCompanyQuery {
-	query := &UserQuery{config: utcq.config}
+	query := (&UserClient{config: utcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -312,7 +323,7 @@ func (utcq *UsersToCompanyQuery) WithUser(opts ...func(*UserQuery)) *UsersToComp
 // WithCompany tells the query-builder to eager-load the nodes that are connected to
 // the "company" edge. The optional arguments are used to configure the query builder of the edge.
 func (utcq *UsersToCompanyQuery) WithCompany(opts ...func(*CompanyQuery)) *UsersToCompanyQuery {
-	query := &CompanyQuery{config: utcq.config}
+	query := (&CompanyClient{config: utcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -335,16 +346,11 @@ func (utcq *UsersToCompanyQuery) WithCompany(opts ...func(*CompanyQuery)) *Users
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (utcq *UsersToCompanyQuery) GroupBy(field string, fields ...string) *UsersToCompanyGroupBy {
-	grbuild := &UsersToCompanyGroupBy{config: utcq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := utcq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return utcq.sqlQuery(ctx), nil
-	}
+	utcq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &UsersToCompanyGroupBy{build: utcq}
+	grbuild.flds = &utcq.ctx.Fields
 	grbuild.label = userstocompany.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -361,11 +367,11 @@ func (utcq *UsersToCompanyQuery) GroupBy(field string, fields ...string) *UsersT
 //		Select(userstocompany.FieldCompanyUUID).
 //		Scan(ctx, &v)
 func (utcq *UsersToCompanyQuery) Select(fields ...string) *UsersToCompanySelect {
-	utcq.fields = append(utcq.fields, fields...)
-	selbuild := &UsersToCompanySelect{UsersToCompanyQuery: utcq}
-	selbuild.label = userstocompany.Label
-	selbuild.flds, selbuild.scan = &utcq.fields, selbuild.Scan
-	return selbuild
+	utcq.ctx.Fields = append(utcq.ctx.Fields, fields...)
+	sbuild := &UsersToCompanySelect{UsersToCompanyQuery: utcq}
+	sbuild.label = userstocompany.Label
+	sbuild.flds, sbuild.scan = &utcq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a UsersToCompanySelect configured with the given aggregations.
@@ -374,7 +380,17 @@ func (utcq *UsersToCompanyQuery) Aggregate(fns ...AggregateFunc) *UsersToCompany
 }
 
 func (utcq *UsersToCompanyQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range utcq.fields {
+	for _, inter := range utcq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, utcq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range utcq.ctx.Fields {
 		if !userstocompany.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -406,6 +422,9 @@ func (utcq *UsersToCompanyQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(utcq.modifiers) > 0 {
+		_spec.Modifiers = utcq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -441,6 +460,9 @@ func (utcq *UsersToCompanyQuery) loadUser(ctx context.Context, query *UserQuery,
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -467,6 +489,9 @@ func (utcq *UsersToCompanyQuery) loadCompany(ctx context.Context, query *Company
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(company.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -486,41 +511,25 @@ func (utcq *UsersToCompanyQuery) loadCompany(ctx context.Context, query *Company
 
 func (utcq *UsersToCompanyQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := utcq.querySpec()
-	_spec.Node.Columns = utcq.fields
-	if len(utcq.fields) > 0 {
-		_spec.Unique = utcq.unique != nil && *utcq.unique
+	if len(utcq.modifiers) > 0 {
+		_spec.Modifiers = utcq.modifiers
+	}
+	_spec.Node.Columns = utcq.ctx.Fields
+	if len(utcq.ctx.Fields) > 0 {
+		_spec.Unique = utcq.ctx.Unique != nil && *utcq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, utcq.driver, _spec)
 }
 
-func (utcq *UsersToCompanyQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := utcq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (utcq *UsersToCompanyQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   userstocompany.Table,
-			Columns: userstocompany.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: userstocompany.FieldID,
-			},
-		},
-		From:   utcq.sql,
-		Unique: true,
-	}
-	if unique := utcq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(userstocompany.Table, userstocompany.Columns, sqlgraph.NewFieldSpec(userstocompany.FieldID, field.TypeUUID))
+	_spec.From = utcq.sql
+	if unique := utcq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if utcq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := utcq.fields; len(fields) > 0 {
+	if fields := utcq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, userstocompany.FieldID)
 		for i := range fields {
@@ -536,10 +545,10 @@ func (utcq *UsersToCompanyQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := utcq.limit; limit != nil {
+	if limit := utcq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := utcq.offset; offset != nil {
+	if offset := utcq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := utcq.order; len(ps) > 0 {
@@ -555,7 +564,7 @@ func (utcq *UsersToCompanyQuery) querySpec() *sqlgraph.QuerySpec {
 func (utcq *UsersToCompanyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(utcq.driver.Dialect())
 	t1 := builder.Table(userstocompany.Table)
-	columns := utcq.fields
+	columns := utcq.ctx.Fields
 	if len(columns) == 0 {
 		columns = userstocompany.Columns
 	}
@@ -564,8 +573,11 @@ func (utcq *UsersToCompanyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = utcq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if utcq.unique != nil && *utcq.unique {
+	if utcq.ctx.Unique != nil && *utcq.ctx.Unique {
 		selector.Distinct()
+	}
+	for _, m := range utcq.modifiers {
+		m(selector)
 	}
 	for _, p := range utcq.predicates {
 		p(selector)
@@ -573,26 +585,47 @@ func (utcq *UsersToCompanyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range utcq.order {
 		p(selector)
 	}
-	if offset := utcq.offset; offset != nil {
+	if offset := utcq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := utcq.limit; limit != nil {
+	if limit := utcq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
 }
 
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (utcq *UsersToCompanyQuery) ForUpdate(opts ...sql.LockOption) *UsersToCompanyQuery {
+	if utcq.driver.Dialect() == dialect.Postgres {
+		utcq.Unique(false)
+	}
+	utcq.modifiers = append(utcq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return utcq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (utcq *UsersToCompanyQuery) ForShare(opts ...sql.LockOption) *UsersToCompanyQuery {
+	if utcq.driver.Dialect() == dialect.Postgres {
+		utcq.Unique(false)
+	}
+	utcq.modifiers = append(utcq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return utcq
+}
+
 // UsersToCompanyGroupBy is the group-by builder for UsersToCompany entities.
 type UsersToCompanyGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *UsersToCompanyQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -601,58 +634,46 @@ func (utcgb *UsersToCompanyGroupBy) Aggregate(fns ...AggregateFunc) *UsersToComp
 	return utcgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (utcgb *UsersToCompanyGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := utcgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, utcgb.build.ctx, "GroupBy")
+	if err := utcgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	utcgb.sql = query
-	return utcgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*UsersToCompanyQuery, *UsersToCompanyGroupBy](ctx, utcgb.build, utcgb, utcgb.build.inters, v)
 }
 
-func (utcgb *UsersToCompanyGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range utcgb.fields {
-		if !userstocompany.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (utcgb *UsersToCompanyGroupBy) sqlScan(ctx context.Context, root *UsersToCompanyQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(utcgb.fns))
+	for _, fn := range utcgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := utcgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*utcgb.flds)+len(utcgb.fns))
+		for _, f := range *utcgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*utcgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := utcgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := utcgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (utcgb *UsersToCompanyGroupBy) sqlQuery() *sql.Selector {
-	selector := utcgb.sql.Select()
-	aggregation := make([]string, 0, len(utcgb.fns))
-	for _, fn := range utcgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(utcgb.fields)+len(utcgb.fns))
-		for _, f := range utcgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(utcgb.fields...)...)
-}
-
 // UsersToCompanySelect is the builder for selecting fields of UsersToCompany entities.
 type UsersToCompanySelect struct {
 	*UsersToCompanyQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -663,26 +684,27 @@ func (utcs *UsersToCompanySelect) Aggregate(fns ...AggregateFunc) *UsersToCompan
 
 // Scan applies the selector query and scans the result into the given value.
 func (utcs *UsersToCompanySelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, utcs.ctx, "Select")
 	if err := utcs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	utcs.sql = utcs.UsersToCompanyQuery.sqlQuery(ctx)
-	return utcs.sqlScan(ctx, v)
+	return scanWithInterceptors[*UsersToCompanyQuery, *UsersToCompanySelect](ctx, utcs.UsersToCompanyQuery, utcs, utcs.inters, v)
 }
 
-func (utcs *UsersToCompanySelect) sqlScan(ctx context.Context, v any) error {
+func (utcs *UsersToCompanySelect) sqlScan(ctx context.Context, root *UsersToCompanyQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(utcs.fns))
 	for _, fn := range utcs.fns {
-		aggregation = append(aggregation, fn(utcs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*utcs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		utcs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		utcs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := utcs.sql.Query()
+	query, args := selector.Query()
 	if err := utcs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

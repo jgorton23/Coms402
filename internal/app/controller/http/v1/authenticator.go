@@ -1,35 +1,21 @@
 package http
 
 import (
-	"encoding/base64"
 	"os"
-	"time"
 
-	"github.com/gorilla/sessions"
 	"github.com/samber/do"
-	abclientstate "github.com/volatiletech/authboss-clientstate"
 	"github.com/volatiletech/authboss/v3"
 	"github.com/volatiletech/authboss/v3/defaults"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
 
 func NewHttpAuthenticator(i *do.Injector) (*authboss.Authboss, error) {
 	logger := do.MustInvoke[*usecase.Logger](i).WithSubsystem("http_authenticator")
-	conf := do.MustInvoke[*domain.Config](i)
-
-	sessionStoreKey, _ := base64.StdEncoding.DecodeString(conf.HTTP.SessionStoreKey)
-
-	sessionStore := abclientstate.NewSessionStorer(conf.App.Name, sessionStoreKey, nil)
-	cstore := sessionStore.Store.(*sessions.CookieStore)
-	cstore.Options.HttpOnly = false
-	cstore.Options.Secure = false
-	cstore.MaxAge(int((30 * 24 * time.Hour) / time.Second))
 
 	ab := authboss.New()
 	ab.Config.Storage.Server = do.MustInvoke[*usecase.AuthBossServer](i)
-	ab.Config.Storage.SessionState = sessionStore
+	ab.Config.Storage.SessionState = do.MustInvoke[*usecase.AuthbossSession](i)
 
 	ab.Config.Paths.Mount = "/auth"
 	// TODO set from env file....

@@ -4,11 +4,11 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
@@ -28,34 +28,7 @@ func (ibtibd *ItemBatchToItemBatchDelete) Where(ps ...predicate.ItemBatchToItemB
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ibtibd *ItemBatchToItemBatchDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ibtibd.hooks) == 0 {
-		affected, err = ibtibd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemBatchToItemBatchMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ibtibd.mutation = mutation
-			affected, err = ibtibd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ibtibd.hooks) - 1; i >= 0; i-- {
-			if ibtibd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ibtibd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ibtibd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ItemBatchToItemBatchMutation](ctx, ibtibd.sqlExec, ibtibd.mutation, ibtibd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +41,7 @@ func (ibtibd *ItemBatchToItemBatchDelete) ExecX(ctx context.Context) int {
 }
 
 func (ibtibd *ItemBatchToItemBatchDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: itembatchtoitembatch.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: itembatchtoitembatch.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(itembatchtoitembatch.Table, sqlgraph.NewFieldSpec(itembatchtoitembatch.FieldID, field.TypeUUID))
 	if ps := ibtibd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +53,19 @@ func (ibtibd *ItemBatchToItemBatchDelete) sqlExec(ctx context.Context) (int, err
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	ibtibd.mutation.done = true
 	return affected, err
 }
 
 // ItemBatchToItemBatchDeleteOne is the builder for deleting a single ItemBatchToItemBatch entity.
 type ItemBatchToItemBatchDeleteOne struct {
 	ibtibd *ItemBatchToItemBatchDelete
+}
+
+// Where appends a list predicates to the ItemBatchToItemBatchDelete builder.
+func (ibtibdo *ItemBatchToItemBatchDeleteOne) Where(ps ...predicate.ItemBatchToItemBatch) *ItemBatchToItemBatchDeleteOne {
+	ibtibdo.ibtibd.mutation.Where(ps...)
+	return ibtibdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +83,7 @@ func (ibtibdo *ItemBatchToItemBatchDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ibtibdo *ItemBatchToItemBatchDeleteOne) ExecX(ctx context.Context) {
-	ibtibdo.ibtibd.ExecX(ctx)
+	if err := ibtibdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

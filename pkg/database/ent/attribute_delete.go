@@ -4,11 +4,11 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
@@ -28,34 +28,7 @@ func (ad *AttributeDelete) Where(ps ...predicate.Attribute) *AttributeDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ad *AttributeDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ad.hooks) == 0 {
-		affected, err = ad.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AttributeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ad.mutation = mutation
-			affected, err = ad.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ad.hooks) - 1; i >= 0; i-- {
-			if ad.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ad.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ad.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, AttributeMutation](ctx, ad.sqlExec, ad.mutation, ad.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +41,7 @@ func (ad *AttributeDelete) ExecX(ctx context.Context) int {
 }
 
 func (ad *AttributeDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: attribute.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attribute.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(attribute.Table, sqlgraph.NewFieldSpec(attribute.FieldID, field.TypeUUID))
 	if ps := ad.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +53,19 @@ func (ad *AttributeDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	ad.mutation.done = true
 	return affected, err
 }
 
 // AttributeDeleteOne is the builder for deleting a single Attribute entity.
 type AttributeDeleteOne struct {
 	ad *AttributeDelete
+}
+
+// Where appends a list predicates to the AttributeDelete builder.
+func (ado *AttributeDeleteOne) Where(ps ...predicate.Attribute) *AttributeDeleteOne {
+	ado.ad.mutation.Where(ps...)
+	return ado
 }
 
 // Exec executes the deletion query.
@@ -111,5 +83,7 @@ func (ado *AttributeDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (ado *AttributeDeleteOne) ExecX(ctx context.Context) {
-	ado.ad.ExecX(ctx)
+	if err := ado.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

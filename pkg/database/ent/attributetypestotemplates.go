@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
-	"github.com/google/uuid"
 )
 
 // AttributeTypesToTemplates is the model entity for the AttributeTypesToTemplates schema.
@@ -110,19 +111,19 @@ func (attt *AttributeTypesToTemplates) assignValues(columns []string, values []a
 
 // QueryAttribute queries the "attribute" edge of the AttributeTypesToTemplates entity.
 func (attt *AttributeTypesToTemplates) QueryAttribute() *AttributeTypeQuery {
-	return (&AttributeTypesToTemplatesClient{config: attt.config}).QueryAttribute(attt)
+	return NewAttributeTypesToTemplatesClient(attt.config).QueryAttribute(attt)
 }
 
 // QueryTemplate queries the "template" edge of the AttributeTypesToTemplates entity.
 func (attt *AttributeTypesToTemplates) QueryTemplate() *CertificationTemplateQuery {
-	return (&AttributeTypesToTemplatesClient{config: attt.config}).QueryTemplate(attt)
+	return NewAttributeTypesToTemplatesClient(attt.config).QueryTemplate(attt)
 }
 
 // Update returns a builder for updating this AttributeTypesToTemplates.
 // Note that you need to call AttributeTypesToTemplates.Unwrap() before calling this method if this AttributeTypesToTemplates
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (attt *AttributeTypesToTemplates) Update() *AttributeTypesToTemplatesUpdateOne {
-	return (&AttributeTypesToTemplatesClient{config: attt.config}).UpdateOne(attt)
+	return NewAttributeTypesToTemplatesClient(attt.config).UpdateOne(attt)
 }
 
 // Unwrap unwraps the AttributeTypesToTemplates entity that was returned from a transaction after it was closed,
@@ -152,9 +153,3 @@ func (attt *AttributeTypesToTemplates) String() string {
 
 // AttributeTypesToTemplatesSlice is a parsable slice of AttributeTypesToTemplates.
 type AttributeTypesToTemplatesSlice []*AttributeTypesToTemplates
-
-func (attt AttributeTypesToTemplatesSlice) config(cfg config) {
-	for _i := range attt {
-		attt[_i].config = cfg
-	}
-}

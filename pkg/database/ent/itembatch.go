@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
-	"github.com/google/uuid"
 )
 
 // ItemBatch is the model entity for the ItemBatch schema.
@@ -105,14 +106,14 @@ func (ib *ItemBatch) assignValues(columns []string, values []any) error {
 
 // QueryCompany queries the "company" edge of the ItemBatch entity.
 func (ib *ItemBatch) QueryCompany() *CompanyQuery {
-	return (&ItemBatchClient{config: ib.config}).QueryCompany(ib)
+	return NewItemBatchClient(ib.config).QueryCompany(ib)
 }
 
 // Update returns a builder for updating this ItemBatch.
 // Note that you need to call ItemBatch.Unwrap() before calling this method if this ItemBatch
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ib *ItemBatch) Update() *ItemBatchUpdateOne {
-	return (&ItemBatchClient{config: ib.config}).UpdateOne(ib)
+	return NewItemBatchClient(ib.config).UpdateOne(ib)
 }
 
 // Unwrap unwraps the ItemBatch entity that was returned from a transaction after it was closed,
@@ -145,9 +146,3 @@ func (ib *ItemBatch) String() string {
 
 // ItemBatches is a parsable slice of ItemBatch.
 type ItemBatches []*ItemBatch
-
-func (ib ItemBatches) config(cfg config) {
-	for _i := range ib {
-		ib[_i].config = cfg
-	}
-}

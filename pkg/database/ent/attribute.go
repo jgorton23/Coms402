@@ -7,10 +7,11 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
-	"github.com/google/uuid"
 )
 
 // Attribute is the model entity for the Attribute schema.
@@ -129,19 +130,19 @@ func (a *Attribute) assignValues(columns []string, values []any) error {
 
 // QueryCertification queries the "certification" edge of the Attribute entity.
 func (a *Attribute) QueryCertification() *CertificationQuery {
-	return (&AttributeClient{config: a.config}).QueryCertification(a)
+	return NewAttributeClient(a.config).QueryCertification(a)
 }
 
 // QueryAttributeType queries the "attributeType" edge of the Attribute entity.
 func (a *Attribute) QueryAttributeType() *AttributeTypeQuery {
-	return (&AttributeClient{config: a.config}).QueryAttributeType(a)
+	return NewAttributeClient(a.config).QueryAttributeType(a)
 }
 
 // Update returns a builder for updating this Attribute.
 // Note that you need to call Attribute.Unwrap() before calling this method if this Attribute
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (a *Attribute) Update() *AttributeUpdateOne {
-	return (&AttributeClient{config: a.config}).UpdateOne(a)
+	return NewAttributeClient(a.config).UpdateOne(a)
 }
 
 // Unwrap unwraps the Attribute entity that was returned from a transaction after it was closed,
@@ -177,9 +178,3 @@ func (a *Attribute) String() string {
 
 // Attributes is a parsable slice of Attribute.
 type Attributes []*Attribute
-
-func (a Attributes) config(cfg config) {
-	for _i := range a {
-		a[_i].config = cfg
-	}
-}

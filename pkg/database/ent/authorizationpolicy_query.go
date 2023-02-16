@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
@@ -17,12 +19,11 @@ import (
 // AuthorizationPolicyQuery is the builder for querying AuthorizationPolicy entities.
 type AuthorizationPolicyQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.AuthorizationPolicy
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -34,26 +35,26 @@ func (apq *AuthorizationPolicyQuery) Where(ps ...predicate.AuthorizationPolicy) 
 	return apq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (apq *AuthorizationPolicyQuery) Limit(limit int) *AuthorizationPolicyQuery {
-	apq.limit = &limit
+	apq.ctx.Limit = &limit
 	return apq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (apq *AuthorizationPolicyQuery) Offset(offset int) *AuthorizationPolicyQuery {
-	apq.offset = &offset
+	apq.ctx.Offset = &offset
 	return apq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (apq *AuthorizationPolicyQuery) Unique(unique bool) *AuthorizationPolicyQuery {
-	apq.unique = &unique
+	apq.ctx.Unique = &unique
 	return apq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (apq *AuthorizationPolicyQuery) Order(o ...OrderFunc) *AuthorizationPolicyQuery {
 	apq.order = append(apq.order, o...)
 	return apq
@@ -62,7 +63,7 @@ func (apq *AuthorizationPolicyQuery) Order(o ...OrderFunc) *AuthorizationPolicyQ
 // First returns the first AuthorizationPolicy entity from the query.
 // Returns a *NotFoundError when no AuthorizationPolicy was found.
 func (apq *AuthorizationPolicyQuery) First(ctx context.Context) (*AuthorizationPolicy, error) {
-	nodes, err := apq.Limit(1).All(ctx)
+	nodes, err := apq.Limit(1).All(setContextOp(ctx, apq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +86,7 @@ func (apq *AuthorizationPolicyQuery) FirstX(ctx context.Context) *AuthorizationP
 // Returns a *NotFoundError when no AuthorizationPolicy ID was found.
 func (apq *AuthorizationPolicyQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = apq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = apq.Limit(1).IDs(setContextOp(ctx, apq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -108,7 +109,7 @@ func (apq *AuthorizationPolicyQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one AuthorizationPolicy entity is found.
 // Returns a *NotFoundError when no AuthorizationPolicy entities are found.
 func (apq *AuthorizationPolicyQuery) Only(ctx context.Context) (*AuthorizationPolicy, error) {
-	nodes, err := apq.Limit(2).All(ctx)
+	nodes, err := apq.Limit(2).All(setContextOp(ctx, apq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +137,7 @@ func (apq *AuthorizationPolicyQuery) OnlyX(ctx context.Context) *AuthorizationPo
 // Returns a *NotFoundError when no entities are found.
 func (apq *AuthorizationPolicyQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = apq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = apq.Limit(2).IDs(setContextOp(ctx, apq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -161,10 +162,12 @@ func (apq *AuthorizationPolicyQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of AuthorizationPolicies.
 func (apq *AuthorizationPolicyQuery) All(ctx context.Context) ([]*AuthorizationPolicy, error) {
+	ctx = setContextOp(ctx, apq.ctx, "All")
 	if err := apq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return apq.sqlAll(ctx)
+	qr := querierAll[[]*AuthorizationPolicy, *AuthorizationPolicyQuery]()
+	return withInterceptors[[]*AuthorizationPolicy](ctx, apq, qr, apq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -177,9 +180,12 @@ func (apq *AuthorizationPolicyQuery) AllX(ctx context.Context) []*AuthorizationP
 }
 
 // IDs executes the query and returns a list of AuthorizationPolicy IDs.
-func (apq *AuthorizationPolicyQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := apq.Select(authorizationpolicy.FieldID).Scan(ctx, &ids); err != nil {
+func (apq *AuthorizationPolicyQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if apq.ctx.Unique == nil && apq.path != nil {
+		apq.Unique(true)
+	}
+	ctx = setContextOp(ctx, apq.ctx, "IDs")
+	if err = apq.Select(authorizationpolicy.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -196,10 +202,11 @@ func (apq *AuthorizationPolicyQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (apq *AuthorizationPolicyQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, apq.ctx, "Count")
 	if err := apq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return apq.sqlCount(ctx)
+	return withInterceptors[int](ctx, apq, querierCount[*AuthorizationPolicyQuery](), apq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -213,10 +220,15 @@ func (apq *AuthorizationPolicyQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (apq *AuthorizationPolicyQuery) Exist(ctx context.Context) (bool, error) {
-	if err := apq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, apq.ctx, "Exist")
+	switch _, err := apq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return apq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -236,14 +248,13 @@ func (apq *AuthorizationPolicyQuery) Clone() *AuthorizationPolicyQuery {
 	}
 	return &AuthorizationPolicyQuery{
 		config:     apq.config,
-		limit:      apq.limit,
-		offset:     apq.offset,
+		ctx:        apq.ctx.Clone(),
 		order:      append([]OrderFunc{}, apq.order...),
+		inters:     append([]Interceptor{}, apq.inters...),
 		predicates: append([]predicate.AuthorizationPolicy{}, apq.predicates...),
 		// clone intermediate query.
-		sql:    apq.sql.Clone(),
-		path:   apq.path,
-		unique: apq.unique,
+		sql:  apq.sql.Clone(),
+		path: apq.path,
 	}
 }
 
@@ -262,16 +273,11 @@ func (apq *AuthorizationPolicyQuery) Clone() *AuthorizationPolicyQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (apq *AuthorizationPolicyQuery) GroupBy(field string, fields ...string) *AuthorizationPolicyGroupBy {
-	grbuild := &AuthorizationPolicyGroupBy{config: apq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := apq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return apq.sqlQuery(ctx), nil
-	}
+	apq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &AuthorizationPolicyGroupBy{build: apq}
+	grbuild.flds = &apq.ctx.Fields
 	grbuild.label = authorizationpolicy.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -288,11 +294,11 @@ func (apq *AuthorizationPolicyQuery) GroupBy(field string, fields ...string) *Au
 //		Select(authorizationpolicy.FieldPtype).
 //		Scan(ctx, &v)
 func (apq *AuthorizationPolicyQuery) Select(fields ...string) *AuthorizationPolicySelect {
-	apq.fields = append(apq.fields, fields...)
-	selbuild := &AuthorizationPolicySelect{AuthorizationPolicyQuery: apq}
-	selbuild.label = authorizationpolicy.Label
-	selbuild.flds, selbuild.scan = &apq.fields, selbuild.Scan
-	return selbuild
+	apq.ctx.Fields = append(apq.ctx.Fields, fields...)
+	sbuild := &AuthorizationPolicySelect{AuthorizationPolicyQuery: apq}
+	sbuild.label = authorizationpolicy.Label
+	sbuild.flds, sbuild.scan = &apq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a AuthorizationPolicySelect configured with the given aggregations.
@@ -301,7 +307,17 @@ func (apq *AuthorizationPolicyQuery) Aggregate(fns ...AggregateFunc) *Authorizat
 }
 
 func (apq *AuthorizationPolicyQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range apq.fields {
+	for _, inter := range apq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, apq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range apq.ctx.Fields {
 		if !authorizationpolicy.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -329,6 +345,9 @@ func (apq *AuthorizationPolicyQuery) sqlAll(ctx context.Context, hooks ...queryH
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
+	if len(apq.modifiers) > 0 {
+		_spec.Modifiers = apq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -343,41 +362,25 @@ func (apq *AuthorizationPolicyQuery) sqlAll(ctx context.Context, hooks ...queryH
 
 func (apq *AuthorizationPolicyQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := apq.querySpec()
-	_spec.Node.Columns = apq.fields
-	if len(apq.fields) > 0 {
-		_spec.Unique = apq.unique != nil && *apq.unique
+	if len(apq.modifiers) > 0 {
+		_spec.Modifiers = apq.modifiers
+	}
+	_spec.Node.Columns = apq.ctx.Fields
+	if len(apq.ctx.Fields) > 0 {
+		_spec.Unique = apq.ctx.Unique != nil && *apq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, apq.driver, _spec)
 }
 
-func (apq *AuthorizationPolicyQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := apq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (apq *AuthorizationPolicyQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   authorizationpolicy.Table,
-			Columns: authorizationpolicy.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: authorizationpolicy.FieldID,
-			},
-		},
-		From:   apq.sql,
-		Unique: true,
-	}
-	if unique := apq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(authorizationpolicy.Table, authorizationpolicy.Columns, sqlgraph.NewFieldSpec(authorizationpolicy.FieldID, field.TypeInt))
+	_spec.From = apq.sql
+	if unique := apq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if apq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := apq.fields; len(fields) > 0 {
+	if fields := apq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, authorizationpolicy.FieldID)
 		for i := range fields {
@@ -393,10 +396,10 @@ func (apq *AuthorizationPolicyQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := apq.limit; limit != nil {
+	if limit := apq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := apq.offset; offset != nil {
+	if offset := apq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := apq.order; len(ps) > 0 {
@@ -412,7 +415,7 @@ func (apq *AuthorizationPolicyQuery) querySpec() *sqlgraph.QuerySpec {
 func (apq *AuthorizationPolicyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(apq.driver.Dialect())
 	t1 := builder.Table(authorizationpolicy.Table)
-	columns := apq.fields
+	columns := apq.ctx.Fields
 	if len(columns) == 0 {
 		columns = authorizationpolicy.Columns
 	}
@@ -421,8 +424,11 @@ func (apq *AuthorizationPolicyQuery) sqlQuery(ctx context.Context) *sql.Selector
 		selector = apq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if apq.unique != nil && *apq.unique {
+	if apq.ctx.Unique != nil && *apq.ctx.Unique {
 		selector.Distinct()
+	}
+	for _, m := range apq.modifiers {
+		m(selector)
 	}
 	for _, p := range apq.predicates {
 		p(selector)
@@ -430,26 +436,47 @@ func (apq *AuthorizationPolicyQuery) sqlQuery(ctx context.Context) *sql.Selector
 	for _, p := range apq.order {
 		p(selector)
 	}
-	if offset := apq.offset; offset != nil {
+	if offset := apq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := apq.limit; limit != nil {
+	if limit := apq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
 }
 
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (apq *AuthorizationPolicyQuery) ForUpdate(opts ...sql.LockOption) *AuthorizationPolicyQuery {
+	if apq.driver.Dialect() == dialect.Postgres {
+		apq.Unique(false)
+	}
+	apq.modifiers = append(apq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return apq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (apq *AuthorizationPolicyQuery) ForShare(opts ...sql.LockOption) *AuthorizationPolicyQuery {
+	if apq.driver.Dialect() == dialect.Postgres {
+		apq.Unique(false)
+	}
+	apq.modifiers = append(apq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return apq
+}
+
 // AuthorizationPolicyGroupBy is the group-by builder for AuthorizationPolicy entities.
 type AuthorizationPolicyGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *AuthorizationPolicyQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -458,58 +485,46 @@ func (apgb *AuthorizationPolicyGroupBy) Aggregate(fns ...AggregateFunc) *Authori
 	return apgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (apgb *AuthorizationPolicyGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := apgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, apgb.build.ctx, "GroupBy")
+	if err := apgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	apgb.sql = query
-	return apgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*AuthorizationPolicyQuery, *AuthorizationPolicyGroupBy](ctx, apgb.build, apgb, apgb.build.inters, v)
 }
 
-func (apgb *AuthorizationPolicyGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range apgb.fields {
-		if !authorizationpolicy.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (apgb *AuthorizationPolicyGroupBy) sqlScan(ctx context.Context, root *AuthorizationPolicyQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(apgb.fns))
+	for _, fn := range apgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := apgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*apgb.flds)+len(apgb.fns))
+		for _, f := range *apgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*apgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := apgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := apgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (apgb *AuthorizationPolicyGroupBy) sqlQuery() *sql.Selector {
-	selector := apgb.sql.Select()
-	aggregation := make([]string, 0, len(apgb.fns))
-	for _, fn := range apgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(apgb.fields)+len(apgb.fns))
-		for _, f := range apgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(apgb.fields...)...)
-}
-
 // AuthorizationPolicySelect is the builder for selecting fields of AuthorizationPolicy entities.
 type AuthorizationPolicySelect struct {
 	*AuthorizationPolicyQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -520,26 +535,27 @@ func (aps *AuthorizationPolicySelect) Aggregate(fns ...AggregateFunc) *Authoriza
 
 // Scan applies the selector query and scans the result into the given value.
 func (aps *AuthorizationPolicySelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, aps.ctx, "Select")
 	if err := aps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	aps.sql = aps.AuthorizationPolicyQuery.sqlQuery(ctx)
-	return aps.sqlScan(ctx, v)
+	return scanWithInterceptors[*AuthorizationPolicyQuery, *AuthorizationPolicySelect](ctx, aps.AuthorizationPolicyQuery, aps, aps.inters, v)
 }
 
-func (aps *AuthorizationPolicySelect) sqlScan(ctx context.Context, v any) error {
+func (aps *AuthorizationPolicySelect) sqlScan(ctx context.Context, root *AuthorizationPolicyQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(aps.fns))
 	for _, fn := range aps.fns {
-		aggregation = append(aggregation, fn(aps.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*aps.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		aps.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		aps.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := aps.sql.Query()
+	query, args := selector.Query()
 	if err := aps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
