@@ -5,292 +5,189 @@ package userstocompany
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.UsersToCompany(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.UsersToCompany(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.UsersToCompany(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.UsersToCompany(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.UsersToCompany(sql.FieldLTE(FieldID, id))
 }
 
 // CompanyUUID applies equality check predicate on the "companyUUID" field. It's identical to CompanyUUIDEQ.
 func CompanyUUID(v uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldCompanyUUID, v))
 }
 
 // UserUUID applies equality check predicate on the "userUUID" field. It's identical to UserUUIDEQ.
 func UserUUID(v int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserUUID), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldUserUUID, v))
 }
 
 // RoleType applies equality check predicate on the "roleType" field. It's identical to RoleTypeEQ.
 func RoleType(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldRoleType, v))
 }
 
 // Approved applies equality check predicate on the "approved" field. It's identical to ApprovedEQ.
 func Approved(v bool) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldApproved), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldApproved, v))
 }
 
 // CompanyUUIDEQ applies the EQ predicate on the "companyUUID" field.
 func CompanyUUIDEQ(v uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldCompanyUUID, v))
 }
 
 // CompanyUUIDNEQ applies the NEQ predicate on the "companyUUID" field.
 func CompanyUUIDNEQ(v uuid.UUID) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.UsersToCompany(sql.FieldNEQ(FieldCompanyUUID, v))
 }
 
 // CompanyUUIDIn applies the In predicate on the "companyUUID" field.
 func CompanyUUIDIn(vs ...uuid.UUID) predicate.UsersToCompany {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCompanyUUID), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldIn(FieldCompanyUUID, vs...))
 }
 
 // CompanyUUIDNotIn applies the NotIn predicate on the "companyUUID" field.
 func CompanyUUIDNotIn(vs ...uuid.UUID) predicate.UsersToCompany {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCompanyUUID), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldNotIn(FieldCompanyUUID, vs...))
 }
 
 // UserUUIDEQ applies the EQ predicate on the "userUUID" field.
 func UserUUIDEQ(v int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserUUID), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldUserUUID, v))
 }
 
 // UserUUIDNEQ applies the NEQ predicate on the "userUUID" field.
 func UserUUIDNEQ(v int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUserUUID), v))
-	})
+	return predicate.UsersToCompany(sql.FieldNEQ(FieldUserUUID, v))
 }
 
 // UserUUIDIn applies the In predicate on the "userUUID" field.
 func UserUUIDIn(vs ...int) predicate.UsersToCompany {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUserUUID), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldIn(FieldUserUUID, vs...))
 }
 
 // UserUUIDNotIn applies the NotIn predicate on the "userUUID" field.
 func UserUUIDNotIn(vs ...int) predicate.UsersToCompany {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUserUUID), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldNotIn(FieldUserUUID, vs...))
 }
 
 // RoleTypeEQ applies the EQ predicate on the "roleType" field.
 func RoleTypeEQ(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldRoleType, v))
 }
 
 // RoleTypeNEQ applies the NEQ predicate on the "roleType" field.
 func RoleTypeNEQ(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldNEQ(FieldRoleType, v))
 }
 
 // RoleTypeIn applies the In predicate on the "roleType" field.
 func RoleTypeIn(vs ...string) predicate.UsersToCompany {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRoleType), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldIn(FieldRoleType, vs...))
 }
 
 // RoleTypeNotIn applies the NotIn predicate on the "roleType" field.
 func RoleTypeNotIn(vs ...string) predicate.UsersToCompany {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRoleType), v...))
-	})
+	return predicate.UsersToCompany(sql.FieldNotIn(FieldRoleType, vs...))
 }
 
 // RoleTypeGT applies the GT predicate on the "roleType" field.
 func RoleTypeGT(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldGT(FieldRoleType, v))
 }
 
 // RoleTypeGTE applies the GTE predicate on the "roleType" field.
 func RoleTypeGTE(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldGTE(FieldRoleType, v))
 }
 
 // RoleTypeLT applies the LT predicate on the "roleType" field.
 func RoleTypeLT(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldLT(FieldRoleType, v))
 }
 
 // RoleTypeLTE applies the LTE predicate on the "roleType" field.
 func RoleTypeLTE(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldLTE(FieldRoleType, v))
 }
 
 // RoleTypeContains applies the Contains predicate on the "roleType" field.
 func RoleTypeContains(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldContains(FieldRoleType, v))
 }
 
 // RoleTypeHasPrefix applies the HasPrefix predicate on the "roleType" field.
 func RoleTypeHasPrefix(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldHasPrefix(FieldRoleType, v))
 }
 
 // RoleTypeHasSuffix applies the HasSuffix predicate on the "roleType" field.
 func RoleTypeHasSuffix(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldHasSuffix(FieldRoleType, v))
 }
 
 // RoleTypeEqualFold applies the EqualFold predicate on the "roleType" field.
 func RoleTypeEqualFold(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEqualFold(FieldRoleType, v))
 }
 
 // RoleTypeContainsFold applies the ContainsFold predicate on the "roleType" field.
 func RoleTypeContainsFold(v string) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldRoleType), v))
-	})
+	return predicate.UsersToCompany(sql.FieldContainsFold(FieldRoleType, v))
 }
 
 // ApprovedEQ applies the EQ predicate on the "approved" field.
 func ApprovedEQ(v bool) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldApproved), v))
-	})
+	return predicate.UsersToCompany(sql.FieldEQ(FieldApproved, v))
 }
 
 // ApprovedNEQ applies the NEQ predicate on the "approved" field.
 func ApprovedNEQ(v bool) predicate.UsersToCompany {
-	return predicate.UsersToCompany(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldApproved), v))
-	})
+	return predicate.UsersToCompany(sql.FieldNEQ(FieldApproved, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -298,7 +195,6 @@ func HasUser() predicate.UsersToCompany {
 	return predicate.UsersToCompany(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserTable, UserFieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -326,7 +222,6 @@ func HasCompany() predicate.UsersToCompany {
 	return predicate.UsersToCompany(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CompanyTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, CompanyTable, CompanyColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

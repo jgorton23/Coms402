@@ -4,11 +4,11 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
@@ -28,34 +28,7 @@ func (apd *AuthorizationPolicyDelete) Where(ps ...predicate.AuthorizationPolicy)
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (apd *AuthorizationPolicyDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(apd.hooks) == 0 {
-		affected, err = apd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AuthorizationPolicyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			apd.mutation = mutation
-			affected, err = apd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(apd.hooks) - 1; i >= 0; i-- {
-			if apd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = apd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, apd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, AuthorizationPolicyMutation](ctx, apd.sqlExec, apd.mutation, apd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +41,7 @@ func (apd *AuthorizationPolicyDelete) ExecX(ctx context.Context) int {
 }
 
 func (apd *AuthorizationPolicyDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: authorizationpolicy.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: authorizationpolicy.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(authorizationpolicy.Table, sqlgraph.NewFieldSpec(authorizationpolicy.FieldID, field.TypeInt))
 	if ps := apd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +53,19 @@ func (apd *AuthorizationPolicyDelete) sqlExec(ctx context.Context) (int, error) 
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	apd.mutation.done = true
 	return affected, err
 }
 
 // AuthorizationPolicyDeleteOne is the builder for deleting a single AuthorizationPolicy entity.
 type AuthorizationPolicyDeleteOne struct {
 	apd *AuthorizationPolicyDelete
+}
+
+// Where appends a list predicates to the AuthorizationPolicyDelete builder.
+func (apdo *AuthorizationPolicyDeleteOne) Where(ps ...predicate.AuthorizationPolicy) *AuthorizationPolicyDeleteOne {
+	apdo.apd.mutation.Where(ps...)
+	return apdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +83,7 @@ func (apdo *AuthorizationPolicyDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (apdo *AuthorizationPolicyDeleteOne) ExecX(ctx context.Context) {
-	apdo.apd.ExecX(ctx)
+	if err := apdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

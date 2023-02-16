@@ -10,10 +10,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // CertificationTemplateUpdate is the builder for updating CertificationTemplate entities.
@@ -65,40 +66,7 @@ func (ctu *CertificationTemplateUpdate) ClearCompany() *CertificationTemplateUpd
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ctu *CertificationTemplateUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ctu.hooks) == 0 {
-		if err = ctu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = ctu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CertificationTemplateMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ctu.check(); err != nil {
-				return 0, err
-			}
-			ctu.mutation = mutation
-			affected, err = ctu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ctu.hooks) - 1; i >= 0; i-- {
-			if ctu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ctu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ctu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, CertificationTemplateMutation](ctx, ctu.sqlSave, ctu.mutation, ctu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -132,16 +100,10 @@ func (ctu *CertificationTemplateUpdate) check() error {
 }
 
 func (ctu *CertificationTemplateUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   certificationtemplate.Table,
-			Columns: certificationtemplate.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: certificationtemplate.FieldID,
-			},
-		},
+	if err := ctu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(certificationtemplate.Table, certificationtemplate.Columns, sqlgraph.NewFieldSpec(certificationtemplate.FieldID, field.TypeUUID))
 	if ps := ctu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -195,6 +157,7 @@ func (ctu *CertificationTemplateUpdate) sqlSave(ctx context.Context) (n int, err
 		}
 		return 0, err
 	}
+	ctu.mutation.done = true
 	return n, nil
 }
 
@@ -240,6 +203,12 @@ func (ctuo *CertificationTemplateUpdateOne) ClearCompany() *CertificationTemplat
 	return ctuo
 }
 
+// Where appends a list predicates to the CertificationTemplateUpdate builder.
+func (ctuo *CertificationTemplateUpdateOne) Where(ps ...predicate.CertificationTemplate) *CertificationTemplateUpdateOne {
+	ctuo.mutation.Where(ps...)
+	return ctuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ctuo *CertificationTemplateUpdateOne) Select(field string, fields ...string) *CertificationTemplateUpdateOne {
@@ -249,46 +218,7 @@ func (ctuo *CertificationTemplateUpdateOne) Select(field string, fields ...strin
 
 // Save executes the query and returns the updated CertificationTemplate entity.
 func (ctuo *CertificationTemplateUpdateOne) Save(ctx context.Context) (*CertificationTemplate, error) {
-	var (
-		err  error
-		node *CertificationTemplate
-	)
-	if len(ctuo.hooks) == 0 {
-		if err = ctuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = ctuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CertificationTemplateMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ctuo.check(); err != nil {
-				return nil, err
-			}
-			ctuo.mutation = mutation
-			node, err = ctuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ctuo.hooks) - 1; i >= 0; i-- {
-			if ctuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ctuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ctuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*CertificationTemplate)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from CertificationTemplateMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*CertificationTemplate, CertificationTemplateMutation](ctx, ctuo.sqlSave, ctuo.mutation, ctuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -322,16 +252,10 @@ func (ctuo *CertificationTemplateUpdateOne) check() error {
 }
 
 func (ctuo *CertificationTemplateUpdateOne) sqlSave(ctx context.Context) (_node *CertificationTemplate, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   certificationtemplate.Table,
-			Columns: certificationtemplate.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: certificationtemplate.FieldID,
-			},
-		},
+	if err := ctuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(certificationtemplate.Table, certificationtemplate.Columns, sqlgraph.NewFieldSpec(certificationtemplate.FieldID, field.TypeUUID))
 	id, ok := ctuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "CertificationTemplate.id" for update`)}
@@ -405,5 +329,6 @@ func (ctuo *CertificationTemplateUpdateOne) sqlSave(ctx context.Context) (_node 
 		}
 		return nil, err
 	}
+	ctuo.mutation.done = true
 	return _node, nil
 }

@@ -7,27 +7,28 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // AttributeTypesToTemplatesQuery is the builder for querying AttributeTypesToTemplates entities.
 type AttributeTypesToTemplatesQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
+	ctx           *QueryContext
 	order         []OrderFunc
-	fields        []string
+	inters        []Interceptor
 	predicates    []predicate.AttributeTypesToTemplates
 	withAttribute *AttributeTypeQuery
 	withTemplate  *CertificationTemplateQuery
+	modifiers     []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -39,26 +40,26 @@ func (atttq *AttributeTypesToTemplatesQuery) Where(ps ...predicate.AttributeType
 	return atttq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (atttq *AttributeTypesToTemplatesQuery) Limit(limit int) *AttributeTypesToTemplatesQuery {
-	atttq.limit = &limit
+	atttq.ctx.Limit = &limit
 	return atttq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (atttq *AttributeTypesToTemplatesQuery) Offset(offset int) *AttributeTypesToTemplatesQuery {
-	atttq.offset = &offset
+	atttq.ctx.Offset = &offset
 	return atttq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (atttq *AttributeTypesToTemplatesQuery) Unique(unique bool) *AttributeTypesToTemplatesQuery {
-	atttq.unique = &unique
+	atttq.ctx.Unique = &unique
 	return atttq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (atttq *AttributeTypesToTemplatesQuery) Order(o ...OrderFunc) *AttributeTypesToTemplatesQuery {
 	atttq.order = append(atttq.order, o...)
 	return atttq
@@ -66,7 +67,7 @@ func (atttq *AttributeTypesToTemplatesQuery) Order(o ...OrderFunc) *AttributeTyp
 
 // QueryAttribute chains the current query on the "attribute" edge.
 func (atttq *AttributeTypesToTemplatesQuery) QueryAttribute() *AttributeTypeQuery {
-	query := &AttributeTypeQuery{config: atttq.config}
+	query := (&AttributeTypeClient{config: atttq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := atttq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -88,7 +89,7 @@ func (atttq *AttributeTypesToTemplatesQuery) QueryAttribute() *AttributeTypeQuer
 
 // QueryTemplate chains the current query on the "template" edge.
 func (atttq *AttributeTypesToTemplatesQuery) QueryTemplate() *CertificationTemplateQuery {
-	query := &CertificationTemplateQuery{config: atttq.config}
+	query := (&CertificationTemplateClient{config: atttq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := atttq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -111,7 +112,7 @@ func (atttq *AttributeTypesToTemplatesQuery) QueryTemplate() *CertificationTempl
 // First returns the first AttributeTypesToTemplates entity from the query.
 // Returns a *NotFoundError when no AttributeTypesToTemplates was found.
 func (atttq *AttributeTypesToTemplatesQuery) First(ctx context.Context) (*AttributeTypesToTemplates, error) {
-	nodes, err := atttq.Limit(1).All(ctx)
+	nodes, err := atttq.Limit(1).All(setContextOp(ctx, atttq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,7 @@ func (atttq *AttributeTypesToTemplatesQuery) FirstX(ctx context.Context) *Attrib
 // Returns a *NotFoundError when no AttributeTypesToTemplates ID was found.
 func (atttq *AttributeTypesToTemplatesQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = atttq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = atttq.Limit(1).IDs(setContextOp(ctx, atttq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -157,7 +158,7 @@ func (atttq *AttributeTypesToTemplatesQuery) FirstIDX(ctx context.Context) uuid.
 // Returns a *NotSingularError when more than one AttributeTypesToTemplates entity is found.
 // Returns a *NotFoundError when no AttributeTypesToTemplates entities are found.
 func (atttq *AttributeTypesToTemplatesQuery) Only(ctx context.Context) (*AttributeTypesToTemplates, error) {
-	nodes, err := atttq.Limit(2).All(ctx)
+	nodes, err := atttq.Limit(2).All(setContextOp(ctx, atttq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (atttq *AttributeTypesToTemplatesQuery) OnlyX(ctx context.Context) *Attribu
 // Returns a *NotFoundError when no entities are found.
 func (atttq *AttributeTypesToTemplatesQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = atttq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = atttq.Limit(2).IDs(setContextOp(ctx, atttq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -210,10 +211,12 @@ func (atttq *AttributeTypesToTemplatesQuery) OnlyIDX(ctx context.Context) uuid.U
 
 // All executes the query and returns a list of AttributeTypesToTemplatesSlice.
 func (atttq *AttributeTypesToTemplatesQuery) All(ctx context.Context) ([]*AttributeTypesToTemplates, error) {
+	ctx = setContextOp(ctx, atttq.ctx, "All")
 	if err := atttq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return atttq.sqlAll(ctx)
+	qr := querierAll[[]*AttributeTypesToTemplates, *AttributeTypesToTemplatesQuery]()
+	return withInterceptors[[]*AttributeTypesToTemplates](ctx, atttq, qr, atttq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -226,9 +229,12 @@ func (atttq *AttributeTypesToTemplatesQuery) AllX(ctx context.Context) []*Attrib
 }
 
 // IDs executes the query and returns a list of AttributeTypesToTemplates IDs.
-func (atttq *AttributeTypesToTemplatesQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := atttq.Select(attributetypestotemplates.FieldID).Scan(ctx, &ids); err != nil {
+func (atttq *AttributeTypesToTemplatesQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if atttq.ctx.Unique == nil && atttq.path != nil {
+		atttq.Unique(true)
+	}
+	ctx = setContextOp(ctx, atttq.ctx, "IDs")
+	if err = atttq.Select(attributetypestotemplates.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -245,10 +251,11 @@ func (atttq *AttributeTypesToTemplatesQuery) IDsX(ctx context.Context) []uuid.UU
 
 // Count returns the count of the given query.
 func (atttq *AttributeTypesToTemplatesQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, atttq.ctx, "Count")
 	if err := atttq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return atttq.sqlCount(ctx)
+	return withInterceptors[int](ctx, atttq, querierCount[*AttributeTypesToTemplatesQuery](), atttq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -262,10 +269,15 @@ func (atttq *AttributeTypesToTemplatesQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (atttq *AttributeTypesToTemplatesQuery) Exist(ctx context.Context) (bool, error) {
-	if err := atttq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, atttq.ctx, "Exist")
+	switch _, err := atttq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return atttq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -285,23 +297,22 @@ func (atttq *AttributeTypesToTemplatesQuery) Clone() *AttributeTypesToTemplatesQ
 	}
 	return &AttributeTypesToTemplatesQuery{
 		config:        atttq.config,
-		limit:         atttq.limit,
-		offset:        atttq.offset,
+		ctx:           atttq.ctx.Clone(),
 		order:         append([]OrderFunc{}, atttq.order...),
+		inters:        append([]Interceptor{}, atttq.inters...),
 		predicates:    append([]predicate.AttributeTypesToTemplates{}, atttq.predicates...),
 		withAttribute: atttq.withAttribute.Clone(),
 		withTemplate:  atttq.withTemplate.Clone(),
 		// clone intermediate query.
-		sql:    atttq.sql.Clone(),
-		path:   atttq.path,
-		unique: atttq.unique,
+		sql:  atttq.sql.Clone(),
+		path: atttq.path,
 	}
 }
 
 // WithAttribute tells the query-builder to eager-load the nodes that are connected to
 // the "attribute" edge. The optional arguments are used to configure the query builder of the edge.
 func (atttq *AttributeTypesToTemplatesQuery) WithAttribute(opts ...func(*AttributeTypeQuery)) *AttributeTypesToTemplatesQuery {
-	query := &AttributeTypeQuery{config: atttq.config}
+	query := (&AttributeTypeClient{config: atttq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -312,7 +323,7 @@ func (atttq *AttributeTypesToTemplatesQuery) WithAttribute(opts ...func(*Attribu
 // WithTemplate tells the query-builder to eager-load the nodes that are connected to
 // the "template" edge. The optional arguments are used to configure the query builder of the edge.
 func (atttq *AttributeTypesToTemplatesQuery) WithTemplate(opts ...func(*CertificationTemplateQuery)) *AttributeTypesToTemplatesQuery {
-	query := &CertificationTemplateQuery{config: atttq.config}
+	query := (&CertificationTemplateClient{config: atttq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -335,16 +346,11 @@ func (atttq *AttributeTypesToTemplatesQuery) WithTemplate(opts ...func(*Certific
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (atttq *AttributeTypesToTemplatesQuery) GroupBy(field string, fields ...string) *AttributeTypesToTemplatesGroupBy {
-	grbuild := &AttributeTypesToTemplatesGroupBy{config: atttq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := atttq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return atttq.sqlQuery(ctx), nil
-	}
+	atttq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &AttributeTypesToTemplatesGroupBy{build: atttq}
+	grbuild.flds = &atttq.ctx.Fields
 	grbuild.label = attributetypestotemplates.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -361,11 +367,11 @@ func (atttq *AttributeTypesToTemplatesQuery) GroupBy(field string, fields ...str
 //		Select(attributetypestotemplates.FieldAttributeTypeUUID).
 //		Scan(ctx, &v)
 func (atttq *AttributeTypesToTemplatesQuery) Select(fields ...string) *AttributeTypesToTemplatesSelect {
-	atttq.fields = append(atttq.fields, fields...)
-	selbuild := &AttributeTypesToTemplatesSelect{AttributeTypesToTemplatesQuery: atttq}
-	selbuild.label = attributetypestotemplates.Label
-	selbuild.flds, selbuild.scan = &atttq.fields, selbuild.Scan
-	return selbuild
+	atttq.ctx.Fields = append(atttq.ctx.Fields, fields...)
+	sbuild := &AttributeTypesToTemplatesSelect{AttributeTypesToTemplatesQuery: atttq}
+	sbuild.label = attributetypestotemplates.Label
+	sbuild.flds, sbuild.scan = &atttq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a AttributeTypesToTemplatesSelect configured with the given aggregations.
@@ -374,7 +380,17 @@ func (atttq *AttributeTypesToTemplatesQuery) Aggregate(fns ...AggregateFunc) *At
 }
 
 func (atttq *AttributeTypesToTemplatesQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range atttq.fields {
+	for _, inter := range atttq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, atttq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range atttq.ctx.Fields {
 		if !attributetypestotemplates.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -406,6 +422,9 @@ func (atttq *AttributeTypesToTemplatesQuery) sqlAll(ctx context.Context, hooks .
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(atttq.modifiers) > 0 {
+		_spec.Modifiers = atttq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -441,6 +460,9 @@ func (atttq *AttributeTypesToTemplatesQuery) loadAttribute(ctx context.Context, 
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(attributetype.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -467,6 +489,9 @@ func (atttq *AttributeTypesToTemplatesQuery) loadTemplate(ctx context.Context, q
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(certificationtemplate.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -486,41 +511,25 @@ func (atttq *AttributeTypesToTemplatesQuery) loadTemplate(ctx context.Context, q
 
 func (atttq *AttributeTypesToTemplatesQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := atttq.querySpec()
-	_spec.Node.Columns = atttq.fields
-	if len(atttq.fields) > 0 {
-		_spec.Unique = atttq.unique != nil && *atttq.unique
+	if len(atttq.modifiers) > 0 {
+		_spec.Modifiers = atttq.modifiers
+	}
+	_spec.Node.Columns = atttq.ctx.Fields
+	if len(atttq.ctx.Fields) > 0 {
+		_spec.Unique = atttq.ctx.Unique != nil && *atttq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, atttq.driver, _spec)
 }
 
-func (atttq *AttributeTypesToTemplatesQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := atttq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (atttq *AttributeTypesToTemplatesQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   attributetypestotemplates.Table,
-			Columns: attributetypestotemplates.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attributetypestotemplates.FieldID,
-			},
-		},
-		From:   atttq.sql,
-		Unique: true,
-	}
-	if unique := atttq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(attributetypestotemplates.Table, attributetypestotemplates.Columns, sqlgraph.NewFieldSpec(attributetypestotemplates.FieldID, field.TypeUUID))
+	_spec.From = atttq.sql
+	if unique := atttq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if atttq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := atttq.fields; len(fields) > 0 {
+	if fields := atttq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, attributetypestotemplates.FieldID)
 		for i := range fields {
@@ -536,10 +545,10 @@ func (atttq *AttributeTypesToTemplatesQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := atttq.limit; limit != nil {
+	if limit := atttq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := atttq.offset; offset != nil {
+	if offset := atttq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := atttq.order; len(ps) > 0 {
@@ -555,7 +564,7 @@ func (atttq *AttributeTypesToTemplatesQuery) querySpec() *sqlgraph.QuerySpec {
 func (atttq *AttributeTypesToTemplatesQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(atttq.driver.Dialect())
 	t1 := builder.Table(attributetypestotemplates.Table)
-	columns := atttq.fields
+	columns := atttq.ctx.Fields
 	if len(columns) == 0 {
 		columns = attributetypestotemplates.Columns
 	}
@@ -564,8 +573,11 @@ func (atttq *AttributeTypesToTemplatesQuery) sqlQuery(ctx context.Context) *sql.
 		selector = atttq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if atttq.unique != nil && *atttq.unique {
+	if atttq.ctx.Unique != nil && *atttq.ctx.Unique {
 		selector.Distinct()
+	}
+	for _, m := range atttq.modifiers {
+		m(selector)
 	}
 	for _, p := range atttq.predicates {
 		p(selector)
@@ -573,26 +585,47 @@ func (atttq *AttributeTypesToTemplatesQuery) sqlQuery(ctx context.Context) *sql.
 	for _, p := range atttq.order {
 		p(selector)
 	}
-	if offset := atttq.offset; offset != nil {
+	if offset := atttq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := atttq.limit; limit != nil {
+	if limit := atttq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
 }
 
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (atttq *AttributeTypesToTemplatesQuery) ForUpdate(opts ...sql.LockOption) *AttributeTypesToTemplatesQuery {
+	if atttq.driver.Dialect() == dialect.Postgres {
+		atttq.Unique(false)
+	}
+	atttq.modifiers = append(atttq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return atttq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (atttq *AttributeTypesToTemplatesQuery) ForShare(opts ...sql.LockOption) *AttributeTypesToTemplatesQuery {
+	if atttq.driver.Dialect() == dialect.Postgres {
+		atttq.Unique(false)
+	}
+	atttq.modifiers = append(atttq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return atttq
+}
+
 // AttributeTypesToTemplatesGroupBy is the group-by builder for AttributeTypesToTemplates entities.
 type AttributeTypesToTemplatesGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *AttributeTypesToTemplatesQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -601,58 +634,46 @@ func (atttgb *AttributeTypesToTemplatesGroupBy) Aggregate(fns ...AggregateFunc) 
 	return atttgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (atttgb *AttributeTypesToTemplatesGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := atttgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, atttgb.build.ctx, "GroupBy")
+	if err := atttgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	atttgb.sql = query
-	return atttgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*AttributeTypesToTemplatesQuery, *AttributeTypesToTemplatesGroupBy](ctx, atttgb.build, atttgb, atttgb.build.inters, v)
 }
 
-func (atttgb *AttributeTypesToTemplatesGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range atttgb.fields {
-		if !attributetypestotemplates.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (atttgb *AttributeTypesToTemplatesGroupBy) sqlScan(ctx context.Context, root *AttributeTypesToTemplatesQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(atttgb.fns))
+	for _, fn := range atttgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := atttgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*atttgb.flds)+len(atttgb.fns))
+		for _, f := range *atttgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*atttgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := atttgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := atttgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (atttgb *AttributeTypesToTemplatesGroupBy) sqlQuery() *sql.Selector {
-	selector := atttgb.sql.Select()
-	aggregation := make([]string, 0, len(atttgb.fns))
-	for _, fn := range atttgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(atttgb.fields)+len(atttgb.fns))
-		for _, f := range atttgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(atttgb.fields...)...)
-}
-
 // AttributeTypesToTemplatesSelect is the builder for selecting fields of AttributeTypesToTemplates entities.
 type AttributeTypesToTemplatesSelect struct {
 	*AttributeTypesToTemplatesQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -663,26 +684,27 @@ func (attts *AttributeTypesToTemplatesSelect) Aggregate(fns ...AggregateFunc) *A
 
 // Scan applies the selector query and scans the result into the given value.
 func (attts *AttributeTypesToTemplatesSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, attts.ctx, "Select")
 	if err := attts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	attts.sql = attts.AttributeTypesToTemplatesQuery.sqlQuery(ctx)
-	return attts.sqlScan(ctx, v)
+	return scanWithInterceptors[*AttributeTypesToTemplatesQuery, *AttributeTypesToTemplatesSelect](ctx, attts.AttributeTypesToTemplatesQuery, attts, attts.inters, v)
 }
 
-func (attts *AttributeTypesToTemplatesSelect) sqlScan(ctx context.Context, v any) error {
+func (attts *AttributeTypesToTemplatesSelect) sqlScan(ctx context.Context, root *AttributeTypesToTemplatesQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(attts.fns))
 	for _, fn := range attts.fns {
-		aggregation = append(aggregation, fn(attts.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*attts.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		attts.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		attts.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := attts.sql.Query()
+	query, args := selector.Query()
 	if err := attts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

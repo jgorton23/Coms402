@@ -10,11 +10,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // AttributeUpdate is the builder for updating Attribute entities.
@@ -95,40 +96,7 @@ func (au *AttributeUpdate) ClearAttributeType() *AttributeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (au *AttributeUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(au.hooks) == 0 {
-		if err = au.check(); err != nil {
-			return 0, err
-		}
-		affected, err = au.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AttributeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = au.check(); err != nil {
-				return 0, err
-			}
-			au.mutation = mutation
-			affected, err = au.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(au.hooks) - 1; i >= 0; i-- {
-			if au.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = au.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, au.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, AttributeMutation](ctx, au.sqlSave, au.mutation, au.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -165,16 +133,10 @@ func (au *AttributeUpdate) check() error {
 }
 
 func (au *AttributeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   attribute.Table,
-			Columns: attribute.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attribute.FieldID,
-			},
-		},
+	if err := au.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(attribute.Table, attribute.Columns, sqlgraph.NewFieldSpec(attribute.FieldID, field.TypeUUID))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -266,6 +228,7 @@ func (au *AttributeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	au.mutation.done = true
 	return n, nil
 }
 
@@ -340,6 +303,12 @@ func (auo *AttributeUpdateOne) ClearAttributeType() *AttributeUpdateOne {
 	return auo
 }
 
+// Where appends a list predicates to the AttributeUpdate builder.
+func (auo *AttributeUpdateOne) Where(ps ...predicate.Attribute) *AttributeUpdateOne {
+	auo.mutation.Where(ps...)
+	return auo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (auo *AttributeUpdateOne) Select(field string, fields ...string) *AttributeUpdateOne {
@@ -349,46 +318,7 @@ func (auo *AttributeUpdateOne) Select(field string, fields ...string) *Attribute
 
 // Save executes the query and returns the updated Attribute entity.
 func (auo *AttributeUpdateOne) Save(ctx context.Context) (*Attribute, error) {
-	var (
-		err  error
-		node *Attribute
-	)
-	if len(auo.hooks) == 0 {
-		if err = auo.check(); err != nil {
-			return nil, err
-		}
-		node, err = auo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AttributeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = auo.check(); err != nil {
-				return nil, err
-			}
-			auo.mutation = mutation
-			node, err = auo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(auo.hooks) - 1; i >= 0; i-- {
-			if auo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = auo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, auo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Attribute)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AttributeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Attribute, AttributeMutation](ctx, auo.sqlSave, auo.mutation, auo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -425,16 +355,10 @@ func (auo *AttributeUpdateOne) check() error {
 }
 
 func (auo *AttributeUpdateOne) sqlSave(ctx context.Context) (_node *Attribute, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   attribute.Table,
-			Columns: attribute.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attribute.FieldID,
-			},
-		},
+	if err := auo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(attribute.Table, attribute.Columns, sqlgraph.NewFieldSpec(attribute.FieldID, field.TypeUUID))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Attribute.id" for update`)}
@@ -546,5 +470,6 @@ func (auo *AttributeUpdateOne) sqlSave(ctx context.Context) (_node *Attribute, e
 		}
 		return nil, err
 	}
+	auo.mutation.done = true
 	return _node, nil
 }

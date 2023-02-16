@@ -10,10 +10,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // ItemBatchToItemBatchUpdate is the builder for updating ItemBatchToItemBatch entities.
@@ -82,40 +83,7 @@ func (ibtibu *ItemBatchToItemBatchUpdate) ClearChild() *ItemBatchToItemBatchUpda
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ibtibu *ItemBatchToItemBatchUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ibtibu.hooks) == 0 {
-		if err = ibtibu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = ibtibu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemBatchToItemBatchMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ibtibu.check(); err != nil {
-				return 0, err
-			}
-			ibtibu.mutation = mutation
-			affected, err = ibtibu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ibtibu.hooks) - 1; i >= 0; i-- {
-			if ibtibu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ibtibu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ibtibu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ItemBatchToItemBatchMutation](ctx, ibtibu.sqlSave, ibtibu.mutation, ibtibu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -152,16 +120,10 @@ func (ibtibu *ItemBatchToItemBatchUpdate) check() error {
 }
 
 func (ibtibu *ItemBatchToItemBatchUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   itembatchtoitembatch.Table,
-			Columns: itembatchtoitembatch.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: itembatchtoitembatch.FieldID,
-			},
-		},
+	if err := ibtibu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(itembatchtoitembatch.Table, itembatchtoitembatch.Columns, sqlgraph.NewFieldSpec(itembatchtoitembatch.FieldID, field.TypeUUID))
 	if ps := ibtibu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -247,6 +209,7 @@ func (ibtibu *ItemBatchToItemBatchUpdate) sqlSave(ctx context.Context) (n int, e
 		}
 		return 0, err
 	}
+	ibtibu.mutation.done = true
 	return n, nil
 }
 
@@ -309,6 +272,12 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) ClearChild() *ItemBatchToItemBatch
 	return ibtibuo
 }
 
+// Where appends a list predicates to the ItemBatchToItemBatchUpdate builder.
+func (ibtibuo *ItemBatchToItemBatchUpdateOne) Where(ps ...predicate.ItemBatchToItemBatch) *ItemBatchToItemBatchUpdateOne {
+	ibtibuo.mutation.Where(ps...)
+	return ibtibuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ibtibuo *ItemBatchToItemBatchUpdateOne) Select(field string, fields ...string) *ItemBatchToItemBatchUpdateOne {
@@ -318,46 +287,7 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) Select(field string, fields ...str
 
 // Save executes the query and returns the updated ItemBatchToItemBatch entity.
 func (ibtibuo *ItemBatchToItemBatchUpdateOne) Save(ctx context.Context) (*ItemBatchToItemBatch, error) {
-	var (
-		err  error
-		node *ItemBatchToItemBatch
-	)
-	if len(ibtibuo.hooks) == 0 {
-		if err = ibtibuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = ibtibuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemBatchToItemBatchMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ibtibuo.check(); err != nil {
-				return nil, err
-			}
-			ibtibuo.mutation = mutation
-			node, err = ibtibuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ibtibuo.hooks) - 1; i >= 0; i-- {
-			if ibtibuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ibtibuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ibtibuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*ItemBatchToItemBatch)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ItemBatchToItemBatchMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*ItemBatchToItemBatch, ItemBatchToItemBatchMutation](ctx, ibtibuo.sqlSave, ibtibuo.mutation, ibtibuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -394,16 +324,10 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) check() error {
 }
 
 func (ibtibuo *ItemBatchToItemBatchUpdateOne) sqlSave(ctx context.Context) (_node *ItemBatchToItemBatch, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   itembatchtoitembatch.Table,
-			Columns: itembatchtoitembatch.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: itembatchtoitembatch.FieldID,
-			},
-		},
+	if err := ibtibuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(itembatchtoitembatch.Table, itembatchtoitembatch.Columns, sqlgraph.NewFieldSpec(itembatchtoitembatch.FieldID, field.TypeUUID))
 	id, ok := ibtibuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ItemBatchToItemBatch.id" for update`)}
@@ -509,5 +433,6 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) sqlSave(ctx context.Context) (_nod
 		}
 		return nil, err
 	}
+	ibtibuo.mutation.done = true
 	return _node, nil
 }

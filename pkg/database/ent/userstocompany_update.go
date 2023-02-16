@@ -10,11 +10,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
-	"github.com/google/uuid"
 )
 
 // UsersToCompanyUpdate is the builder for updating UsersToCompany entities.
@@ -95,40 +96,7 @@ func (utcu *UsersToCompanyUpdate) ClearCompany() *UsersToCompanyUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (utcu *UsersToCompanyUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(utcu.hooks) == 0 {
-		if err = utcu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = utcu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UsersToCompanyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = utcu.check(); err != nil {
-				return 0, err
-			}
-			utcu.mutation = mutation
-			affected, err = utcu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(utcu.hooks) - 1; i >= 0; i-- {
-			if utcu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utcu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, utcu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, UsersToCompanyMutation](ctx, utcu.sqlSave, utcu.mutation, utcu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -165,16 +133,10 @@ func (utcu *UsersToCompanyUpdate) check() error {
 }
 
 func (utcu *UsersToCompanyUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   userstocompany.Table,
-			Columns: userstocompany.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: userstocompany.FieldID,
-			},
-		},
+	if err := utcu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(userstocompany.Table, userstocompany.Columns, sqlgraph.NewFieldSpec(userstocompany.FieldID, field.TypeUUID))
 	if ps := utcu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -266,6 +228,7 @@ func (utcu *UsersToCompanyUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		return 0, err
 	}
+	utcu.mutation.done = true
 	return n, nil
 }
 
@@ -340,6 +303,12 @@ func (utcuo *UsersToCompanyUpdateOne) ClearCompany() *UsersToCompanyUpdateOne {
 	return utcuo
 }
 
+// Where appends a list predicates to the UsersToCompanyUpdate builder.
+func (utcuo *UsersToCompanyUpdateOne) Where(ps ...predicate.UsersToCompany) *UsersToCompanyUpdateOne {
+	utcuo.mutation.Where(ps...)
+	return utcuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (utcuo *UsersToCompanyUpdateOne) Select(field string, fields ...string) *UsersToCompanyUpdateOne {
@@ -349,46 +318,7 @@ func (utcuo *UsersToCompanyUpdateOne) Select(field string, fields ...string) *Us
 
 // Save executes the query and returns the updated UsersToCompany entity.
 func (utcuo *UsersToCompanyUpdateOne) Save(ctx context.Context) (*UsersToCompany, error) {
-	var (
-		err  error
-		node *UsersToCompany
-	)
-	if len(utcuo.hooks) == 0 {
-		if err = utcuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = utcuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UsersToCompanyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = utcuo.check(); err != nil {
-				return nil, err
-			}
-			utcuo.mutation = mutation
-			node, err = utcuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(utcuo.hooks) - 1; i >= 0; i-- {
-			if utcuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utcuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, utcuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*UsersToCompany)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UsersToCompanyMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*UsersToCompany, UsersToCompanyMutation](ctx, utcuo.sqlSave, utcuo.mutation, utcuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -425,16 +355,10 @@ func (utcuo *UsersToCompanyUpdateOne) check() error {
 }
 
 func (utcuo *UsersToCompanyUpdateOne) sqlSave(ctx context.Context) (_node *UsersToCompany, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   userstocompany.Table,
-			Columns: userstocompany.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: userstocompany.FieldID,
-			},
-		},
+	if err := utcuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(userstocompany.Table, userstocompany.Columns, sqlgraph.NewFieldSpec(userstocompany.FieldID, field.TypeUUID))
 	id, ok := utcuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UsersToCompany.id" for update`)}
@@ -546,5 +470,6 @@ func (utcuo *UsersToCompanyUpdateOne) sqlSave(ctx context.Context) (_node *Users
 		}
 		return nil, err
 	}
+	utcuo.mutation.done = true
 	return _node, nil
 }

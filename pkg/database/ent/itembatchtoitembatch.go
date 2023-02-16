@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
-	"github.com/google/uuid"
 )
 
 // ItemBatchToItemBatch is the model entity for the ItemBatchToItemBatch schema.
@@ -109,19 +110,19 @@ func (ibtib *ItemBatchToItemBatch) assignValues(columns []string, values []any) 
 
 // QueryParent queries the "parent" edge of the ItemBatchToItemBatch entity.
 func (ibtib *ItemBatchToItemBatch) QueryParent() *ItemBatchQuery {
-	return (&ItemBatchToItemBatchClient{config: ibtib.config}).QueryParent(ibtib)
+	return NewItemBatchToItemBatchClient(ibtib.config).QueryParent(ibtib)
 }
 
 // QueryChild queries the "child" edge of the ItemBatchToItemBatch entity.
 func (ibtib *ItemBatchToItemBatch) QueryChild() *ItemBatchQuery {
-	return (&ItemBatchToItemBatchClient{config: ibtib.config}).QueryChild(ibtib)
+	return NewItemBatchToItemBatchClient(ibtib.config).QueryChild(ibtib)
 }
 
 // Update returns a builder for updating this ItemBatchToItemBatch.
 // Note that you need to call ItemBatchToItemBatch.Unwrap() before calling this method if this ItemBatchToItemBatch
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ibtib *ItemBatchToItemBatch) Update() *ItemBatchToItemBatchUpdateOne {
-	return (&ItemBatchToItemBatchClient{config: ibtib.config}).UpdateOne(ibtib)
+	return NewItemBatchToItemBatchClient(ibtib.config).UpdateOne(ibtib)
 }
 
 // Unwrap unwraps the ItemBatchToItemBatch entity that was returned from a transaction after it was closed,
@@ -151,9 +152,3 @@ func (ibtib *ItemBatchToItemBatch) String() string {
 
 // ItemBatchToItemBatches is a parsable slice of ItemBatchToItemBatch.
 type ItemBatchToItemBatches []*ItemBatchToItemBatch
-
-func (ibtib ItemBatchToItemBatches) config(cfg config) {
-	for _i := range ibtib {
-		ibtib[_i].config = cfg
-	}
-}

@@ -10,10 +10,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // ItemBatchUpdate is the builder for updating ItemBatch entities.
@@ -71,40 +72,7 @@ func (ibu *ItemBatchUpdate) ClearCompany() *ItemBatchUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ibu *ItemBatchUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ibu.hooks) == 0 {
-		if err = ibu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = ibu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemBatchMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ibu.check(); err != nil {
-				return 0, err
-			}
-			ibu.mutation = mutation
-			affected, err = ibu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ibu.hooks) - 1; i >= 0; i-- {
-			if ibu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ibu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ibu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ItemBatchMutation](ctx, ibu.sqlSave, ibu.mutation, ibu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -138,16 +106,10 @@ func (ibu *ItemBatchUpdate) check() error {
 }
 
 func (ibu *ItemBatchUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   itembatch.Table,
-			Columns: itembatch.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: itembatch.FieldID,
-			},
-		},
+	if err := ibu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(itembatch.Table, itembatch.Columns, sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID))
 	if ps := ibu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -204,6 +166,7 @@ func (ibu *ItemBatchUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	ibu.mutation.done = true
 	return n, nil
 }
 
@@ -255,6 +218,12 @@ func (ibuo *ItemBatchUpdateOne) ClearCompany() *ItemBatchUpdateOne {
 	return ibuo
 }
 
+// Where appends a list predicates to the ItemBatchUpdate builder.
+func (ibuo *ItemBatchUpdateOne) Where(ps ...predicate.ItemBatch) *ItemBatchUpdateOne {
+	ibuo.mutation.Where(ps...)
+	return ibuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ibuo *ItemBatchUpdateOne) Select(field string, fields ...string) *ItemBatchUpdateOne {
@@ -264,46 +233,7 @@ func (ibuo *ItemBatchUpdateOne) Select(field string, fields ...string) *ItemBatc
 
 // Save executes the query and returns the updated ItemBatch entity.
 func (ibuo *ItemBatchUpdateOne) Save(ctx context.Context) (*ItemBatch, error) {
-	var (
-		err  error
-		node *ItemBatch
-	)
-	if len(ibuo.hooks) == 0 {
-		if err = ibuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = ibuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ItemBatchMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ibuo.check(); err != nil {
-				return nil, err
-			}
-			ibuo.mutation = mutation
-			node, err = ibuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ibuo.hooks) - 1; i >= 0; i-- {
-			if ibuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ibuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ibuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*ItemBatch)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ItemBatchMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*ItemBatch, ItemBatchMutation](ctx, ibuo.sqlSave, ibuo.mutation, ibuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -337,16 +267,10 @@ func (ibuo *ItemBatchUpdateOne) check() error {
 }
 
 func (ibuo *ItemBatchUpdateOne) sqlSave(ctx context.Context) (_node *ItemBatch, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   itembatch.Table,
-			Columns: itembatch.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: itembatch.FieldID,
-			},
-		},
+	if err := ibuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(itembatch.Table, itembatch.Columns, sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID))
 	id, ok := ibuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ItemBatch.id" for update`)}
@@ -423,5 +347,6 @@ func (ibuo *ItemBatchUpdateOne) sqlSave(ctx context.Context) (_node *ItemBatch, 
 		}
 		return nil, err
 	}
+	ibuo.mutation.done = true
 	return _node, nil
 }

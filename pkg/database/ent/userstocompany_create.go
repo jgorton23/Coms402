@@ -7,12 +7,15 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
-	"github.com/google/uuid"
 )
 
 // UsersToCompanyCreate is the builder for creating a UsersToCompany entity.
@@ -20,6 +23,7 @@ type UsersToCompanyCreate struct {
 	config
 	mutation *UsersToCompanyMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetCompanyUUID sets the "companyUUID" field.
@@ -89,50 +93,8 @@ func (utcc *UsersToCompanyCreate) Mutation() *UsersToCompanyMutation {
 
 // Save creates the UsersToCompany in the database.
 func (utcc *UsersToCompanyCreate) Save(ctx context.Context) (*UsersToCompany, error) {
-	var (
-		err  error
-		node *UsersToCompany
-	)
 	utcc.defaults()
-	if len(utcc.hooks) == 0 {
-		if err = utcc.check(); err != nil {
-			return nil, err
-		}
-		node, err = utcc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UsersToCompanyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = utcc.check(); err != nil {
-				return nil, err
-			}
-			utcc.mutation = mutation
-			if node, err = utcc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(utcc.hooks) - 1; i >= 0; i-- {
-			if utcc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = utcc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, utcc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*UsersToCompany)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from UsersToCompanyMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*UsersToCompany, UsersToCompanyMutation](ctx, utcc.sqlSave, utcc.mutation, utcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -189,6 +151,9 @@ func (utcc *UsersToCompanyCreate) check() error {
 }
 
 func (utcc *UsersToCompanyCreate) sqlSave(ctx context.Context) (*UsersToCompany, error) {
+	if err := utcc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := utcc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, utcc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -203,20 +168,17 @@ func (utcc *UsersToCompanyCreate) sqlSave(ctx context.Context) (*UsersToCompany,
 			return nil, err
 		}
 	}
+	utcc.mutation.id = &_node.ID
+	utcc.mutation.done = true
 	return _node, nil
 }
 
 func (utcc *UsersToCompanyCreate) createSpec() (*UsersToCompany, *sqlgraph.CreateSpec) {
 	var (
 		_node = &UsersToCompany{config: utcc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: userstocompany.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: userstocompany.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(userstocompany.Table, sqlgraph.NewFieldSpec(userstocompany.FieldID, field.TypeUUID))
 	)
+	_spec.OnConflict = utcc.conflict
 	if id, ok := utcc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
@@ -272,10 +234,250 @@ func (utcc *UsersToCompanyCreate) createSpec() (*UsersToCompany, *sqlgraph.Creat
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.UsersToCompany.Create().
+//		SetCompanyUUID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.UsersToCompanyUpsert) {
+//			SetCompanyUUID(v+v).
+//		}).
+//		Exec(ctx)
+func (utcc *UsersToCompanyCreate) OnConflict(opts ...sql.ConflictOption) *UsersToCompanyUpsertOne {
+	utcc.conflict = opts
+	return &UsersToCompanyUpsertOne{
+		create: utcc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.UsersToCompany.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (utcc *UsersToCompanyCreate) OnConflictColumns(columns ...string) *UsersToCompanyUpsertOne {
+	utcc.conflict = append(utcc.conflict, sql.ConflictColumns(columns...))
+	return &UsersToCompanyUpsertOne{
+		create: utcc,
+	}
+}
+
+type (
+	// UsersToCompanyUpsertOne is the builder for "upsert"-ing
+	//  one UsersToCompany node.
+	UsersToCompanyUpsertOne struct {
+		create *UsersToCompanyCreate
+	}
+
+	// UsersToCompanyUpsert is the "OnConflict" setter.
+	UsersToCompanyUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetCompanyUUID sets the "companyUUID" field.
+func (u *UsersToCompanyUpsert) SetCompanyUUID(v uuid.UUID) *UsersToCompanyUpsert {
+	u.Set(userstocompany.FieldCompanyUUID, v)
+	return u
+}
+
+// UpdateCompanyUUID sets the "companyUUID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsert) UpdateCompanyUUID() *UsersToCompanyUpsert {
+	u.SetExcluded(userstocompany.FieldCompanyUUID)
+	return u
+}
+
+// SetUserUUID sets the "userUUID" field.
+func (u *UsersToCompanyUpsert) SetUserUUID(v int) *UsersToCompanyUpsert {
+	u.Set(userstocompany.FieldUserUUID, v)
+	return u
+}
+
+// UpdateUserUUID sets the "userUUID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsert) UpdateUserUUID() *UsersToCompanyUpsert {
+	u.SetExcluded(userstocompany.FieldUserUUID)
+	return u
+}
+
+// SetRoleType sets the "roleType" field.
+func (u *UsersToCompanyUpsert) SetRoleType(v string) *UsersToCompanyUpsert {
+	u.Set(userstocompany.FieldRoleType, v)
+	return u
+}
+
+// UpdateRoleType sets the "roleType" field to the value that was provided on create.
+func (u *UsersToCompanyUpsert) UpdateRoleType() *UsersToCompanyUpsert {
+	u.SetExcluded(userstocompany.FieldRoleType)
+	return u
+}
+
+// SetApproved sets the "approved" field.
+func (u *UsersToCompanyUpsert) SetApproved(v bool) *UsersToCompanyUpsert {
+	u.Set(userstocompany.FieldApproved, v)
+	return u
+}
+
+// UpdateApproved sets the "approved" field to the value that was provided on create.
+func (u *UsersToCompanyUpsert) UpdateApproved() *UsersToCompanyUpsert {
+	u.SetExcluded(userstocompany.FieldApproved)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.UsersToCompany.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(userstocompany.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *UsersToCompanyUpsertOne) UpdateNewValues() *UsersToCompanyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(userstocompany.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.UsersToCompany.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *UsersToCompanyUpsertOne) Ignore() *UsersToCompanyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *UsersToCompanyUpsertOne) DoNothing() *UsersToCompanyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the UsersToCompanyCreate.OnConflict
+// documentation for more info.
+func (u *UsersToCompanyUpsertOne) Update(set func(*UsersToCompanyUpsert)) *UsersToCompanyUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&UsersToCompanyUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetCompanyUUID sets the "companyUUID" field.
+func (u *UsersToCompanyUpsertOne) SetCompanyUUID(v uuid.UUID) *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetCompanyUUID(v)
+	})
+}
+
+// UpdateCompanyUUID sets the "companyUUID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertOne) UpdateCompanyUUID() *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateCompanyUUID()
+	})
+}
+
+// SetUserUUID sets the "userUUID" field.
+func (u *UsersToCompanyUpsertOne) SetUserUUID(v int) *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetUserUUID(v)
+	})
+}
+
+// UpdateUserUUID sets the "userUUID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertOne) UpdateUserUUID() *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateUserUUID()
+	})
+}
+
+// SetRoleType sets the "roleType" field.
+func (u *UsersToCompanyUpsertOne) SetRoleType(v string) *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetRoleType(v)
+	})
+}
+
+// UpdateRoleType sets the "roleType" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertOne) UpdateRoleType() *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateRoleType()
+	})
+}
+
+// SetApproved sets the "approved" field.
+func (u *UsersToCompanyUpsertOne) SetApproved(v bool) *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetApproved(v)
+	})
+}
+
+// UpdateApproved sets the "approved" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertOne) UpdateApproved() *UsersToCompanyUpsertOne {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateApproved()
+	})
+}
+
+// Exec executes the query.
+func (u *UsersToCompanyUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for UsersToCompanyCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *UsersToCompanyUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *UsersToCompanyUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: UsersToCompanyUpsertOne.ID is not supported by MySQL driver. Use UsersToCompanyUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *UsersToCompanyUpsertOne) IDX(ctx context.Context) uuid.UUID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // UsersToCompanyCreateBulk is the builder for creating many UsersToCompany entities in bulk.
 type UsersToCompanyCreateBulk struct {
 	config
 	builders []*UsersToCompanyCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the UsersToCompany entities in the database.
@@ -302,6 +504,7 @@ func (utccb *UsersToCompanyCreateBulk) Save(ctx context.Context) ([]*UsersToComp
 					_, err = mutators[i+1].Mutate(root, utccb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = utccb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, utccb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -348,6 +551,173 @@ func (utccb *UsersToCompanyCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (utccb *UsersToCompanyCreateBulk) ExecX(ctx context.Context) {
 	if err := utccb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.UsersToCompany.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.UsersToCompanyUpsert) {
+//			SetCompanyUUID(v+v).
+//		}).
+//		Exec(ctx)
+func (utccb *UsersToCompanyCreateBulk) OnConflict(opts ...sql.ConflictOption) *UsersToCompanyUpsertBulk {
+	utccb.conflict = opts
+	return &UsersToCompanyUpsertBulk{
+		create: utccb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.UsersToCompany.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (utccb *UsersToCompanyCreateBulk) OnConflictColumns(columns ...string) *UsersToCompanyUpsertBulk {
+	utccb.conflict = append(utccb.conflict, sql.ConflictColumns(columns...))
+	return &UsersToCompanyUpsertBulk{
+		create: utccb,
+	}
+}
+
+// UsersToCompanyUpsertBulk is the builder for "upsert"-ing
+// a bulk of UsersToCompany nodes.
+type UsersToCompanyUpsertBulk struct {
+	create *UsersToCompanyCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.UsersToCompany.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(userstocompany.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *UsersToCompanyUpsertBulk) UpdateNewValues() *UsersToCompanyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(userstocompany.FieldID)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.UsersToCompany.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *UsersToCompanyUpsertBulk) Ignore() *UsersToCompanyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *UsersToCompanyUpsertBulk) DoNothing() *UsersToCompanyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the UsersToCompanyCreateBulk.OnConflict
+// documentation for more info.
+func (u *UsersToCompanyUpsertBulk) Update(set func(*UsersToCompanyUpsert)) *UsersToCompanyUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&UsersToCompanyUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetCompanyUUID sets the "companyUUID" field.
+func (u *UsersToCompanyUpsertBulk) SetCompanyUUID(v uuid.UUID) *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetCompanyUUID(v)
+	})
+}
+
+// UpdateCompanyUUID sets the "companyUUID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertBulk) UpdateCompanyUUID() *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateCompanyUUID()
+	})
+}
+
+// SetUserUUID sets the "userUUID" field.
+func (u *UsersToCompanyUpsertBulk) SetUserUUID(v int) *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetUserUUID(v)
+	})
+}
+
+// UpdateUserUUID sets the "userUUID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertBulk) UpdateUserUUID() *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateUserUUID()
+	})
+}
+
+// SetRoleType sets the "roleType" field.
+func (u *UsersToCompanyUpsertBulk) SetRoleType(v string) *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetRoleType(v)
+	})
+}
+
+// UpdateRoleType sets the "roleType" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertBulk) UpdateRoleType() *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateRoleType()
+	})
+}
+
+// SetApproved sets the "approved" field.
+func (u *UsersToCompanyUpsertBulk) SetApproved(v bool) *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.SetApproved(v)
+	})
+}
+
+// UpdateApproved sets the "approved" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertBulk) UpdateApproved() *UsersToCompanyUpsertBulk {
+	return u.Update(func(s *UsersToCompanyUpsert) {
+		s.UpdateApproved()
+	})
+}
+
+// Exec executes the query.
+func (u *UsersToCompanyUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the UsersToCompanyCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for UsersToCompanyCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *UsersToCompanyUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

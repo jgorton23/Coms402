@@ -7,25 +7,26 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // CertificationTemplateQuery is the builder for querying CertificationTemplate entities.
 type CertificationTemplateQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
+	ctx         *QueryContext
 	order       []OrderFunc
-	fields      []string
+	inters      []Interceptor
 	predicates  []predicate.CertificationTemplate
 	withCompany *CompanyQuery
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -37,26 +38,26 @@ func (ctq *CertificationTemplateQuery) Where(ps ...predicate.CertificationTempla
 	return ctq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (ctq *CertificationTemplateQuery) Limit(limit int) *CertificationTemplateQuery {
-	ctq.limit = &limit
+	ctq.ctx.Limit = &limit
 	return ctq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (ctq *CertificationTemplateQuery) Offset(offset int) *CertificationTemplateQuery {
-	ctq.offset = &offset
+	ctq.ctx.Offset = &offset
 	return ctq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (ctq *CertificationTemplateQuery) Unique(unique bool) *CertificationTemplateQuery {
-	ctq.unique = &unique
+	ctq.ctx.Unique = &unique
 	return ctq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (ctq *CertificationTemplateQuery) Order(o ...OrderFunc) *CertificationTemplateQuery {
 	ctq.order = append(ctq.order, o...)
 	return ctq
@@ -64,7 +65,7 @@ func (ctq *CertificationTemplateQuery) Order(o ...OrderFunc) *CertificationTempl
 
 // QueryCompany chains the current query on the "company" edge.
 func (ctq *CertificationTemplateQuery) QueryCompany() *CompanyQuery {
-	query := &CompanyQuery{config: ctq.config}
+	query := (&CompanyClient{config: ctq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ctq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -87,7 +88,7 @@ func (ctq *CertificationTemplateQuery) QueryCompany() *CompanyQuery {
 // First returns the first CertificationTemplate entity from the query.
 // Returns a *NotFoundError when no CertificationTemplate was found.
 func (ctq *CertificationTemplateQuery) First(ctx context.Context) (*CertificationTemplate, error) {
-	nodes, err := ctq.Limit(1).All(ctx)
+	nodes, err := ctq.Limit(1).All(setContextOp(ctx, ctq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func (ctq *CertificationTemplateQuery) FirstX(ctx context.Context) *Certificatio
 // Returns a *NotFoundError when no CertificationTemplate ID was found.
 func (ctq *CertificationTemplateQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = ctq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = ctq.Limit(1).IDs(setContextOp(ctx, ctq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -133,7 +134,7 @@ func (ctq *CertificationTemplateQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one CertificationTemplate entity is found.
 // Returns a *NotFoundError when no CertificationTemplate entities are found.
 func (ctq *CertificationTemplateQuery) Only(ctx context.Context) (*CertificationTemplate, error) {
-	nodes, err := ctq.Limit(2).All(ctx)
+	nodes, err := ctq.Limit(2).All(setContextOp(ctx, ctq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +162,7 @@ func (ctq *CertificationTemplateQuery) OnlyX(ctx context.Context) *Certification
 // Returns a *NotFoundError when no entities are found.
 func (ctq *CertificationTemplateQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = ctq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = ctq.Limit(2).IDs(setContextOp(ctx, ctq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -186,10 +187,12 @@ func (ctq *CertificationTemplateQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of CertificationTemplates.
 func (ctq *CertificationTemplateQuery) All(ctx context.Context) ([]*CertificationTemplate, error) {
+	ctx = setContextOp(ctx, ctq.ctx, "All")
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return ctq.sqlAll(ctx)
+	qr := querierAll[[]*CertificationTemplate, *CertificationTemplateQuery]()
+	return withInterceptors[[]*CertificationTemplate](ctx, ctq, qr, ctq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -202,9 +205,12 @@ func (ctq *CertificationTemplateQuery) AllX(ctx context.Context) []*Certificatio
 }
 
 // IDs executes the query and returns a list of CertificationTemplate IDs.
-func (ctq *CertificationTemplateQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := ctq.Select(certificationtemplate.FieldID).Scan(ctx, &ids); err != nil {
+func (ctq *CertificationTemplateQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if ctq.ctx.Unique == nil && ctq.path != nil {
+		ctq.Unique(true)
+	}
+	ctx = setContextOp(ctx, ctq.ctx, "IDs")
+	if err = ctq.Select(certificationtemplate.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -221,10 +227,11 @@ func (ctq *CertificationTemplateQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (ctq *CertificationTemplateQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, ctq.ctx, "Count")
 	if err := ctq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return ctq.sqlCount(ctx)
+	return withInterceptors[int](ctx, ctq, querierCount[*CertificationTemplateQuery](), ctq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -238,10 +245,15 @@ func (ctq *CertificationTemplateQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (ctq *CertificationTemplateQuery) Exist(ctx context.Context) (bool, error) {
-	if err := ctq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, ctq.ctx, "Exist")
+	switch _, err := ctq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return ctq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -261,22 +273,21 @@ func (ctq *CertificationTemplateQuery) Clone() *CertificationTemplateQuery {
 	}
 	return &CertificationTemplateQuery{
 		config:      ctq.config,
-		limit:       ctq.limit,
-		offset:      ctq.offset,
+		ctx:         ctq.ctx.Clone(),
 		order:       append([]OrderFunc{}, ctq.order...),
+		inters:      append([]Interceptor{}, ctq.inters...),
 		predicates:  append([]predicate.CertificationTemplate{}, ctq.predicates...),
 		withCompany: ctq.withCompany.Clone(),
 		// clone intermediate query.
-		sql:    ctq.sql.Clone(),
-		path:   ctq.path,
-		unique: ctq.unique,
+		sql:  ctq.sql.Clone(),
+		path: ctq.path,
 	}
 }
 
 // WithCompany tells the query-builder to eager-load the nodes that are connected to
 // the "company" edge. The optional arguments are used to configure the query builder of the edge.
 func (ctq *CertificationTemplateQuery) WithCompany(opts ...func(*CompanyQuery)) *CertificationTemplateQuery {
-	query := &CompanyQuery{config: ctq.config}
+	query := (&CompanyClient{config: ctq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -299,16 +310,11 @@ func (ctq *CertificationTemplateQuery) WithCompany(opts ...func(*CompanyQuery)) 
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ctq *CertificationTemplateQuery) GroupBy(field string, fields ...string) *CertificationTemplateGroupBy {
-	grbuild := &CertificationTemplateGroupBy{config: ctq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := ctq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ctq.sqlQuery(ctx), nil
-	}
+	ctq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CertificationTemplateGroupBy{build: ctq}
+	grbuild.flds = &ctq.ctx.Fields
 	grbuild.label = certificationtemplate.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -325,11 +331,11 @@ func (ctq *CertificationTemplateQuery) GroupBy(field string, fields ...string) *
 //		Select(certificationtemplate.FieldDescription).
 //		Scan(ctx, &v)
 func (ctq *CertificationTemplateQuery) Select(fields ...string) *CertificationTemplateSelect {
-	ctq.fields = append(ctq.fields, fields...)
-	selbuild := &CertificationTemplateSelect{CertificationTemplateQuery: ctq}
-	selbuild.label = certificationtemplate.Label
-	selbuild.flds, selbuild.scan = &ctq.fields, selbuild.Scan
-	return selbuild
+	ctq.ctx.Fields = append(ctq.ctx.Fields, fields...)
+	sbuild := &CertificationTemplateSelect{CertificationTemplateQuery: ctq}
+	sbuild.label = certificationtemplate.Label
+	sbuild.flds, sbuild.scan = &ctq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a CertificationTemplateSelect configured with the given aggregations.
@@ -338,7 +344,17 @@ func (ctq *CertificationTemplateQuery) Aggregate(fns ...AggregateFunc) *Certific
 }
 
 func (ctq *CertificationTemplateQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range ctq.fields {
+	for _, inter := range ctq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, ctq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range ctq.ctx.Fields {
 		if !certificationtemplate.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -370,6 +386,9 @@ func (ctq *CertificationTemplateQuery) sqlAll(ctx context.Context, hooks ...quer
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(ctq.modifiers) > 0 {
+		_spec.Modifiers = ctq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -398,6 +417,9 @@ func (ctq *CertificationTemplateQuery) loadCompany(ctx context.Context, query *C
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(company.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -417,41 +439,25 @@ func (ctq *CertificationTemplateQuery) loadCompany(ctx context.Context, query *C
 
 func (ctq *CertificationTemplateQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ctq.querySpec()
-	_spec.Node.Columns = ctq.fields
-	if len(ctq.fields) > 0 {
-		_spec.Unique = ctq.unique != nil && *ctq.unique
+	if len(ctq.modifiers) > 0 {
+		_spec.Modifiers = ctq.modifiers
+	}
+	_spec.Node.Columns = ctq.ctx.Fields
+	if len(ctq.ctx.Fields) > 0 {
+		_spec.Unique = ctq.ctx.Unique != nil && *ctq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, ctq.driver, _spec)
 }
 
-func (ctq *CertificationTemplateQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := ctq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (ctq *CertificationTemplateQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   certificationtemplate.Table,
-			Columns: certificationtemplate.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: certificationtemplate.FieldID,
-			},
-		},
-		From:   ctq.sql,
-		Unique: true,
-	}
-	if unique := ctq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(certificationtemplate.Table, certificationtemplate.Columns, sqlgraph.NewFieldSpec(certificationtemplate.FieldID, field.TypeUUID))
+	_spec.From = ctq.sql
+	if unique := ctq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if ctq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := ctq.fields; len(fields) > 0 {
+	if fields := ctq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certificationtemplate.FieldID)
 		for i := range fields {
@@ -467,10 +473,10 @@ func (ctq *CertificationTemplateQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := ctq.limit; limit != nil {
+	if limit := ctq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ctq.offset; offset != nil {
+	if offset := ctq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := ctq.order; len(ps) > 0 {
@@ -486,7 +492,7 @@ func (ctq *CertificationTemplateQuery) querySpec() *sqlgraph.QuerySpec {
 func (ctq *CertificationTemplateQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ctq.driver.Dialect())
 	t1 := builder.Table(certificationtemplate.Table)
-	columns := ctq.fields
+	columns := ctq.ctx.Fields
 	if len(columns) == 0 {
 		columns = certificationtemplate.Columns
 	}
@@ -495,8 +501,11 @@ func (ctq *CertificationTemplateQuery) sqlQuery(ctx context.Context) *sql.Select
 		selector = ctq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ctq.unique != nil && *ctq.unique {
+	if ctq.ctx.Unique != nil && *ctq.ctx.Unique {
 		selector.Distinct()
+	}
+	for _, m := range ctq.modifiers {
+		m(selector)
 	}
 	for _, p := range ctq.predicates {
 		p(selector)
@@ -504,26 +513,47 @@ func (ctq *CertificationTemplateQuery) sqlQuery(ctx context.Context) *sql.Select
 	for _, p := range ctq.order {
 		p(selector)
 	}
-	if offset := ctq.offset; offset != nil {
+	if offset := ctq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ctq.limit; limit != nil {
+	if limit := ctq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
 }
 
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (ctq *CertificationTemplateQuery) ForUpdate(opts ...sql.LockOption) *CertificationTemplateQuery {
+	if ctq.driver.Dialect() == dialect.Postgres {
+		ctq.Unique(false)
+	}
+	ctq.modifiers = append(ctq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return ctq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (ctq *CertificationTemplateQuery) ForShare(opts ...sql.LockOption) *CertificationTemplateQuery {
+	if ctq.driver.Dialect() == dialect.Postgres {
+		ctq.Unique(false)
+	}
+	ctq.modifiers = append(ctq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return ctq
+}
+
 // CertificationTemplateGroupBy is the group-by builder for CertificationTemplate entities.
 type CertificationTemplateGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *CertificationTemplateQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -532,58 +562,46 @@ func (ctgb *CertificationTemplateGroupBy) Aggregate(fns ...AggregateFunc) *Certi
 	return ctgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ctgb *CertificationTemplateGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := ctgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, ctgb.build.ctx, "GroupBy")
+	if err := ctgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ctgb.sql = query
-	return ctgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*CertificationTemplateQuery, *CertificationTemplateGroupBy](ctx, ctgb.build, ctgb, ctgb.build.inters, v)
 }
 
-func (ctgb *CertificationTemplateGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range ctgb.fields {
-		if !certificationtemplate.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (ctgb *CertificationTemplateGroupBy) sqlScan(ctx context.Context, root *CertificationTemplateQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(ctgb.fns))
+	for _, fn := range ctgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := ctgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*ctgb.flds)+len(ctgb.fns))
+		for _, f := range *ctgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*ctgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ctgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := ctgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (ctgb *CertificationTemplateGroupBy) sqlQuery() *sql.Selector {
-	selector := ctgb.sql.Select()
-	aggregation := make([]string, 0, len(ctgb.fns))
-	for _, fn := range ctgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(ctgb.fields)+len(ctgb.fns))
-		for _, f := range ctgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(ctgb.fields...)...)
-}
-
 // CertificationTemplateSelect is the builder for selecting fields of CertificationTemplate entities.
 type CertificationTemplateSelect struct {
 	*CertificationTemplateQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -594,26 +612,27 @@ func (cts *CertificationTemplateSelect) Aggregate(fns ...AggregateFunc) *Certifi
 
 // Scan applies the selector query and scans the result into the given value.
 func (cts *CertificationTemplateSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, cts.ctx, "Select")
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cts.sql = cts.CertificationTemplateQuery.sqlQuery(ctx)
-	return cts.sqlScan(ctx, v)
+	return scanWithInterceptors[*CertificationTemplateQuery, *CertificationTemplateSelect](ctx, cts.CertificationTemplateQuery, cts, cts.inters, v)
 }
 
-func (cts *CertificationTemplateSelect) sqlScan(ctx context.Context, v any) error {
+func (cts *CertificationTemplateSelect) sqlScan(ctx context.Context, root *CertificationTemplateQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(cts.fns))
 	for _, fn := range cts.fns {
-		aggregation = append(aggregation, fn(cts.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*cts.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		cts.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		cts.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := cts.sql.Query()
+	query, args := selector.Query()
 	if err := cts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

@@ -7,10 +7,11 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
-	"github.com/google/uuid"
 )
 
 // UsersToCompany is the model entity for the UsersToCompany schema.
@@ -133,19 +134,19 @@ func (utc *UsersToCompany) assignValues(columns []string, values []any) error {
 
 // QueryUser queries the "user" edge of the UsersToCompany entity.
 func (utc *UsersToCompany) QueryUser() *UserQuery {
-	return (&UsersToCompanyClient{config: utc.config}).QueryUser(utc)
+	return NewUsersToCompanyClient(utc.config).QueryUser(utc)
 }
 
 // QueryCompany queries the "company" edge of the UsersToCompany entity.
 func (utc *UsersToCompany) QueryCompany() *CompanyQuery {
-	return (&UsersToCompanyClient{config: utc.config}).QueryCompany(utc)
+	return NewUsersToCompanyClient(utc.config).QueryCompany(utc)
 }
 
 // Update returns a builder for updating this UsersToCompany.
 // Note that you need to call UsersToCompany.Unwrap() before calling this method if this UsersToCompany
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (utc *UsersToCompany) Update() *UsersToCompanyUpdateOne {
-	return (&UsersToCompanyClient{config: utc.config}).UpdateOne(utc)
+	return NewUsersToCompanyClient(utc.config).UpdateOne(utc)
 }
 
 // Unwrap unwraps the UsersToCompany entity that was returned from a transaction after it was closed,
@@ -181,9 +182,3 @@ func (utc *UsersToCompany) String() string {
 
 // UsersToCompanies is a parsable slice of UsersToCompany.
 type UsersToCompanies []*UsersToCompany
-
-func (utc UsersToCompanies) config(cfg config) {
-	for _i := range utc {
-		utc[_i].config = cfg
-	}
-}

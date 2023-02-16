@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
-	"github.com/google/uuid"
 )
 
 // Certification is the model entity for the Certification schema.
@@ -153,24 +154,24 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 
 // QueryCompany queries the "company" edge of the Certification entity.
 func (c *Certification) QueryCompany() *CompanyQuery {
-	return (&CertificationClient{config: c.config}).QueryCompany(c)
+	return NewCertificationClient(c.config).QueryCompany(c)
 }
 
 // QueryItemBatch queries the "itemBatch" edge of the Certification entity.
 func (c *Certification) QueryItemBatch() *ItemBatchQuery {
-	return (&CertificationClient{config: c.config}).QueryItemBatch(c)
+	return NewCertificationClient(c.config).QueryItemBatch(c)
 }
 
 // QueryTemplate queries the "template" edge of the Certification entity.
 func (c *Certification) QueryTemplate() *CertificationTemplateQuery {
-	return (&CertificationClient{config: c.config}).QueryTemplate(c)
+	return NewCertificationClient(c.config).QueryTemplate(c)
 }
 
 // Update returns a builder for updating this Certification.
 // Note that you need to call Certification.Unwrap() before calling this method if this Certification
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Certification) Update() *CertificationUpdateOne {
-	return (&CertificationClient{config: c.config}).UpdateOne(c)
+	return NewCertificationClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Certification entity that was returned from a transaction after it was closed,
@@ -209,9 +210,3 @@ func (c *Certification) String() string {
 
 // Certifications is a parsable slice of Certification.
 type Certifications []*Certification
-
-func (c Certifications) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

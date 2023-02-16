@@ -7,12 +7,15 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
-	"github.com/google/uuid"
 )
 
 // AttributeCreate is the builder for creating a Attribute entity.
@@ -20,6 +23,7 @@ type AttributeCreate struct {
 	config
 	mutation *AttributeMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetKey sets the "key" field.
@@ -89,50 +93,8 @@ func (ac *AttributeCreate) Mutation() *AttributeMutation {
 
 // Save creates the Attribute in the database.
 func (ac *AttributeCreate) Save(ctx context.Context) (*Attribute, error) {
-	var (
-		err  error
-		node *Attribute
-	)
 	ac.defaults()
-	if len(ac.hooks) == 0 {
-		if err = ac.check(); err != nil {
-			return nil, err
-		}
-		node, err = ac.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AttributeMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ac.check(); err != nil {
-				return nil, err
-			}
-			ac.mutation = mutation
-			if node, err = ac.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ac.hooks) - 1; i >= 0; i-- {
-			if ac.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ac.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ac.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Attribute)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AttributeMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Attribute, AttributeMutation](ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -189,6 +151,9 @@ func (ac *AttributeCreate) check() error {
 }
 
 func (ac *AttributeCreate) sqlSave(ctx context.Context) (*Attribute, error) {
+	if err := ac.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ac.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ac.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -203,20 +168,17 @@ func (ac *AttributeCreate) sqlSave(ctx context.Context) (*Attribute, error) {
 			return nil, err
 		}
 	}
+	ac.mutation.id = &_node.ID
+	ac.mutation.done = true
 	return _node, nil
 }
 
 func (ac *AttributeCreate) createSpec() (*Attribute, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Attribute{config: ac.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: attribute.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attribute.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(attribute.Table, sqlgraph.NewFieldSpec(attribute.FieldID, field.TypeUUID))
 	)
+	_spec.OnConflict = ac.conflict
 	if id, ok := ac.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
@@ -272,10 +234,250 @@ func (ac *AttributeCreate) createSpec() (*Attribute, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Attribute.Create().
+//		SetKey(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.AttributeUpsert) {
+//			SetKey(v+v).
+//		}).
+//		Exec(ctx)
+func (ac *AttributeCreate) OnConflict(opts ...sql.ConflictOption) *AttributeUpsertOne {
+	ac.conflict = opts
+	return &AttributeUpsertOne{
+		create: ac,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Attribute.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (ac *AttributeCreate) OnConflictColumns(columns ...string) *AttributeUpsertOne {
+	ac.conflict = append(ac.conflict, sql.ConflictColumns(columns...))
+	return &AttributeUpsertOne{
+		create: ac,
+	}
+}
+
+type (
+	// AttributeUpsertOne is the builder for "upsert"-ing
+	//  one Attribute node.
+	AttributeUpsertOne struct {
+		create *AttributeCreate
+	}
+
+	// AttributeUpsert is the "OnConflict" setter.
+	AttributeUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetKey sets the "key" field.
+func (u *AttributeUpsert) SetKey(v string) *AttributeUpsert {
+	u.Set(attribute.FieldKey, v)
+	return u
+}
+
+// UpdateKey sets the "key" field to the value that was provided on create.
+func (u *AttributeUpsert) UpdateKey() *AttributeUpsert {
+	u.SetExcluded(attribute.FieldKey)
+	return u
+}
+
+// SetValue sets the "value" field.
+func (u *AttributeUpsert) SetValue(v string) *AttributeUpsert {
+	u.Set(attribute.FieldValue, v)
+	return u
+}
+
+// UpdateValue sets the "value" field to the value that was provided on create.
+func (u *AttributeUpsert) UpdateValue() *AttributeUpsert {
+	u.SetExcluded(attribute.FieldValue)
+	return u
+}
+
+// SetCertUUID sets the "certUUID" field.
+func (u *AttributeUpsert) SetCertUUID(v uuid.UUID) *AttributeUpsert {
+	u.Set(attribute.FieldCertUUID, v)
+	return u
+}
+
+// UpdateCertUUID sets the "certUUID" field to the value that was provided on create.
+func (u *AttributeUpsert) UpdateCertUUID() *AttributeUpsert {
+	u.SetExcluded(attribute.FieldCertUUID)
+	return u
+}
+
+// SetAttributeTypeUUID sets the "attributeTypeUUID" field.
+func (u *AttributeUpsert) SetAttributeTypeUUID(v uuid.UUID) *AttributeUpsert {
+	u.Set(attribute.FieldAttributeTypeUUID, v)
+	return u
+}
+
+// UpdateAttributeTypeUUID sets the "attributeTypeUUID" field to the value that was provided on create.
+func (u *AttributeUpsert) UpdateAttributeTypeUUID() *AttributeUpsert {
+	u.SetExcluded(attribute.FieldAttributeTypeUUID)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.Attribute.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(attribute.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *AttributeUpsertOne) UpdateNewValues() *AttributeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(attribute.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Attribute.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *AttributeUpsertOne) Ignore() *AttributeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *AttributeUpsertOne) DoNothing() *AttributeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the AttributeCreate.OnConflict
+// documentation for more info.
+func (u *AttributeUpsertOne) Update(set func(*AttributeUpsert)) *AttributeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&AttributeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetKey sets the "key" field.
+func (u *AttributeUpsertOne) SetKey(v string) *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetKey(v)
+	})
+}
+
+// UpdateKey sets the "key" field to the value that was provided on create.
+func (u *AttributeUpsertOne) UpdateKey() *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateKey()
+	})
+}
+
+// SetValue sets the "value" field.
+func (u *AttributeUpsertOne) SetValue(v string) *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetValue(v)
+	})
+}
+
+// UpdateValue sets the "value" field to the value that was provided on create.
+func (u *AttributeUpsertOne) UpdateValue() *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateValue()
+	})
+}
+
+// SetCertUUID sets the "certUUID" field.
+func (u *AttributeUpsertOne) SetCertUUID(v uuid.UUID) *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetCertUUID(v)
+	})
+}
+
+// UpdateCertUUID sets the "certUUID" field to the value that was provided on create.
+func (u *AttributeUpsertOne) UpdateCertUUID() *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateCertUUID()
+	})
+}
+
+// SetAttributeTypeUUID sets the "attributeTypeUUID" field.
+func (u *AttributeUpsertOne) SetAttributeTypeUUID(v uuid.UUID) *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetAttributeTypeUUID(v)
+	})
+}
+
+// UpdateAttributeTypeUUID sets the "attributeTypeUUID" field to the value that was provided on create.
+func (u *AttributeUpsertOne) UpdateAttributeTypeUUID() *AttributeUpsertOne {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateAttributeTypeUUID()
+	})
+}
+
+// Exec executes the query.
+func (u *AttributeUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for AttributeCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *AttributeUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *AttributeUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: AttributeUpsertOne.ID is not supported by MySQL driver. Use AttributeUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *AttributeUpsertOne) IDX(ctx context.Context) uuid.UUID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // AttributeCreateBulk is the builder for creating many Attribute entities in bulk.
 type AttributeCreateBulk struct {
 	config
 	builders []*AttributeCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Attribute entities in the database.
@@ -302,6 +504,7 @@ func (acb *AttributeCreateBulk) Save(ctx context.Context) ([]*Attribute, error) 
 					_, err = mutators[i+1].Mutate(root, acb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = acb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, acb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -348,6 +551,173 @@ func (acb *AttributeCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (acb *AttributeCreateBulk) ExecX(ctx context.Context) {
 	if err := acb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Attribute.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.AttributeUpsert) {
+//			SetKey(v+v).
+//		}).
+//		Exec(ctx)
+func (acb *AttributeCreateBulk) OnConflict(opts ...sql.ConflictOption) *AttributeUpsertBulk {
+	acb.conflict = opts
+	return &AttributeUpsertBulk{
+		create: acb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Attribute.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (acb *AttributeCreateBulk) OnConflictColumns(columns ...string) *AttributeUpsertBulk {
+	acb.conflict = append(acb.conflict, sql.ConflictColumns(columns...))
+	return &AttributeUpsertBulk{
+		create: acb,
+	}
+}
+
+// AttributeUpsertBulk is the builder for "upsert"-ing
+// a bulk of Attribute nodes.
+type AttributeUpsertBulk struct {
+	create *AttributeCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Attribute.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(attribute.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *AttributeUpsertBulk) UpdateNewValues() *AttributeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(attribute.FieldID)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Attribute.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *AttributeUpsertBulk) Ignore() *AttributeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *AttributeUpsertBulk) DoNothing() *AttributeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the AttributeCreateBulk.OnConflict
+// documentation for more info.
+func (u *AttributeUpsertBulk) Update(set func(*AttributeUpsert)) *AttributeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&AttributeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetKey sets the "key" field.
+func (u *AttributeUpsertBulk) SetKey(v string) *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetKey(v)
+	})
+}
+
+// UpdateKey sets the "key" field to the value that was provided on create.
+func (u *AttributeUpsertBulk) UpdateKey() *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateKey()
+	})
+}
+
+// SetValue sets the "value" field.
+func (u *AttributeUpsertBulk) SetValue(v string) *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetValue(v)
+	})
+}
+
+// UpdateValue sets the "value" field to the value that was provided on create.
+func (u *AttributeUpsertBulk) UpdateValue() *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateValue()
+	})
+}
+
+// SetCertUUID sets the "certUUID" field.
+func (u *AttributeUpsertBulk) SetCertUUID(v uuid.UUID) *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetCertUUID(v)
+	})
+}
+
+// UpdateCertUUID sets the "certUUID" field to the value that was provided on create.
+func (u *AttributeUpsertBulk) UpdateCertUUID() *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateCertUUID()
+	})
+}
+
+// SetAttributeTypeUUID sets the "attributeTypeUUID" field.
+func (u *AttributeUpsertBulk) SetAttributeTypeUUID(v uuid.UUID) *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.SetAttributeTypeUUID(v)
+	})
+}
+
+// UpdateAttributeTypeUUID sets the "attributeTypeUUID" field to the value that was provided on create.
+func (u *AttributeUpsertBulk) UpdateAttributeTypeUUID() *AttributeUpsertBulk {
+	return u.Update(func(s *AttributeUpsert) {
+		s.UpdateAttributeTypeUUID()
+	})
+}
+
+// Exec executes the query.
+func (u *AttributeUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AttributeCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for AttributeCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *AttributeUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

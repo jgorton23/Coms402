@@ -3,6 +3,7 @@ package usecase
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/casbin/casbin/v2/model"
 
@@ -59,5 +60,11 @@ type (
 	AuthorizationEnforcerRepo interface {
 		EnforceRolePathMethod(role, path, method string) (bool, error)
 		ReloadPolicy() error
+	}
+
+	// SessionStateRepo -
+	SessionStateRepo interface {
+		Get(r *http.Request) (map[interface{}]interface{}, error)
+		Save(r *http.Request, w http.ResponseWriter, values map[interface{}]interface{}) error
 	}
 )

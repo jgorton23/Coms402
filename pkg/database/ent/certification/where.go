@@ -5,399 +5,254 @@ package certification
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Certification(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Certification(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Certification(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Certification(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Certification(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Certification(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Certification(sql.FieldLTE(FieldID, id))
 }
 
 // PrimaryAttribute applies equality check predicate on the "primaryAttribute" field. It's identical to PrimaryAttributeEQ.
 func PrimaryAttribute(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldPrimaryAttribute, v))
 }
 
 // CompanyUUID applies equality check predicate on the "companyUUID" field. It's identical to CompanyUUIDEQ.
 func CompanyUUID(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldCompanyUUID, v))
 }
 
 // ItemBatchUUID applies equality check predicate on the "itemBatchUUID" field. It's identical to ItemBatchUUIDEQ.
 func ItemBatchUUID(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldItemBatchUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldItemBatchUUID, v))
 }
 
 // ImageUUID applies equality check predicate on the "imageUUID" field. It's identical to ImageUUIDEQ.
 func ImageUUID(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImageUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldImageUUID, v))
 }
 
 // TemplateUUID applies equality check predicate on the "templateUUID" field. It's identical to TemplateUUIDEQ.
 func TemplateUUID(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemplateUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldTemplateUUID, v))
 }
 
 // PrimaryAttributeEQ applies the EQ predicate on the "primaryAttribute" field.
 func PrimaryAttributeEQ(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeNEQ applies the NEQ predicate on the "primaryAttribute" field.
 func PrimaryAttributeNEQ(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldNEQ(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeIn applies the In predicate on the "primaryAttribute" field.
 func PrimaryAttributeIn(vs ...string) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPrimaryAttribute), v...))
-	})
+	return predicate.Certification(sql.FieldIn(FieldPrimaryAttribute, vs...))
 }
 
 // PrimaryAttributeNotIn applies the NotIn predicate on the "primaryAttribute" field.
 func PrimaryAttributeNotIn(vs ...string) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPrimaryAttribute), v...))
-	})
+	return predicate.Certification(sql.FieldNotIn(FieldPrimaryAttribute, vs...))
 }
 
 // PrimaryAttributeGT applies the GT predicate on the "primaryAttribute" field.
 func PrimaryAttributeGT(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldGT(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeGTE applies the GTE predicate on the "primaryAttribute" field.
 func PrimaryAttributeGTE(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldGTE(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeLT applies the LT predicate on the "primaryAttribute" field.
 func PrimaryAttributeLT(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldLT(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeLTE applies the LTE predicate on the "primaryAttribute" field.
 func PrimaryAttributeLTE(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldLTE(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeContains applies the Contains predicate on the "primaryAttribute" field.
 func PrimaryAttributeContains(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldContains(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeHasPrefix applies the HasPrefix predicate on the "primaryAttribute" field.
 func PrimaryAttributeHasPrefix(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldHasPrefix(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeHasSuffix applies the HasSuffix predicate on the "primaryAttribute" field.
 func PrimaryAttributeHasSuffix(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldHasSuffix(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeEqualFold applies the EqualFold predicate on the "primaryAttribute" field.
 func PrimaryAttributeEqualFold(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldEqualFold(FieldPrimaryAttribute, v))
 }
 
 // PrimaryAttributeContainsFold applies the ContainsFold predicate on the "primaryAttribute" field.
 func PrimaryAttributeContainsFold(v string) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPrimaryAttribute), v))
-	})
+	return predicate.Certification(sql.FieldContainsFold(FieldPrimaryAttribute, v))
 }
 
 // CompanyUUIDEQ applies the EQ predicate on the "companyUUID" field.
 func CompanyUUIDEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldCompanyUUID, v))
 }
 
 // CompanyUUIDNEQ applies the NEQ predicate on the "companyUUID" field.
 func CompanyUUIDNEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCompanyUUID), v))
-	})
+	return predicate.Certification(sql.FieldNEQ(FieldCompanyUUID, v))
 }
 
 // CompanyUUIDIn applies the In predicate on the "companyUUID" field.
 func CompanyUUIDIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCompanyUUID), v...))
-	})
+	return predicate.Certification(sql.FieldIn(FieldCompanyUUID, vs...))
 }
 
 // CompanyUUIDNotIn applies the NotIn predicate on the "companyUUID" field.
 func CompanyUUIDNotIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCompanyUUID), v...))
-	})
+	return predicate.Certification(sql.FieldNotIn(FieldCompanyUUID, vs...))
 }
 
 // ItemBatchUUIDEQ applies the EQ predicate on the "itemBatchUUID" field.
 func ItemBatchUUIDEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldItemBatchUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldItemBatchUUID, v))
 }
 
 // ItemBatchUUIDNEQ applies the NEQ predicate on the "itemBatchUUID" field.
 func ItemBatchUUIDNEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldItemBatchUUID), v))
-	})
+	return predicate.Certification(sql.FieldNEQ(FieldItemBatchUUID, v))
 }
 
 // ItemBatchUUIDIn applies the In predicate on the "itemBatchUUID" field.
 func ItemBatchUUIDIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldItemBatchUUID), v...))
-	})
+	return predicate.Certification(sql.FieldIn(FieldItemBatchUUID, vs...))
 }
 
 // ItemBatchUUIDNotIn applies the NotIn predicate on the "itemBatchUUID" field.
 func ItemBatchUUIDNotIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldItemBatchUUID), v...))
-	})
+	return predicate.Certification(sql.FieldNotIn(FieldItemBatchUUID, vs...))
 }
 
 // ImageUUIDEQ applies the EQ predicate on the "imageUUID" field.
 func ImageUUIDEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImageUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldImageUUID, v))
 }
 
 // ImageUUIDNEQ applies the NEQ predicate on the "imageUUID" field.
 func ImageUUIDNEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImageUUID), v))
-	})
+	return predicate.Certification(sql.FieldNEQ(FieldImageUUID, v))
 }
 
 // ImageUUIDIn applies the In predicate on the "imageUUID" field.
 func ImageUUIDIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImageUUID), v...))
-	})
+	return predicate.Certification(sql.FieldIn(FieldImageUUID, vs...))
 }
 
 // ImageUUIDNotIn applies the NotIn predicate on the "imageUUID" field.
 func ImageUUIDNotIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImageUUID), v...))
-	})
+	return predicate.Certification(sql.FieldNotIn(FieldImageUUID, vs...))
 }
 
 // ImageUUIDGT applies the GT predicate on the "imageUUID" field.
 func ImageUUIDGT(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImageUUID), v))
-	})
+	return predicate.Certification(sql.FieldGT(FieldImageUUID, v))
 }
 
 // ImageUUIDGTE applies the GTE predicate on the "imageUUID" field.
 func ImageUUIDGTE(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImageUUID), v))
-	})
+	return predicate.Certification(sql.FieldGTE(FieldImageUUID, v))
 }
 
 // ImageUUIDLT applies the LT predicate on the "imageUUID" field.
 func ImageUUIDLT(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImageUUID), v))
-	})
+	return predicate.Certification(sql.FieldLT(FieldImageUUID, v))
 }
 
 // ImageUUIDLTE applies the LTE predicate on the "imageUUID" field.
 func ImageUUIDLTE(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImageUUID), v))
-	})
+	return predicate.Certification(sql.FieldLTE(FieldImageUUID, v))
 }
 
 // TemplateUUIDEQ applies the EQ predicate on the "templateUUID" field.
 func TemplateUUIDEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemplateUUID), v))
-	})
+	return predicate.Certification(sql.FieldEQ(FieldTemplateUUID, v))
 }
 
 // TemplateUUIDNEQ applies the NEQ predicate on the "templateUUID" field.
 func TemplateUUIDNEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTemplateUUID), v))
-	})
+	return predicate.Certification(sql.FieldNEQ(FieldTemplateUUID, v))
 }
 
 // TemplateUUIDIn applies the In predicate on the "templateUUID" field.
 func TemplateUUIDIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTemplateUUID), v...))
-	})
+	return predicate.Certification(sql.FieldIn(FieldTemplateUUID, vs...))
 }
 
 // TemplateUUIDNotIn applies the NotIn predicate on the "templateUUID" field.
 func TemplateUUIDNotIn(vs ...uuid.UUID) predicate.Certification {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTemplateUUID), v...))
-	})
+	return predicate.Certification(sql.FieldNotIn(FieldTemplateUUID, vs...))
 }
 
 // TemplateUUIDIsNil applies the IsNil predicate on the "templateUUID" field.
 func TemplateUUIDIsNil() predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldTemplateUUID)))
-	})
+	return predicate.Certification(sql.FieldIsNull(FieldTemplateUUID))
 }
 
 // TemplateUUIDNotNil applies the NotNil predicate on the "templateUUID" field.
 func TemplateUUIDNotNil() predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldTemplateUUID)))
-	})
+	return predicate.Certification(sql.FieldNotNull(FieldTemplateUUID))
 }
 
 // HasCompany applies the HasEdge predicate on the "company" edge.
@@ -405,7 +260,6 @@ func HasCompany() predicate.Certification {
 	return predicate.Certification(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CompanyTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, CompanyTable, CompanyColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -433,7 +287,6 @@ func HasItemBatch() predicate.Certification {
 	return predicate.Certification(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ItemBatchTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, ItemBatchTable, ItemBatchColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -461,7 +314,6 @@ func HasTemplate() predicate.Certification {
 	return predicate.Certification(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TemplateTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, TemplateTable, TemplateColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

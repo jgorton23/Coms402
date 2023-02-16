@@ -10,11 +10,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // AttributeTypesToTemplatesUpdate is the builder for updating AttributeTypesToTemplates entities.
@@ -83,40 +84,7 @@ func (atttu *AttributeTypesToTemplatesUpdate) ClearTemplate() *AttributeTypesToT
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (atttu *AttributeTypesToTemplatesUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(atttu.hooks) == 0 {
-		if err = atttu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = atttu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AttributeTypesToTemplatesMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = atttu.check(); err != nil {
-				return 0, err
-			}
-			atttu.mutation = mutation
-			affected, err = atttu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(atttu.hooks) - 1; i >= 0; i-- {
-			if atttu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = atttu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, atttu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, AttributeTypesToTemplatesMutation](ctx, atttu.sqlSave, atttu.mutation, atttu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -153,16 +121,10 @@ func (atttu *AttributeTypesToTemplatesUpdate) check() error {
 }
 
 func (atttu *AttributeTypesToTemplatesUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   attributetypestotemplates.Table,
-			Columns: attributetypestotemplates.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attributetypestotemplates.FieldID,
-			},
-		},
+	if err := atttu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(attributetypestotemplates.Table, attributetypestotemplates.Columns, sqlgraph.NewFieldSpec(attributetypestotemplates.FieldID, field.TypeUUID))
 	if ps := atttu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -248,6 +210,7 @@ func (atttu *AttributeTypesToTemplatesUpdate) sqlSave(ctx context.Context) (n in
 		}
 		return 0, err
 	}
+	atttu.mutation.done = true
 	return n, nil
 }
 
@@ -310,6 +273,12 @@ func (atttuo *AttributeTypesToTemplatesUpdateOne) ClearTemplate() *AttributeType
 	return atttuo
 }
 
+// Where appends a list predicates to the AttributeTypesToTemplatesUpdate builder.
+func (atttuo *AttributeTypesToTemplatesUpdateOne) Where(ps ...predicate.AttributeTypesToTemplates) *AttributeTypesToTemplatesUpdateOne {
+	atttuo.mutation.Where(ps...)
+	return atttuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (atttuo *AttributeTypesToTemplatesUpdateOne) Select(field string, fields ...string) *AttributeTypesToTemplatesUpdateOne {
@@ -319,46 +288,7 @@ func (atttuo *AttributeTypesToTemplatesUpdateOne) Select(field string, fields ..
 
 // Save executes the query and returns the updated AttributeTypesToTemplates entity.
 func (atttuo *AttributeTypesToTemplatesUpdateOne) Save(ctx context.Context) (*AttributeTypesToTemplates, error) {
-	var (
-		err  error
-		node *AttributeTypesToTemplates
-	)
-	if len(atttuo.hooks) == 0 {
-		if err = atttuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = atttuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AttributeTypesToTemplatesMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = atttuo.check(); err != nil {
-				return nil, err
-			}
-			atttuo.mutation = mutation
-			node, err = atttuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(atttuo.hooks) - 1; i >= 0; i-- {
-			if atttuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = atttuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, atttuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*AttributeTypesToTemplates)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AttributeTypesToTemplatesMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*AttributeTypesToTemplates, AttributeTypesToTemplatesMutation](ctx, atttuo.sqlSave, atttuo.mutation, atttuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -395,16 +325,10 @@ func (atttuo *AttributeTypesToTemplatesUpdateOne) check() error {
 }
 
 func (atttuo *AttributeTypesToTemplatesUpdateOne) sqlSave(ctx context.Context) (_node *AttributeTypesToTemplates, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   attributetypestotemplates.Table,
-			Columns: attributetypestotemplates.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: attributetypestotemplates.FieldID,
-			},
-		},
+	if err := atttuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(attributetypestotemplates.Table, attributetypestotemplates.Columns, sqlgraph.NewFieldSpec(attributetypestotemplates.FieldID, field.TypeUUID))
 	id, ok := atttuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AttributeTypesToTemplates.id" for update`)}
@@ -510,5 +434,6 @@ func (atttuo *AttributeTypesToTemplatesUpdateOne) sqlSave(ctx context.Context) (
 		}
 		return nil, err
 	}
+	atttuo.mutation.done = true
 	return _node, nil
 }
