@@ -21,8 +21,8 @@ type UsersToCompany struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CompanyUUID holds the value of the "companyUUID" field.
 	CompanyUUID uuid.UUID `json:"companyUUID,omitempty"`
-	// UserUUID holds the value of the "userUUID" field.
-	UserUUID int `json:"userUUID,omitempty"`
+	// UserID holds the value of the "userID" field.
+	UserID int `json:"userID,omitempty"`
 	// RoleType holds the value of the "roleType" field.
 	RoleType string `json:"roleType,omitempty"`
 	// Approved holds the value of the "approved" field.
@@ -76,7 +76,7 @@ func (*UsersToCompany) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case userstocompany.FieldApproved:
 			values[i] = new(sql.NullBool)
-		case userstocompany.FieldUserUUID:
+		case userstocompany.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case userstocompany.FieldRoleType:
 			values[i] = new(sql.NullString)
@@ -109,11 +109,11 @@ func (utc *UsersToCompany) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				utc.CompanyUUID = *value
 			}
-		case userstocompany.FieldUserUUID:
+		case userstocompany.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field userUUID", values[i])
+				return fmt.Errorf("unexpected type %T for field userID", values[i])
 			} else if value.Valid {
-				utc.UserUUID = int(value.Int64)
+				utc.UserID = int(value.Int64)
 			}
 		case userstocompany.FieldRoleType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -168,8 +168,8 @@ func (utc *UsersToCompany) String() string {
 	builder.WriteString("companyUUID=")
 	builder.WriteString(fmt.Sprintf("%v", utc.CompanyUUID))
 	builder.WriteString(", ")
-	builder.WriteString("userUUID=")
-	builder.WriteString(fmt.Sprintf("%v", utc.UserUUID))
+	builder.WriteString("userID=")
+	builder.WriteString(fmt.Sprintf("%v", utc.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("roleType=")
 	builder.WriteString(utc.RoleType)

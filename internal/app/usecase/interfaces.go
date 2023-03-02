@@ -67,4 +67,17 @@ type (
 		Get(r *http.Request) (map[interface{}]interface{}, error)
 		Save(r *http.Request, w http.ResponseWriter, values map[interface{}]interface{}) error
 	}
+
+	// CompanyRepo -
+	CompanyRepo interface {
+		Exists(context.Context, string) (bool, error)
+		Create(context.Context, domain.Company) (domain.Company, error)
+		// Update(context.Context, domain.Company) error
+	}
+
+	// userToCompanyRepo -
+	UserToCompanyRepo interface {
+		Exists(context.Context, domain.UserToCompany) (bool, error)
+		Create(context.Context, domain.UserToCompany) (domain.UserToCompany, error)
+	}
 )

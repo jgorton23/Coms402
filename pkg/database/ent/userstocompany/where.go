@@ -60,9 +60,9 @@ func CompanyUUID(v uuid.UUID) predicate.UsersToCompany {
 	return predicate.UsersToCompany(sql.FieldEQ(FieldCompanyUUID, v))
 }
 
-// UserUUID applies equality check predicate on the "userUUID" field. It's identical to UserUUIDEQ.
-func UserUUID(v int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(sql.FieldEQ(FieldUserUUID, v))
+// UserID applies equality check predicate on the "userID" field. It's identical to UserIDEQ.
+func UserID(v int) predicate.UsersToCompany {
+	return predicate.UsersToCompany(sql.FieldEQ(FieldUserID, v))
 }
 
 // RoleType applies equality check predicate on the "roleType" field. It's identical to RoleTypeEQ.
@@ -95,24 +95,24 @@ func CompanyUUIDNotIn(vs ...uuid.UUID) predicate.UsersToCompany {
 	return predicate.UsersToCompany(sql.FieldNotIn(FieldCompanyUUID, vs...))
 }
 
-// UserUUIDEQ applies the EQ predicate on the "userUUID" field.
-func UserUUIDEQ(v int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(sql.FieldEQ(FieldUserUUID, v))
+// UserIDEQ applies the EQ predicate on the "userID" field.
+func UserIDEQ(v int) predicate.UsersToCompany {
+	return predicate.UsersToCompany(sql.FieldEQ(FieldUserID, v))
 }
 
-// UserUUIDNEQ applies the NEQ predicate on the "userUUID" field.
-func UserUUIDNEQ(v int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(sql.FieldNEQ(FieldUserUUID, v))
+// UserIDNEQ applies the NEQ predicate on the "userID" field.
+func UserIDNEQ(v int) predicate.UsersToCompany {
+	return predicate.UsersToCompany(sql.FieldNEQ(FieldUserID, v))
 }
 
-// UserUUIDIn applies the In predicate on the "userUUID" field.
-func UserUUIDIn(vs ...int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(sql.FieldIn(FieldUserUUID, vs...))
+// UserIDIn applies the In predicate on the "userID" field.
+func UserIDIn(vs ...int) predicate.UsersToCompany {
+	return predicate.UsersToCompany(sql.FieldIn(FieldUserID, vs...))
 }
 
-// UserUUIDNotIn applies the NotIn predicate on the "userUUID" field.
-func UserUUIDNotIn(vs ...int) predicate.UsersToCompany {
-	return predicate.UsersToCompany(sql.FieldNotIn(FieldUserUUID, vs...))
+// UserIDNotIn applies the NotIn predicate on the "userID" field.
+func UserIDNotIn(vs ...int) predicate.UsersToCompany {
+	return predicate.UsersToCompany(sql.FieldNotIn(FieldUserID, vs...))
 }
 
 // RoleTypeEQ applies the EQ predicate on the "roleType" field.

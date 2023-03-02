@@ -1,0 +1,180 @@
+openapi: 3.0.0
+info:
+  description: "This is a sample server Petstore server.  You can find out more about
+    Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net,
+    #swagger](http://swagger.io/irc/).  For this sample, you can use the api key
+    `special-key` to test the authorization filters."
+  version: 1.0.2
+  title: Online Certificate Repository
+  termsOfService: "temp"
+  contact:
+    email: "s23-cs-srp-gp12@iastate.edu"
+#   license:
+#     name: Apache 2.0
+#     url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: company
+    description: Company
+#     externalDocs:
+#       description: Find out more
+#       url: http://swagger.io
+paths:
+  /company:
+    post:
+      tags:
+        - company
+      summary: Create a new Company
+      description: "Creates a new company"
+      operationId: addCompany
+      requestBody:
+        description: Company to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewCompany"              
+      responses:
+        "201":
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        "400":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        "401":
+          $ref: '#/components/responses/DefaultUnauthenticatedErrorResponse'
+        "403":
+          $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    put:
+      tags:
+        - company
+      summary: Update an existing company
+      description: "Update an existing company"
+      operationId: updateCompany
+      requestBody:
+        description: Company to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Company"
+      responses:
+        "200":
+          description: Successively updated company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        "400":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        "401":
+          $ref: '#/components/responses/DefaultUnauthenticatedErrorResponse'
+        "403":
+          $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
+        "404":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+  /company/{companyUUID}:
+    get:
+      tags:
+        - company
+      summary: Find company by UUID
+      description: Returns a single company
+      operationId: getCompanyByUUID
+      parameters:
+        - name: companyUUID
+          in: path
+          description: UUID of company to return
+          required: true
+          schema:
+            type: string
+            pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        "400":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        "401":
+          $ref: '#/components/responses/DefaultUnauthenticatedErrorResponse'
+        "403":
+          $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
+        "404":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
+# externalDocs:
+#   description: Find out more about Swagger
+#   url: http://swagger.io
+servers:
+  - url: localhost:8082
+components:
+  responses:
+    DefaultErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"      
+      description: unexpected error
+    DefaultUnauthenticatedErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"      
+      description: unauthenticated error
+    DefaultUnauthorizedErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"      
+      description: unauthorized error
+  schemas:
+    NewCompany:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the company
+          maxLength: 10
+          pattern: "[A-Za-z0-9_]"
+      additionalProperties: false
+    Company:
+      allOf:
+        - $ref: '#/components/schemas/NewCompany'
+        - type: object
+          required:
+            - "uuid"
+          properties:
+            uuid: 
+              type: string
+              description: uuid of the company
+              pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+          additionalProperties: false
+      additionalProperties: false
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Error code 
+        message:
+          type: string
+          description: Error message
+          pattern: "[A-Za-z0-9_]"
+          maxLength: 128
+      additionalProperties: false
