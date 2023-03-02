@@ -126,6 +126,7 @@ func (ur *userDBEntImplem) Update(ctx context.Context, u domain.User) error {
 
 func (ur *userDBEntImplem) databaseUserToEntityUser(u *ent.User) domain.User {
 	return domain.User{
+		ID:                   u.ID,
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,
 		Email:                u.Email,

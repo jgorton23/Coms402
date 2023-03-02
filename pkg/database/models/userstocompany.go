@@ -20,9 +20,7 @@ func (UsersToCompany) Fields() []ent.Field {
 			StorageKey("UUID").
 			Unique(),
 		field.UUID("companyUUID", uuid.UUID{}),
-		// This field currentlly is forced to be an Int instead of UUID, because the user
-		// primary key is an int and it has some methods dependent on it (GetById)
-		field.Int("userUUID"),
+		field.Int("userID"),
 		field.String("roleType"),
 		field.Bool("approved"),
 	}
@@ -34,7 +32,7 @@ func (UsersToCompany) Edges() []ent.Edge {
 		edge.To("user", User.Type).
 			Required().
 			Unique().
-			Field("userUUID"),
+			Field("userID"),
 		edge.To("company", Company.Type).
 			Required().
 			Unique().

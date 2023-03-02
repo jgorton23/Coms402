@@ -112,10 +112,6 @@ func init() {
 	session.DataValidator = sessionDescData.Validators[0].(func([]byte) error)
 	userFields := models.User{}.Fields()
 	_ = userFields
-	// userDescUUID is the schema descriptor for UUID field.
-	userDescUUID := userFields[1].Descriptor()
-	// user.DefaultUUID holds the default value on creation for the UUID field.
-	user.DefaultUUID = userDescUUID.Default.(func() uuid.UUID)
 	// userDescCreatedAt is the schema descriptor for created_at field.
 	userDescCreatedAt := userFields[2].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
@@ -125,7 +121,7 @@ func init() {
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(time.Time)
 	// userDescRole is the schema descriptor for role field.
-	userDescRole := userFields[9].Descriptor()
+	userDescRole := userFields[8].Descriptor()
 	// user.DefaultRole holds the default value on creation for the role field.
 	user.DefaultRole = userDescRole.Default.(string)
 	// userDescID is the schema descriptor for id field.

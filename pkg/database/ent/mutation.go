@@ -5273,10 +5273,9 @@ type UserMutation struct {
 	op               Op
 	typ              string
 	id               *int
-	_UUID            *uuid.UUID
+	email            *string
 	created_at       *time.Time
 	updated_at       *time.Time
-	email            *string
 	password_hash    *string
 	attempt_count    *int
 	addattempt_count *int
@@ -5393,40 +5392,40 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetUUID sets the "UUID" field.
-func (m *UserMutation) SetUUID(u uuid.UUID) {
-	m._UUID = &u
+// SetEmail sets the "email" field.
+func (m *UserMutation) SetEmail(s string) {
+	m.email = &s
 }
 
-// UUID returns the value of the "UUID" field in the mutation.
-func (m *UserMutation) UUID() (r uuid.UUID, exists bool) {
-	v := m._UUID
+// Email returns the value of the "email" field in the mutation.
+func (m *UserMutation) Email() (r string, exists bool) {
+	v := m.email
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUUID returns the old "UUID" field's value of the User entity.
+// OldEmail returns the old "email" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUUID requires an ID field in the mutation")
+		return v, errors.New("OldEmail requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
 	}
-	return oldValue.UUID, nil
+	return oldValue.Email, nil
 }
 
-// ResetUUID resets all changes to the "UUID" field.
-func (m *UserMutation) ResetUUID() {
-	m._UUID = nil
+// ResetEmail resets all changes to the "email" field.
+func (m *UserMutation) ResetEmail() {
+	m.email = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -5499,42 +5498,6 @@ func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error
 // ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *UserMutation) ResetUpdatedAt() {
 	m.updated_at = nil
-}
-
-// SetEmail sets the "email" field.
-func (m *UserMutation) SetEmail(s string) {
-	m.email = &s
-}
-
-// Email returns the value of the "email" field in the mutation.
-func (m *UserMutation) Email() (r string, exists bool) {
-	v := m.email
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEmail returns the old "email" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldEmail(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEmail requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
-	}
-	return oldValue.Email, nil
-}
-
-// ResetEmail resets all changes to the "email" field.
-func (m *UserMutation) ResetEmail() {
-	m.email = nil
 }
 
 // SetPasswordHash sets the "password_hash" field.
@@ -5824,18 +5787,15 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
-	if m._UUID != nil {
-		fields = append(fields, user.FieldUUID)
+	fields := make([]string, 0, 8)
+	if m.email != nil {
+		fields = append(fields, user.FieldEmail)
 	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, user.FieldUpdatedAt)
-	}
-	if m.email != nil {
-		fields = append(fields, user.FieldEmail)
 	}
 	if m.password_hash != nil {
 		fields = append(fields, user.FieldPasswordHash)
@@ -5860,14 +5820,12 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldUUID:
-		return m.UUID()
+	case user.FieldEmail:
+		return m.Email()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
 	case user.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case user.FieldEmail:
-		return m.Email()
 	case user.FieldPasswordHash:
 		return m.PasswordHash()
 	case user.FieldAttemptCount:
@@ -5887,14 +5845,12 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldUUID:
-		return m.OldUUID(ctx)
+	case user.FieldEmail:
+		return m.OldEmail(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case user.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case user.FieldEmail:
-		return m.OldEmail(ctx)
 	case user.FieldPasswordHash:
 		return m.OldPasswordHash(ctx)
 	case user.FieldAttemptCount:
@@ -5914,12 +5870,12 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldUUID:
-		v, ok := value.(uuid.UUID)
+	case user.FieldEmail:
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUUID(v)
+		m.SetEmail(v)
 		return nil
 	case user.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -5934,13 +5890,6 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
-		return nil
-	case user.FieldEmail:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEmail(v)
 		return nil
 	case user.FieldPasswordHash:
 		v, ok := value.(string)
@@ -6068,17 +6017,14 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldUUID:
-		m.ResetUUID()
+	case user.FieldEmail:
+		m.ResetEmail()
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
 	case user.FieldUpdatedAt:
 		m.ResetUpdatedAt()
-		return nil
-	case user.FieldEmail:
-		m.ResetEmail()
 		return nil
 	case user.FieldPasswordHash:
 		m.ResetPasswordHash()
@@ -6305,13 +6251,13 @@ func (m *UsersToCompanyMutation) ResetCompanyUUID() {
 	m.company = nil
 }
 
-// SetUserUUID sets the "userUUID" field.
-func (m *UsersToCompanyMutation) SetUserUUID(i int) {
+// SetUserID sets the "userID" field.
+func (m *UsersToCompanyMutation) SetUserID(i int) {
 	m.user = &i
 }
 
-// UserUUID returns the value of the "userUUID" field in the mutation.
-func (m *UsersToCompanyMutation) UserUUID() (r int, exists bool) {
+// UserID returns the value of the "userID" field in the mutation.
+func (m *UsersToCompanyMutation) UserID() (r int, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -6319,25 +6265,25 @@ func (m *UsersToCompanyMutation) UserUUID() (r int, exists bool) {
 	return *v, true
 }
 
-// OldUserUUID returns the old "userUUID" field's value of the UsersToCompany entity.
+// OldUserID returns the old "userID" field's value of the UsersToCompany entity.
 // If the UsersToCompany object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersToCompanyMutation) OldUserUUID(ctx context.Context) (v int, err error) {
+func (m *UsersToCompanyMutation) OldUserID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserUUID is only allowed on UpdateOne operations")
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserUUID requires an ID field in the mutation")
+		return v, errors.New("OldUserID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserUUID: %w", err)
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
 	}
-	return oldValue.UserUUID, nil
+	return oldValue.UserID, nil
 }
 
-// ResetUserUUID resets all changes to the "userUUID" field.
-func (m *UsersToCompanyMutation) ResetUserUUID() {
+// ResetUserID resets all changes to the "userID" field.
+func (m *UsersToCompanyMutation) ResetUserID() {
 	m.user = nil
 }
 
@@ -6413,11 +6359,6 @@ func (m *UsersToCompanyMutation) ResetApproved() {
 	m.approved = nil
 }
 
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *UsersToCompanyMutation) SetUserID(id int) {
-	m.user = &id
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (m *UsersToCompanyMutation) ClearUser() {
 	m.cleareduser = true
@@ -6426,14 +6367,6 @@ func (m *UsersToCompanyMutation) ClearUser() {
 // UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *UsersToCompanyMutation) UserCleared() bool {
 	return m.cleareduser
-}
-
-// UserID returns the "user" edge ID in the mutation.
-func (m *UsersToCompanyMutation) UserID() (id int, exists bool) {
-	if m.user != nil {
-		return *m.user, true
-	}
-	return
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
@@ -6530,7 +6463,7 @@ func (m *UsersToCompanyMutation) Fields() []string {
 		fields = append(fields, userstocompany.FieldCompanyUUID)
 	}
 	if m.user != nil {
-		fields = append(fields, userstocompany.FieldUserUUID)
+		fields = append(fields, userstocompany.FieldUserID)
 	}
 	if m.roleType != nil {
 		fields = append(fields, userstocompany.FieldRoleType)
@@ -6548,8 +6481,8 @@ func (m *UsersToCompanyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case userstocompany.FieldCompanyUUID:
 		return m.CompanyUUID()
-	case userstocompany.FieldUserUUID:
-		return m.UserUUID()
+	case userstocompany.FieldUserID:
+		return m.UserID()
 	case userstocompany.FieldRoleType:
 		return m.RoleType()
 	case userstocompany.FieldApproved:
@@ -6565,8 +6498,8 @@ func (m *UsersToCompanyMutation) OldField(ctx context.Context, name string) (ent
 	switch name {
 	case userstocompany.FieldCompanyUUID:
 		return m.OldCompanyUUID(ctx)
-	case userstocompany.FieldUserUUID:
-		return m.OldUserUUID(ctx)
+	case userstocompany.FieldUserID:
+		return m.OldUserID(ctx)
 	case userstocompany.FieldRoleType:
 		return m.OldRoleType(ctx)
 	case userstocompany.FieldApproved:
@@ -6587,12 +6520,12 @@ func (m *UsersToCompanyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCompanyUUID(v)
 		return nil
-	case userstocompany.FieldUserUUID:
+	case userstocompany.FieldUserID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUserUUID(v)
+		m.SetUserID(v)
 		return nil
 	case userstocompany.FieldRoleType:
 		v, ok := value.(string)
@@ -6663,8 +6596,8 @@ func (m *UsersToCompanyMutation) ResetField(name string) error {
 	case userstocompany.FieldCompanyUUID:
 		m.ResetCompanyUUID()
 		return nil
-	case userstocompany.FieldUserUUID:
-		m.ResetUserUUID()
+	case userstocompany.FieldUserID:
+		m.ResetUserID()
 		return nil
 	case userstocompany.FieldRoleType:
 		m.ResetRoleType()

@@ -454,7 +454,7 @@ func (utcq *UsersToCompanyQuery) loadUser(ctx context.Context, query *UserQuery,
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*UsersToCompany)
 	for i := range nodes {
-		fk := nodes[i].UserUUID
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -471,7 +471,7 @@ func (utcq *UsersToCompanyQuery) loadUser(ctx context.Context, query *UserQuery,
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "userUUID" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "userID" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

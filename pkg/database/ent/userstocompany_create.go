@@ -32,9 +32,9 @@ func (utcc *UsersToCompanyCreate) SetCompanyUUID(u uuid.UUID) *UsersToCompanyCre
 	return utcc
 }
 
-// SetUserUUID sets the "userUUID" field.
-func (utcc *UsersToCompanyCreate) SetUserUUID(i int) *UsersToCompanyCreate {
-	utcc.mutation.SetUserUUID(i)
+// SetUserID sets the "userID" field.
+func (utcc *UsersToCompanyCreate) SetUserID(i int) *UsersToCompanyCreate {
+	utcc.mutation.SetUserID(i)
 	return utcc
 }
 
@@ -61,12 +61,6 @@ func (utcc *UsersToCompanyCreate) SetNillableID(u *uuid.UUID) *UsersToCompanyCre
 	if u != nil {
 		utcc.SetID(*u)
 	}
-	return utcc
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (utcc *UsersToCompanyCreate) SetUserID(id int) *UsersToCompanyCreate {
-	utcc.mutation.SetUserID(id)
 	return utcc
 }
 
@@ -132,8 +126,8 @@ func (utcc *UsersToCompanyCreate) check() error {
 	if _, ok := utcc.mutation.CompanyUUID(); !ok {
 		return &ValidationError{Name: "companyUUID", err: errors.New(`ent: missing required field "UsersToCompany.companyUUID"`)}
 	}
-	if _, ok := utcc.mutation.UserUUID(); !ok {
-		return &ValidationError{Name: "userUUID", err: errors.New(`ent: missing required field "UsersToCompany.userUUID"`)}
+	if _, ok := utcc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "userID", err: errors.New(`ent: missing required field "UsersToCompany.userID"`)}
 	}
 	if _, ok := utcc.mutation.RoleType(); !ok {
 		return &ValidationError{Name: "roleType", err: errors.New(`ent: missing required field "UsersToCompany.roleType"`)}
@@ -208,7 +202,7 @@ func (utcc *UsersToCompanyCreate) createSpec() (*UsersToCompany, *sqlgraph.Creat
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.UserUUID = nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := utcc.mutation.CompanyIDs(); len(nodes) > 0 {
@@ -295,15 +289,15 @@ func (u *UsersToCompanyUpsert) UpdateCompanyUUID() *UsersToCompanyUpsert {
 	return u
 }
 
-// SetUserUUID sets the "userUUID" field.
-func (u *UsersToCompanyUpsert) SetUserUUID(v int) *UsersToCompanyUpsert {
-	u.Set(userstocompany.FieldUserUUID, v)
+// SetUserID sets the "userID" field.
+func (u *UsersToCompanyUpsert) SetUserID(v int) *UsersToCompanyUpsert {
+	u.Set(userstocompany.FieldUserID, v)
 	return u
 }
 
-// UpdateUserUUID sets the "userUUID" field to the value that was provided on create.
-func (u *UsersToCompanyUpsert) UpdateUserUUID() *UsersToCompanyUpsert {
-	u.SetExcluded(userstocompany.FieldUserUUID)
+// UpdateUserID sets the "userID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsert) UpdateUserID() *UsersToCompanyUpsert {
+	u.SetExcluded(userstocompany.FieldUserID)
 	return u
 }
 
@@ -393,17 +387,17 @@ func (u *UsersToCompanyUpsertOne) UpdateCompanyUUID() *UsersToCompanyUpsertOne {
 	})
 }
 
-// SetUserUUID sets the "userUUID" field.
-func (u *UsersToCompanyUpsertOne) SetUserUUID(v int) *UsersToCompanyUpsertOne {
+// SetUserID sets the "userID" field.
+func (u *UsersToCompanyUpsertOne) SetUserID(v int) *UsersToCompanyUpsertOne {
 	return u.Update(func(s *UsersToCompanyUpsert) {
-		s.SetUserUUID(v)
+		s.SetUserID(v)
 	})
 }
 
-// UpdateUserUUID sets the "userUUID" field to the value that was provided on create.
-func (u *UsersToCompanyUpsertOne) UpdateUserUUID() *UsersToCompanyUpsertOne {
+// UpdateUserID sets the "userID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertOne) UpdateUserID() *UsersToCompanyUpsertOne {
 	return u.Update(func(s *UsersToCompanyUpsert) {
-		s.UpdateUserUUID()
+		s.UpdateUserID()
 	})
 }
 
@@ -660,17 +654,17 @@ func (u *UsersToCompanyUpsertBulk) UpdateCompanyUUID() *UsersToCompanyUpsertBulk
 	})
 }
 
-// SetUserUUID sets the "userUUID" field.
-func (u *UsersToCompanyUpsertBulk) SetUserUUID(v int) *UsersToCompanyUpsertBulk {
+// SetUserID sets the "userID" field.
+func (u *UsersToCompanyUpsertBulk) SetUserID(v int) *UsersToCompanyUpsertBulk {
 	return u.Update(func(s *UsersToCompanyUpsert) {
-		s.SetUserUUID(v)
+		s.SetUserID(v)
 	})
 }
 
-// UpdateUserUUID sets the "userUUID" field to the value that was provided on create.
-func (u *UsersToCompanyUpsertBulk) UpdateUserUUID() *UsersToCompanyUpsertBulk {
+// UpdateUserID sets the "userID" field to the value that was provided on create.
+func (u *UsersToCompanyUpsertBulk) UpdateUserID() *UsersToCompanyUpsertBulk {
 	return u.Update(func(s *UsersToCompanyUpsert) {
-		s.UpdateUserUUID()
+		s.UpdateUserID()
 	})
 }
 

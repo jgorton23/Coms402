@@ -37,9 +37,9 @@ func (utcu *UsersToCompanyUpdate) SetCompanyUUID(u uuid.UUID) *UsersToCompanyUpd
 	return utcu
 }
 
-// SetUserUUID sets the "userUUID" field.
-func (utcu *UsersToCompanyUpdate) SetUserUUID(i int) *UsersToCompanyUpdate {
-	utcu.mutation.SetUserUUID(i)
+// SetUserID sets the "userID" field.
+func (utcu *UsersToCompanyUpdate) SetUserID(i int) *UsersToCompanyUpdate {
+	utcu.mutation.SetUserID(i)
 	return utcu
 }
 
@@ -52,12 +52,6 @@ func (utcu *UsersToCompanyUpdate) SetRoleType(s string) *UsersToCompanyUpdate {
 // SetApproved sets the "approved" field.
 func (utcu *UsersToCompanyUpdate) SetApproved(b bool) *UsersToCompanyUpdate {
 	utcu.mutation.SetApproved(b)
-	return utcu
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (utcu *UsersToCompanyUpdate) SetUserID(id int) *UsersToCompanyUpdate {
-	utcu.mutation.SetUserID(id)
 	return utcu
 }
 
@@ -246,9 +240,9 @@ func (utcuo *UsersToCompanyUpdateOne) SetCompanyUUID(u uuid.UUID) *UsersToCompan
 	return utcuo
 }
 
-// SetUserUUID sets the "userUUID" field.
-func (utcuo *UsersToCompanyUpdateOne) SetUserUUID(i int) *UsersToCompanyUpdateOne {
-	utcuo.mutation.SetUserUUID(i)
+// SetUserID sets the "userID" field.
+func (utcuo *UsersToCompanyUpdateOne) SetUserID(i int) *UsersToCompanyUpdateOne {
+	utcuo.mutation.SetUserID(i)
 	return utcuo
 }
 
@@ -261,12 +255,6 @@ func (utcuo *UsersToCompanyUpdateOne) SetRoleType(s string) *UsersToCompanyUpdat
 // SetApproved sets the "approved" field.
 func (utcuo *UsersToCompanyUpdateOne) SetApproved(b bool) *UsersToCompanyUpdateOne {
 	utcuo.mutation.SetApproved(b)
-	return utcuo
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (utcuo *UsersToCompanyUpdateOne) SetUserID(id int) *UsersToCompanyUpdateOne {
-	utcuo.mutation.SetUserID(id)
 	return utcuo
 }
 
