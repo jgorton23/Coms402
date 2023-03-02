@@ -107,8 +107,8 @@ func (ur *userToCompanyDBEntImplem) GetByUUIDS(ctx context.Context, userUUID uui
 	if err != nil {
 		return domain.UserToCompany{}, err
 	}
-
-	return ur.databaseToEntity(utc), nil
+	
+	return  ur.databaseToEntity(utc), nil
 }
 
 // Create -.
