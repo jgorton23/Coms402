@@ -96,14 +96,14 @@ func (v1 httpV1Implem) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	}, domainUser.UUID)
 
 	if err != nil {
-		respondWithError(w, r, fmt.Sprintf("error : %v", err), http.StatusBadRequest)
+		respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
 		return
 	}
 
 	company, err := v1.companyUseCase.GetByUUID(r.Context(), id)
 
 	if err != nil {
-		respondWithError(w, r, fmt.Sprintf("error : %v", err), http.StatusBadRequest)
+		respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
 		return
 	}
 
@@ -111,7 +111,22 @@ func (v1 httpV1Implem) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v1 httpV1Implem) GetCompanyByUUID(w http.ResponseWriter, r *http.Request, companyUUID string) {
-	respondWithError(w, r, "request unimplemented", http.StatusUnavailableForLegalReasons)
+
+	id, err := uuid.Parse(companyUUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error parsing uuid: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	company, err := v1.companyUseCase.GetByUUID(r.Context(), id)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	respondWithJson(w, r, http.StatusOK, company)
 }
 
 // Helper Functions
