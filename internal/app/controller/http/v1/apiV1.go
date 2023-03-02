@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
 
@@ -75,7 +76,38 @@ func (v1 httpV1Implem) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithError(w, r, "request unimplemented", http.StatusUnavailableForLegalReasons)
+	domainUser, err := v1.loadDomainUser(r)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	id, err := uuid.Parse(requestBody.Uuid)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error parsing uuid: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	err = v1.companyUseCase.Update(r.Context(), domain.Company{
+		UUID: id,
+		Name: requestBody.Name,
+	}, domainUser.UUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error : %v", err), http.StatusBadRequest)
+		return
+	}
+
+	company, err := v1.companyUseCase.GetByUUID(r.Context(), id)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error : %v", err), http.StatusBadRequest)
+		return
+	}
+
+	respondWithJson(w, r, http.StatusOK, company)
 }
 
 func (v1 httpV1Implem) GetCompanyByUUID(w http.ResponseWriter, r *http.Request, companyUUID string) {

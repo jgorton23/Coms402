@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
@@ -34,7 +35,7 @@ type UserToCompany struct {
 
 func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (err error) {
 
-	exists, err := c.userToCompany.Exists(ctx, dutc)
+	exists, err := c.userToCompany.Exists(ctx, dutc.UserUUID, dutc.CompanyUUID)
 
 	if err != nil {
 		return err
@@ -56,4 +57,26 @@ func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (e
 	c.logger.Info(fmt.Sprintf("userToCompany %v-%v role mapping created in database", dutc.UserUUID, dutc.CompanyUUID))
 
 	return nil
+}
+
+func (c UserToCompany) AllowedToEdit(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
+
+	utc, err := c.userToCompany.GetByUUIDS(ctx, userUUID, companyUUID)
+
+	if err != nil {
+		return false, err
+	}
+
+	if !utc.Approved {
+		return false, nil
+	}
+
+	switch utc.RoleType {
+	case domain.RolePrimaryOwner:
+		return true, nil
+	case domain.RoleOwner:
+		return true, nil
+	default:
+		return false, nil
+	}
 }
