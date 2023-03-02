@@ -126,8 +126,8 @@ func init() {
 	user.DefaultRole = userDescRole.Default.(string)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
-	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	user.IDValidator = userDescID.Validators[0].(func(int) error)
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 	userstocompanyFields := models.UsersToCompany{}.Fields()
 	_ = userstocompanyFields
 	// userstocompanyDescID is the schema descriptor for id field.

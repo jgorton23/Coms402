@@ -20,7 +20,7 @@ func (UsersToCompany) Fields() []ent.Field {
 			StorageKey("UUID").
 			Unique(),
 		field.UUID("companyUUID", uuid.UUID{}),
-		field.Int("userID"),
+		field.UUID("userUUID", uuid.UUID{}),
 		field.String("roleType"),
 		field.Bool("approved"),
 	}
@@ -32,7 +32,7 @@ func (UsersToCompany) Edges() []ent.Edge {
 		edge.To("user", User.Type).
 			Required().
 			Unique().
-			Field("userID"),
+			Field("userUUID"),
 		edge.To("company", Company.Type).
 			Required().
 			Unique().

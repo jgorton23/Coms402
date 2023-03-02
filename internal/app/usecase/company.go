@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
@@ -37,7 +38,7 @@ type Company struct {
 	logger        *Logger
 }
 
-func (c Company) Create(ctx context.Context, dc domain.Company, userID int) (domain.Company, error) {
+func (c Company) Create(ctx context.Context, dc domain.Company, userUUID uuid.UUID) (domain.Company, error) {
 
 	exists, err := c.companyRepo.Exists(ctx, dc.Name)
 
@@ -65,7 +66,7 @@ func (c Company) Create(ctx context.Context, dc domain.Company, userID int) (dom
 
 	c.userToCompany.Create(ctx, domain.UserToCompany{
 		CompanyUUID: dc.UUID,
-		UserID:      userID,
+		UserUUID:    userUUID,
 		RoleType:    domain.RolePrimaryOwner,
 		Approved:    true,
 	})

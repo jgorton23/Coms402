@@ -25,7 +25,7 @@ func NewSCSRepo(i *do.Injector) (scs.Store, error) {
 		logger: do.MustInvoke[*usecase.Logger](i),
 	}
 
-	go implem.runCleanup(10 * time.Second) // TODO load from config or run in a worker system
+	go implem.runCleanup(10 * time.Minute) // TODO load from config or run in a worker system
 
 	return implem, nil
 }

@@ -37,9 +37,9 @@ func (utcu *UsersToCompanyUpdate) SetCompanyUUID(u uuid.UUID) *UsersToCompanyUpd
 	return utcu
 }
 
-// SetUserID sets the "userID" field.
-func (utcu *UsersToCompanyUpdate) SetUserID(i int) *UsersToCompanyUpdate {
-	utcu.mutation.SetUserID(i)
+// SetUserUUID sets the "userUUID" field.
+func (utcu *UsersToCompanyUpdate) SetUserUUID(u uuid.UUID) *UsersToCompanyUpdate {
+	utcu.mutation.SetUserUUID(u)
 	return utcu
 }
 
@@ -52,6 +52,12 @@ func (utcu *UsersToCompanyUpdate) SetRoleType(s string) *UsersToCompanyUpdate {
 // SetApproved sets the "approved" field.
 func (utcu *UsersToCompanyUpdate) SetApproved(b bool) *UsersToCompanyUpdate {
 	utcu.mutation.SetApproved(b)
+	return utcu
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (utcu *UsersToCompanyUpdate) SetUserID(id uuid.UUID) *UsersToCompanyUpdate {
+	utcu.mutation.SetUserID(id)
 	return utcu
 }
 
@@ -153,7 +159,7 @@ func (utcu *UsersToCompanyUpdate) sqlSave(ctx context.Context) (n int, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: user.FieldID,
 				},
 			},
@@ -169,7 +175,7 @@ func (utcu *UsersToCompanyUpdate) sqlSave(ctx context.Context) (n int, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: user.FieldID,
 				},
 			},
@@ -240,9 +246,9 @@ func (utcuo *UsersToCompanyUpdateOne) SetCompanyUUID(u uuid.UUID) *UsersToCompan
 	return utcuo
 }
 
-// SetUserID sets the "userID" field.
-func (utcuo *UsersToCompanyUpdateOne) SetUserID(i int) *UsersToCompanyUpdateOne {
-	utcuo.mutation.SetUserID(i)
+// SetUserUUID sets the "userUUID" field.
+func (utcuo *UsersToCompanyUpdateOne) SetUserUUID(u uuid.UUID) *UsersToCompanyUpdateOne {
+	utcuo.mutation.SetUserUUID(u)
 	return utcuo
 }
 
@@ -255,6 +261,12 @@ func (utcuo *UsersToCompanyUpdateOne) SetRoleType(s string) *UsersToCompanyUpdat
 // SetApproved sets the "approved" field.
 func (utcuo *UsersToCompanyUpdateOne) SetApproved(b bool) *UsersToCompanyUpdateOne {
 	utcuo.mutation.SetApproved(b)
+	return utcuo
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (utcuo *UsersToCompanyUpdateOne) SetUserID(id uuid.UUID) *UsersToCompanyUpdateOne {
+	utcuo.mutation.SetUserID(id)
 	return utcuo
 }
 
@@ -386,7 +398,7 @@ func (utcuo *UsersToCompanyUpdateOne) sqlSave(ctx context.Context) (_node *Users
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: user.FieldID,
 				},
 			},
@@ -402,7 +414,7 @@ func (utcuo *UsersToCompanyUpdateOne) sqlSave(ctx context.Context) (_node *Users
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: user.FieldID,
 				},
 			},

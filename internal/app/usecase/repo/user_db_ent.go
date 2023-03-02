@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
@@ -47,10 +48,10 @@ func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	return users, nil
 }
 
-func (ur *userDBEntImplem) GetById(ctx context.Context, id int) (domain.User, error) {
+func (ur *userDBEntImplem) GetById(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
-		Where(user.ID(id)).
+		Where(user.ID(uuid)).
 		First(ctx)
 	if err != nil {
 		return domain.User{}, err
@@ -126,7 +127,7 @@ func (ur *userDBEntImplem) Update(ctx context.Context, u domain.User) error {
 
 func (ur *userDBEntImplem) databaseUserToEntityUser(u *ent.User) domain.User {
 	return domain.User{
-		ID:                   u.ID,
+		UUID:                 u.ID,
 		CreatedAt:            u.CreatedAt,
 		UpdatedAt:            u.UpdatedAt,
 		Email:                u.Email,

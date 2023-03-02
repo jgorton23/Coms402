@@ -47,14 +47,7 @@ func (v1 httpV1Implem) AddCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := v1.authbossAuthenticator.CurrentUser(r)
-
-	if err != nil {
-		respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
-		return
-	}
-
-	domainUser, err := v1.userUseCase.FindByEmail(r.Context(), user.GetPID())
+	domainUser, err := v1.loadDomainUser(r)
 
 	if err != nil {
 		respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
@@ -63,7 +56,7 @@ func (v1 httpV1Implem) AddCompany(w http.ResponseWriter, r *http.Request) {
 
 	company, err := v1.companyUseCase.Create(r.Context(), domain.Company{
 		Name: requestBody.Name,
-	}, domainUser.ID)
+	}, domainUser.UUID)
 
 	if err != nil {
 		respondWithError(w, r, fmt.Sprintf("unable to create company: %v", err), http.StatusBadRequest)
@@ -90,6 +83,24 @@ func (v1 httpV1Implem) GetCompanyByUUID(w http.ResponseWriter, r *http.Request, 
 }
 
 // Helper Functions
+func (v1 httpV1Implem) loadDomainUser(r *http.Request) (domain.User, error) {
+	user, err := v1.authbossAuthenticator.CurrentUser(r)
+
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	// Get the user email from authboss then query the database for the complete user so we can
+	// get the user id to create a company with
+	domainUser, err := v1.userUseCase.FindByEmail(r.Context(), user.GetPID())
+
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return domainUser, nil
+}
+
 func respondWithError(w http.ResponseWriter, r *http.Request, message string, code int) {
 	respondWithJson(w, r, code, Error{
 		Code:    int32(code),
