@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
@@ -72,14 +73,14 @@ type userToCompanyDBEntImplem struct {
 // }
 
 // Exists -.
-func (ur *userToCompanyDBEntImplem) Exists(ctx context.Context, role domain.UserToCompany) (bool, error) {
+func (ur *userToCompanyDBEntImplem) Exists(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
 
 	exists, err := ur.Client.UsersToCompany.
 		Query().
 		Where(
 			userstocompany.And(
-				userstocompany.CompanyUUID(role.CompanyUUID),
-				userstocompany.UserUUID(role.UserUUID),
+				userstocompany.CompanyUUID(companyUUID),
+				userstocompany.UserUUID(userUUID),
 			),
 		).
 		Exist(ctx)
@@ -90,9 +91,29 @@ func (ur *userToCompanyDBEntImplem) Exists(ctx context.Context, role domain.User
 	return exists, nil
 }
 
+// GetByUUIDS -.
+func (ur *userToCompanyDBEntImplem) GetByUUIDS(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (domain.UserToCompany, error) {
+
+	utc, err := ur.Client.UsersToCompany.
+		Query().
+		Where(
+			userstocompany.And(
+				userstocompany.CompanyUUID(companyUUID),
+				userstocompany.UserUUID(userUUID),
+			),
+		).
+		Only(ctx)
+
+	if err != nil {
+		return domain.UserToCompany{}, err
+	}
+
+	return ur.databaseToEntity(utc), nil
+}
+
 // Create -.
 func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserToCompany) (domain.UserToCompany, error) {
-	u, err := ur.Client.UsersToCompany.
+	utc, err := ur.Client.UsersToCompany.
 		Create().
 		SetCompanyUUID(usr.CompanyUUID).
 		SetUserID(usr.UserUUID).
@@ -103,7 +124,7 @@ func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserT
 		return domain.UserToCompany{}, err
 	}
 
-	return ur.databaseToEntity(u), nil
+	return ur.databaseToEntity(utc), nil
 }
 
 // // Update -.

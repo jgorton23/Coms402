@@ -71,14 +71,17 @@ type (
 
 	// CompanyRepo -
 	CompanyRepo interface {
-		Exists(context.Context, string) (bool, error)
+		ExistsNamed(context.Context, string) (bool, error)
+		ExistsUUID(context.Context, uuid.UUID) (bool, error)
 		Create(context.Context, domain.Company) (domain.Company, error)
-		// Update(context.Context, domain.Company) error
+		Update(context.Context, domain.Company) error
+		GetByUUID(context.Context, uuid.UUID) (domain.Company, error)
 	}
 
 	// userToCompanyRepo -
 	UserToCompanyRepo interface {
-		Exists(context.Context, domain.UserToCompany) (bool, error)
+		Exists(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error)
 		Create(context.Context, domain.UserToCompany) (domain.UserToCompany, error)
+		GetByUUIDS(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (domain.UserToCompany, error)
 	}
 )

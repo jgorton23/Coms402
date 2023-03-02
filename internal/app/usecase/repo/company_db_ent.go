@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
@@ -59,23 +60,36 @@ type companyDBEntImplem struct {
 // 	return ur.databaseCompanyToEntityCompany(u), nil
 // }
 
-// func (ur *companyDBEntImplem) GetByEmail(ctx context.Context, email string) (domain.Company, error) {
-// 	u, err := ur.Client.Company.
-// 		Query().
-// 		Where(Company.Email(email)).
-// 		First(ctx)
-// 	if err != nil {
-// 		return domain.Company{}, err
-// 	}
+func (ur *companyDBEntImplem) GetByUUID(ctx context.Context, companyUuid uuid.UUID) (domain.Company, error) {
+	u, err := ur.Client.Company.
+		Query().
+		Where(company.ID(companyUuid)).
+		First(ctx)
+	if err != nil {
+		return domain.Company{}, err
+	}
 
-// 	return ur.databaseCompanyToEntityCompany(u), nil
-// }
+	return ur.databaseCompanyToEntityCompany(u), nil
+}
 
-// Exists -.
-func (ur *companyDBEntImplem) Exists(ctx context.Context, u string) (bool, error) {
+// ExistsNamed -.
+func (ur *companyDBEntImplem) ExistsNamed(ctx context.Context, u string) (bool, error) {
 	exists, err := ur.Client.Company.
 		Query().
 		Where(company.Name(u)).
+		Exist(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
+// ExistsUUID -.
+func (ur *companyDBEntImplem) ExistsUUID(ctx context.Context, u uuid.UUID) (bool, error) {
+	exists, err := ur.Client.Company.
+		Query().
+		Where(company.ID(u)).
 		Exist(ctx)
 	if err != nil {
 		return false, err
@@ -97,25 +111,18 @@ func (ur *companyDBEntImplem) Create(ctx context.Context, usr domain.Company) (d
 	return ur.databaseCompanyToEntityCompany(u), nil
 }
 
-// // Update -.
-// func (ur *companyDBEntImplem) Update(ctx context.Context, u domain.Company) error {
-// 	_, err := ur.Client.Company.
-// 		Update().
-// 		SetEmail(u.Email).
-// 		SetPasswordHash(u.PasswordHash).
-// 		// SetConfirmSelector(u.ConfirmSelector).
-// 		// SetConfirmVerifier(u.ConfirmVerifier).
-// 		// SetConfirmed(u.Confirmed).
-// 		SetAttemptCount(u.AttemptCount).
-// 		SetLastAttempt(u.LastAttempt).
-// 		SetLocked(u.Locked).
-// 		Save(ctx)
-// 	if err != nil {
-// 		return err
-// 	}
+// Update -.
+func (ur *companyDBEntImplem) Update(ctx context.Context, u domain.Company) error {
+	_, err := ur.Client.Company.
+		Update().
+		SetName(u.Name).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
 
-// 	return nil
-// }
+	return nil
+}
 
 func (ur *companyDBEntImplem) databaseCompanyToEntityCompany(u *ent.Company) domain.Company {
 	return domain.Company{
