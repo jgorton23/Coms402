@@ -3,6 +3,7 @@ package domain
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/volatiletech/authboss/v3"
 )
 
@@ -20,7 +21,7 @@ var (
 )
 
 type User struct {
-	ID           int
+	UUID         uuid.UUID
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	Email        string    `json:"email"`

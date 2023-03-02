@@ -79,7 +79,7 @@ func (ur *userToCompanyDBEntImplem) Exists(ctx context.Context, role domain.User
 		Where(
 			userstocompany.And(
 				userstocompany.CompanyUUID(role.CompanyUUID),
-				userstocompany.UserID(role.UserID),
+				userstocompany.UserUUID(role.UserUUID),
 			),
 		).
 		Exist(ctx)
@@ -95,7 +95,7 @@ func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserT
 	u, err := ur.Client.UsersToCompany.
 		Create().
 		SetCompanyUUID(usr.CompanyUUID).
-		SetUserID(usr.UserID).
+		SetUserID(usr.UserUUID).
 		SetRoleType(string(usr.RoleType)).
 		SetApproved(usr.Approved).
 		Save(ctx)
@@ -130,7 +130,7 @@ func (ur *userToCompanyDBEntImplem) databaseToEntity(u *ent.UsersToCompany) doma
 	return domain.UserToCompany{
 		UUID:        u.ID,
 		CompanyUUID: u.CompanyUUID,
-		UserID:      u.UserID,
+		UserUUID:    u.UserUUID,
 		RoleType:    domain.Role(u.RoleType),
 		Approved:    u.Approved,
 	}

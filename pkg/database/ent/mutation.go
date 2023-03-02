@@ -5272,7 +5272,7 @@ type UserMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *int
+	id               *uuid.UUID
 	email            *string
 	created_at       *time.Time
 	updated_at       *time.Time
@@ -5308,7 +5308,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 }
 
 // withUserID sets the ID field of the mutation.
-func withUserID(id int) userOption {
+func withUserID(id uuid.UUID) userOption {
 	return func(m *UserMutation) {
 		var (
 			err   error
@@ -5360,13 +5360,13 @@ func (m UserMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id int) {
+func (m *UserMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id int, exists bool) {
+func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5377,12 +5377,12 @@ func (m *UserMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -6102,7 +6102,7 @@ type UsersToCompanyMutation struct {
 	roleType       *string
 	approved       *bool
 	clearedFields  map[string]struct{}
-	user           *int
+	user           *uuid.UUID
 	cleareduser    bool
 	company        *uuid.UUID
 	clearedcompany bool
@@ -6251,13 +6251,13 @@ func (m *UsersToCompanyMutation) ResetCompanyUUID() {
 	m.company = nil
 }
 
-// SetUserID sets the "userID" field.
-func (m *UsersToCompanyMutation) SetUserID(i int) {
-	m.user = &i
+// SetUserUUID sets the "userUUID" field.
+func (m *UsersToCompanyMutation) SetUserUUID(u uuid.UUID) {
+	m.user = &u
 }
 
-// UserID returns the value of the "userID" field in the mutation.
-func (m *UsersToCompanyMutation) UserID() (r int, exists bool) {
+// UserUUID returns the value of the "userUUID" field in the mutation.
+func (m *UsersToCompanyMutation) UserUUID() (r uuid.UUID, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -6265,25 +6265,25 @@ func (m *UsersToCompanyMutation) UserID() (r int, exists bool) {
 	return *v, true
 }
 
-// OldUserID returns the old "userID" field's value of the UsersToCompany entity.
+// OldUserUUID returns the old "userUUID" field's value of the UsersToCompany entity.
 // If the UsersToCompany object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersToCompanyMutation) OldUserID(ctx context.Context) (v int, err error) {
+func (m *UsersToCompanyMutation) OldUserUUID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+		return v, errors.New("OldUserUUID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
+		return v, errors.New("OldUserUUID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+		return v, fmt.Errorf("querying old value for OldUserUUID: %w", err)
 	}
-	return oldValue.UserID, nil
+	return oldValue.UserUUID, nil
 }
 
-// ResetUserID resets all changes to the "userID" field.
-func (m *UsersToCompanyMutation) ResetUserID() {
+// ResetUserUUID resets all changes to the "userUUID" field.
+func (m *UsersToCompanyMutation) ResetUserUUID() {
 	m.user = nil
 }
 
@@ -6359,6 +6359,11 @@ func (m *UsersToCompanyMutation) ResetApproved() {
 	m.approved = nil
 }
 
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *UsersToCompanyMutation) SetUserID(id uuid.UUID) {
+	m.user = &id
+}
+
 // ClearUser clears the "user" edge to the User entity.
 func (m *UsersToCompanyMutation) ClearUser() {
 	m.cleareduser = true
@@ -6369,10 +6374,18 @@ func (m *UsersToCompanyMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
+// UserID returns the "user" edge ID in the mutation.
+func (m *UsersToCompanyMutation) UserID() (id uuid.UUID, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *UsersToCompanyMutation) UserIDs() (ids []int) {
+func (m *UsersToCompanyMutation) UserIDs() (ids []uuid.UUID) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -6463,7 +6476,7 @@ func (m *UsersToCompanyMutation) Fields() []string {
 		fields = append(fields, userstocompany.FieldCompanyUUID)
 	}
 	if m.user != nil {
-		fields = append(fields, userstocompany.FieldUserID)
+		fields = append(fields, userstocompany.FieldUserUUID)
 	}
 	if m.roleType != nil {
 		fields = append(fields, userstocompany.FieldRoleType)
@@ -6481,8 +6494,8 @@ func (m *UsersToCompanyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case userstocompany.FieldCompanyUUID:
 		return m.CompanyUUID()
-	case userstocompany.FieldUserID:
-		return m.UserID()
+	case userstocompany.FieldUserUUID:
+		return m.UserUUID()
 	case userstocompany.FieldRoleType:
 		return m.RoleType()
 	case userstocompany.FieldApproved:
@@ -6498,8 +6511,8 @@ func (m *UsersToCompanyMutation) OldField(ctx context.Context, name string) (ent
 	switch name {
 	case userstocompany.FieldCompanyUUID:
 		return m.OldCompanyUUID(ctx)
-	case userstocompany.FieldUserID:
-		return m.OldUserID(ctx)
+	case userstocompany.FieldUserUUID:
+		return m.OldUserUUID(ctx)
 	case userstocompany.FieldRoleType:
 		return m.OldRoleType(ctx)
 	case userstocompany.FieldApproved:
@@ -6520,12 +6533,12 @@ func (m *UsersToCompanyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCompanyUUID(v)
 		return nil
-	case userstocompany.FieldUserID:
-		v, ok := value.(int)
+	case userstocompany.FieldUserUUID:
+		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUserID(v)
+		m.SetUserUUID(v)
 		return nil
 	case userstocompany.FieldRoleType:
 		v, ok := value.(string)
@@ -6548,16 +6561,13 @@ func (m *UsersToCompanyMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UsersToCompanyMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UsersToCompanyMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -6596,8 +6606,8 @@ func (m *UsersToCompanyMutation) ResetField(name string) error {
 	case userstocompany.FieldCompanyUUID:
 		m.ResetCompanyUUID()
 		return nil
-	case userstocompany.FieldUserID:
-		m.ResetUserID()
+	case userstocompany.FieldUserUUID:
+		m.ResetUserUUID()
 		return nil
 	case userstocompany.FieldRoleType:
 		m.ResetRoleType()

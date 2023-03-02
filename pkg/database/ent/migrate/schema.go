@@ -227,7 +227,7 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "UUID", Type: field.TypeUUID},
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -248,7 +248,7 @@ var (
 		{Name: "UUID", Type: field.TypeUUID, Unique: true},
 		{Name: "role_type", Type: field.TypeString},
 		{Name: "approved", Type: field.TypeBool},
-		{Name: "user_id", Type: field.TypeInt},
+		{Name: "user_uuid", Type: field.TypeUUID},
 		{Name: "company_uuid", Type: field.TypeUUID},
 	}
 	// UsersToCompaniesTable holds the schema information for the "users_to_companies" table.

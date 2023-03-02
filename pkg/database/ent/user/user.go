@@ -4,13 +4,15 @@ package user
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
 	// Label holds the string label denoting the user type in the database.
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
-	FieldID = "id"
+	FieldID = "UUID"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -61,6 +63,6 @@ var (
 	DefaultUpdatedAt time.Time
 	// DefaultRole holds the default value on creation for the "role" field.
 	DefaultRole string
-	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(int) error
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

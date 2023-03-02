@@ -4,7 +4,11 @@ info:
     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net,
     #swagger](http://swagger.io/irc/).  For this sample, you can use the api key
     `special-key` to test the authorization filters."
+<<<<<<< HEAD
+  version: 0.0.3
+=======
   version: 1.0.2
+>>>>>>> main
   title: Online Certificate Repository
   termsOfService: "temp"
   contact:

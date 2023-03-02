@@ -13,8 +13,8 @@ const (
 	FieldID = "UUID"
 	// FieldCompanyUUID holds the string denoting the companyuuid field in the database.
 	FieldCompanyUUID = "company_uuid"
-	// FieldUserID holds the string denoting the userid field in the database.
-	FieldUserID = "user_id"
+	// FieldUserUUID holds the string denoting the useruuid field in the database.
+	FieldUserUUID = "user_uuid"
 	// FieldRoleType holds the string denoting the roletype field in the database.
 	FieldRoleType = "role_type"
 	// FieldApproved holds the string denoting the approved field in the database.
@@ -23,8 +23,6 @@ const (
 	EdgeUser = "user"
 	// EdgeCompany holds the string denoting the company edge name in mutations.
 	EdgeCompany = "company"
-	// UserFieldID holds the string denoting the ID field of the User.
-	UserFieldID = "id"
 	// Table holds the table name of the userstocompany in the database.
 	Table = "users_to_companies"
 	// UserTable is the table that holds the user relation/edge.
@@ -33,7 +31,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_id"
+	UserColumn = "user_uuid"
 	// CompanyTable is the table that holds the company relation/edge.
 	CompanyTable = "users_to_companies"
 	// CompanyInverseTable is the table name for the Company entity.
@@ -47,7 +45,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCompanyUUID,
-	FieldUserID,
+	FieldUserUUID,
 	FieldRoleType,
 	FieldApproved,
 }

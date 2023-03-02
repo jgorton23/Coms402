@@ -42,7 +42,7 @@ func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (e
 
 	// role mapping already exists
 	if exists {
-		c.logger.Info(fmt.Sprintf("userToCompany %v-%v role mapping already exists in database", dutc.UserID, dutc.CompanyUUID))
+		c.logger.Info(fmt.Sprintf("userToCompany %v-%v role mapping already exists in database", dutc.UserUUID, dutc.CompanyUUID))
 		return ErrUserToCompanyFound
 	}
 
@@ -53,7 +53,7 @@ func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (e
 		return err
 	}
 
-	c.logger.Info(fmt.Sprintf("userToCompany %v-%v role mapping created in database", dutc.UserID, dutc.CompanyUUID))
+	c.logger.Info(fmt.Sprintf("userToCompany %v-%v role mapping created in database", dutc.UserUUID, dutc.CompanyUUID))
 
 	return nil
 }

@@ -12,7 +12,7 @@ const (
 type UserToCompany struct {
 	UUID        uuid.UUID
 	CompanyUUID uuid.UUID
-	UserID      int
+	UserUUID    uuid.UUID
 	RoleType    Role
 	Approved    bool
 }
