@@ -44,11 +44,11 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.AuthorizationEnforcerRepo
 	authorizationEnforcer.enforcer = enforcer
 
 	// TODO implement ths in a smarter way
-	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/static/*", "*")
-	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/static", "*")
-	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/auth/*", "*")
-	_, _ = authorizationEnforcer.enforcer.AddPolicy("user", "/v1/*", "*")
-	_, _ = authorizationEnforcer.enforcer.AddPolicy("user", "/hello", "*")
+	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/metrics", "*")
+	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/docs", "*")
+	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/docs/*", "*")
+	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/api/auth/*", "*")
+	_, _ = authorizationEnforcer.enforcer.AddPolicy("user", "/api/v1/*", "*")
 
 	return authorizationEnforcer, nil
 }

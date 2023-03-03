@@ -3,8 +3,8 @@ import { check, group, sleep, fail } from 'k6';
 
 export const options = {
   stages: [
-    { duration: '20m', target: 10 }, // simulate ramp-up of traffic from 1 to 100 users over 5 minutes.
-    { duration: '30m', target: 10 }, // stay at 100 users for 10 minutes
+    { duration: '5m', target: 60 }, // simulate ramp-up of traffic from 1 to 100 users over 5 minutes.
+    { duration: '30m', target: 60 }, // stay at 100 users for 10 minutes
     { duration: '10m', target: 0 }, // ramp-down to 0 users
   ],
   thresholds: {
@@ -17,13 +17,13 @@ export const options = {
 
 const BASE_URL = 'http://localhost:8082';
 const EMAIL = 'test@test.com';
-const PASSWORD = 'Test@test22';
+const PASSWORD = ':GJ1HNBL:$TT:tf';
 
 export default () => {
 
   let loginData = { email: EMAIL, password: PASSWORD, };
 
-  let loginRes = http.post(`${BASE_URL}/auth/login`, JSON.stringify(loginData), {
+  let loginRes = http.post(`${BASE_URL}/api/auth/login`, JSON.stringify(loginData), {
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -32,7 +32,7 @@ export default () => {
   });
 
 
-  let logoutRes = http.del(`${BASE_URL}/auth/logout`, JSON.stringify(loginData), {
+  let logoutRes = http.del(`${BASE_URL}/api/auth/logout`, JSON.stringify(loginData), {
     headers: { 'Content-Type': 'application/json' },
   });
   // console.log(logoutRes.json());

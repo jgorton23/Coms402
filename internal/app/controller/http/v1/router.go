@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/flowchartsman/swaggerui"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
@@ -17,10 +19,15 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/httpserver"
 
+	_ "embed"
+
 	_ "github.com/volatiletech/authboss/v3/auth"
 	_ "github.com/volatiletech/authboss/v3/logout"
 	_ "github.com/volatiletech/authboss/v3/register"
 )
+
+//go:embed openapi.yml
+var spec []byte
 
 func NewHttpV1Router(i *do.Injector) (*HttpV1Router, error) {
 	c := &HttpV1Router{
@@ -56,12 +63,17 @@ func (c *HttpV1Router) Shutdown() error {
 }
 
 func (c *HttpV1Router) Run() {
+	prometheus.Register(totalRequests)
+	prometheus.Register(responseStatus)
+	prometheus.Register(httpDuration)
+
 	// HTTP Server
 	mux := chi.NewRouter()
 	mux.Use(chimiddleware.RequestID)
 	mux.Use(chimiddleware.RealIP)
 	mux.Use(middleware.NewStructuredLogger(c.logger))
 	mux.Use(chimiddleware.Recoverer)
+	mux.Use(prometheusMiddleware)
 
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
@@ -89,23 +101,28 @@ func (c *HttpV1Router) Run() {
 
 		r.Get("/metrics", promhttp.Handler().(http.HandlerFunc))
 
-		// Mount the router to a path (this should be the same as the Mount path above)
-		// mux in this example is a chi router, but it could be anything that can route to
-		// the Core.HttpV1Router.
-		r.Group(func(mux chi.Router) {
-			mux.Use(authboss.ModuleListMiddleware(c.authBoss))
-			mux.Mount("/auth", http.StripPrefix("/auth", c.authBoss.Config.Core.Router))
+		r.Mount("/docs/v1/", http.StripPrefix("/docs/v1", swaggerui.Handler(spec)))
+
+		r.Get("/docs/", func(writer http.ResponseWriter, req *http.Request) {
+			http.Redirect(writer, req, "/docs/v1/", http.StatusMovedPermanently)
 		})
 
-		// Protected Routes
-		r.Group(func(r chi.Router) {
-			r.Use(authboss.Middleware2(c.authBoss, authboss.RequireNone, authboss.RespondUnauthorized))
+		r.Route("/api", func(r chi.Router) {
+			// Mount the router to a path (this should be the same as the Mount path above)
+			// mux in this example is a chi router, but it could be anything that can route to
+			// the Core.HttpV1Router.
+			r.Group(func(mux chi.Router) {
+				mux.Use(authboss.ModuleListMiddleware(c.authBoss))
+				mux.Mount("/auth", http.StripPrefix("/api/auth", c.authBoss.Config.Core.Router))
+			})
 
-			// Openapi generated interfaces
-			HandlerFromMuxWithBaseURL(c.httpV1, r, "/v1")
+			// Protected Routes
+			r.Group(func(r chi.Router) {
+				r.Use(authboss.Middleware2(c.authBoss, authboss.RequireNone, authboss.RespondUnauthorized))
 
-			r.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("hello world"))
+				// Openapi generated interfaces
+				HandlerFromMuxWithBaseURL(c.httpV1, r, "/v1")
+
 			})
 		})
 	})
