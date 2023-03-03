@@ -4,8 +4,8 @@ services:
   postgres:
     container_name: postgres
     image: postgres
-    # volumes:
-    #   - pg-data:/var/lib/postgresql/data
+    volumes:
+      - pg-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: 'user'
       POSTGRES_PASSWORD: 'pass'
@@ -13,26 +13,29 @@ services:
     ports:
       - 5432:5432
 
-  # app:
-  #   build: .
-  #   container_name: app
-  #   image: app
-  #   environment:
-  #     PG_URL: 'postgres://user:pass@postgres:5432/postgres'
-  #     RMQ_URL: 'amqp://guest:guest@rabbitmq:5672/'
-  #   ports:
-  #     - 8080:8080
-  #   depends_on:
-  #     - postgres
+  prometheus:
+    image: prom/prometheus:v2.24.0
+    container_name: prometheus
+    volumes:
+      - ./.prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    restart: always
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
 
-  # integration:
-  #   build:
-  #     context: .
-  #     dockerfile: integration-test/Dockerfile
-  #   container_name: integration
-  #   image: integration
-  #   depends_on:
-  #     - app
-
-# volumes:
-#   pg-data:
+volumes:
+  prometheus_data:
+  grafana-storage:
+  pg-data:
