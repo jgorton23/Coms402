@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
@@ -30,4 +31,8 @@ type User struct {
 
 func (u User) FindByEmail(ctx context.Context, email string) (domain.User, error) {
 	return u.User.GetByEmail(ctx, email)
+}
+
+func (u User) FindByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
+	return u.User.GetByUUID(ctx, uuid)
 }

@@ -4,7 +4,7 @@ info:
     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net,
     #swagger](http://swagger.io/irc/).  For this sample, you can use the api key
     `special-key` to test the authorization filters."
-  version: 1.0.2
+  version: 0.0.3
   title: Online Certificate Repository
   termsOfService: "temp"
   contact:
@@ -15,12 +15,45 @@ info:
 tags:
   - name: company
     description: Company
+  - name: user
+    description: User
   - name: userRole
     description: userRoles
 #     externalDocs:
 #       description: Find out more
 #       url: http://swagger.io
 paths:
+  /user:
+    get:
+      tags:
+        - user
+      summary: Find user by *
+      description: Returns a single user
+      operationId: getUserBy*
+      parameters:
+        - name: userEmail
+          in: query
+          description: email of user to return
+          required: false
+          schema:
+            type: string
+        - name: userUUID
+          in: query
+          description: uuid of user to return
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'    
   /user/role:
     post:
       tags:
@@ -169,6 +202,23 @@ components:
             $ref: "#/components/schemas/Error"      
       description: unauthorized error
   schemas:
+    User:
+      type: object
+      required:
+        - "uuid"
+        - "email"
+        - "created"
+      properties:
+        uuid: 
+          type: string
+          description: uuid of the user
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+        email:
+          type: string
+          description: email of the user
+        created:
+          type: string
+          description: time user was created at
     NewUserRole:
       type: object
       required:

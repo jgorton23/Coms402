@@ -48,7 +48,7 @@ func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	return users, nil
 }
 
-func (ur *userDBEntImplem) GetById(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
+func (ur *userDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
 		Where(user.ID(uuid)).
