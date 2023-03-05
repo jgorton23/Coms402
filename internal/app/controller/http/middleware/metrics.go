@@ -1,4 +1,4 @@
-package http
+package middleware
 
 import (
 	"net/http"
@@ -43,7 +43,7 @@ var httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
 	Help: "Duration of HTTP requests.",
 }, []string{"path"})
 
-func prometheusMiddleware(next http.Handler) http.Handler {
+func Prometheus(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		timer := prometheus.NewTimer(httpDuration.WithLabelValues(r.URL.Path))
 		rw := NewResponseWriter(w)
@@ -56,4 +56,10 @@ func prometheusMiddleware(next http.Handler) http.Handler {
 
 		timer.ObserveDuration()
 	})
+}
+
+func PrometheusRegister() {
+	prometheus.Register(totalRequests)
+	prometheus.Register(responseStatus)
+	prometheus.Register(httpDuration)
 }
