@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/samber/do"
 	"github.com/volatiletech/authboss/v3"
@@ -62,10 +61,7 @@ func (c *HttpV1Router) Shutdown() error {
 	return nil
 }
 
-func (c *HttpV1Router) Run() {
-	prometheus.Register(totalRequests)
-	prometheus.Register(responseStatus)
-	prometheus.Register(httpDuration)
+func (c *HttpV1Router) Run(injector *do.Injector) {
 
 	// HTTP Server
 	mux := chi.NewRouter()
@@ -73,7 +69,9 @@ func (c *HttpV1Router) Run() {
 	mux.Use(chimiddleware.RealIP)
 	mux.Use(middleware.NewStructuredLogger(c.logger))
 	mux.Use(chimiddleware.Recoverer)
-	mux.Use(prometheusMiddleware)
+
+	middleware.PrometheusRegister()
+	mux.Use(middleware.Prometheus)
 
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
@@ -84,7 +82,7 @@ func (c *HttpV1Router) Run() {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: false,
+		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
@@ -95,6 +93,19 @@ func (c *HttpV1Router) Run() {
 	// 	// http.FileServer(http.Dir("static")),
 	// ))
 
+	// Useful for tools like k8s or just to verify the service has it's dependencies working
+	mux.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		for i, v := range injector.HealthCheck() {
+			if v != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(fmt.Sprintf("Health check  %v failed: %v", i, v.Error())))
+				return
+			}
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
+
 	mux.Group(func(r chi.Router) {
 		r.Use(c.authBoss.LoadClientStateMiddleware)
 		r.Use(middleware.Authorizer(c.httpAuthorization, c.authBoss))
@@ -102,10 +113,6 @@ func (c *HttpV1Router) Run() {
 		r.Get("/metrics", promhttp.Handler().(http.HandlerFunc))
 
 		r.Mount("/docs/v1/", http.StripPrefix("/docs/v1", swaggerui.Handler(spec)))
-
-		r.Get("/docs/", func(writer http.ResponseWriter, req *http.Request) {
-			http.Redirect(writer, req, "/docs/v1/", http.StatusMovedPermanently)
-		})
 
 		r.Route("/api", func(r chi.Router) {
 			// Mount the router to a path (this should be the same as the Mount path above)

@@ -45,6 +45,7 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.AuthorizationEnforcerRepo
 
 	// TODO implement ths in a smarter way
 	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/metrics", "*")
+	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/healthz", "*")
 	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/docs", "*")
 	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/docs/*", "*")
 	_, _ = authorizationEnforcer.enforcer.AddPolicy("*", "/api/auth/*", "*")

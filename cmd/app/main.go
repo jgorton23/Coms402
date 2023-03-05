@@ -53,7 +53,7 @@ func main() {
 	do.Provide(injector, v1.NewHttpV1Router)
 
 	c := do.MustInvoke[*v1.HttpV1Router](injector)
-	c.Run()
+	c.Run(injector)
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
