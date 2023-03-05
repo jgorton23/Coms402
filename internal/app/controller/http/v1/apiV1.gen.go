@@ -35,6 +35,18 @@ type NewCompany struct {
 	Name string `json:"name"`
 }
 
+// User defines model for User.
+type User struct {
+	// Created time user was created at
+	Created string `json:"created"`
+
+	// Email email of the user
+	Email string `json:"email"`
+
+	// Uuid uuid of the user
+	Uuid string `json:"uuid"`
+}
+
 // DefaultErrorResponse defines model for DefaultErrorResponse.
 type DefaultErrorResponse = Error
 
@@ -43,6 +55,15 @@ type DefaultUnauthenticatedErrorResponse = Error
 
 // DefaultUnauthorizedErrorResponse defines model for DefaultUnauthorizedErrorResponse.
 type DefaultUnauthorizedErrorResponse = Error
+
+// GetUserByParams defines parameters for GetUserBy.
+type GetUserByParams struct {
+	// UserEmail email of user to return
+	UserEmail *string `form:"userEmail,omitempty" json:"userEmail,omitempty"`
+
+	// UserUUID uuid of user to return
+	UserUUID *string `form:"userUUID,omitempty" json:"userUUID,omitempty"`
+}
 
 // AddCompanyJSONRequestBody defines body for AddCompany for application/json ContentType.
 type AddCompanyJSONRequestBody = NewCompany
@@ -61,6 +82,9 @@ type ServerInterface interface {
 	// Find company by UUID
 	// (GET /company/{companyUUID})
 	GetCompanyByUUID(w http.ResponseWriter, r *http.Request, companyUUID string)
+	// Find user by *
+	// (GET /user)
+	GetUserBy(w http.ResponseWriter, r *http.Request, params GetUserByParams)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -119,6 +143,42 @@ func (siw *ServerInterfaceWrapper) GetCompanyByUUID(w http.ResponseWriter, r *ht
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCompanyByUUID(w, r, companyUUID)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetUserBy operation middleware
+func (siw *ServerInterfaceWrapper) GetUserBy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUserByParams
+
+	// ------------- Optional query parameter "userEmail" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "userEmail", r.URL.Query(), &params.UserEmail)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userEmail", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "userUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "userUUID", r.URL.Query(), &params.UserUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userUUID", Err: err})
+		return
+	}
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUserBy(w, r, params)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -249,6 +309,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/company/{companyUUID}", wrapper.GetCompanyByUUID)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/user", wrapper.GetUserBy)
 	})
 
 	return r

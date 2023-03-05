@@ -41,7 +41,7 @@ type (
 	// UserRepo -
 	UserRepo interface {
 		Get(context.Context) ([]domain.User, error)
-		GetById(context.Context, uuid.UUID) (domain.User, error)
+		GetByUUID(context.Context, uuid.UUID) (domain.User, error)
 		GetByEmail(context.Context, string) (domain.User, error)
 		Exists(context.Context, string) (bool, error)
 		Create(context.Context, domain.User) (domain.User, error)
