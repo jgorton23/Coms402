@@ -41,7 +41,7 @@ func (Api) Gen() error {
 
 	w := bufio.NewWriter(f)
 
-	ok, err = sh.Exec(nil, w, os.Stdout, "oapi-codegen", "--config", ".oapi-config.yml", "openapi.yml")
+	ok, err = sh.Exec(nil, w, os.Stdout, "oapi-codegen", "--config", ".oapi-config.yml", "./internal/app/controller/http/v1/openapi.yml")
 
 	if !ok {
 		return err

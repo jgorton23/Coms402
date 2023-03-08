@@ -67,6 +67,7 @@ func (c Company) Create(ctx context.Context, dc domain.Company, userUUID uuid.UU
 
 	// Add initial Company Owner
 
+	// TODO check for err
 	c.userToCompany.Create(ctx, domain.UserToCompany{
 		CompanyUUID: dc.UUID,
 		UserUUID:    userUUID,

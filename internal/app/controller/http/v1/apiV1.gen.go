@@ -35,6 +35,14 @@ type NewCompany struct {
 	Name string `json:"name"`
 }
 
+// NewUserRole defines model for NewUserRole.
+type NewUserRole struct {
+	Approved    *bool   `json:"approved,omitempty"`
+	CompanyUUID string  `json:"companyUUID"`
+	RoleType    string  `json:"roleType"`
+	UserUUID    *string `json:"userUUID,omitempty"`
+}
+
 // User defines model for User.
 type User struct {
 	// Created time user was created at
@@ -45,6 +53,15 @@ type User struct {
 
 	// Uuid uuid of the user
 	Uuid string `json:"uuid"`
+}
+
+// UserRole defines model for UserRole.
+type UserRole struct {
+	Approved    *bool   `json:"approved,omitempty"`
+	CompanyUUID string  `json:"companyUUID"`
+	RoleType    string  `json:"roleType"`
+	UserUUID    *string `json:"userUUID,omitempty"`
+	Uuid        string  `json:"uuid"`
 }
 
 // DefaultErrorResponse defines model for DefaultErrorResponse.
@@ -71,6 +88,9 @@ type AddCompanyJSONRequestBody = NewCompany
 // UpdateCompanyJSONRequestBody defines body for UpdateCompany for application/json ContentType.
 type UpdateCompanyJSONRequestBody = Company
 
+// AddUserRoleJSONRequestBody defines body for AddUserRole for application/json ContentType.
+type AddUserRoleJSONRequestBody = NewUserRole
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Create a new Company
@@ -85,6 +105,9 @@ type ServerInterface interface {
 	// Find user by *
 	// (GET /user)
 	GetUserBy(w http.ResponseWriter, r *http.Request, params GetUserByParams)
+	// Create a new User Role
+	// (POST /user/role)
+	AddUserRole(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -179,6 +202,21 @@ func (siw *ServerInterfaceWrapper) GetUserBy(w http.ResponseWriter, r *http.Requ
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetUserBy(w, r, params)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddUserRole operation middleware
+func (siw *ServerInterfaceWrapper) AddUserRole(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddUserRole(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -312,6 +350,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/user", wrapper.GetUserBy)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/user/role", wrapper.AddUserRole)
 	})
 
 	return r

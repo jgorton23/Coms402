@@ -23,9 +23,10 @@ var (
 
 func NewHttpV1(i *do.Injector) (ServerInterface, error) {
 	httpV1 := &httpV1Implem{
-		logger:         do.MustInvoke[*usecase.Logger](i).WithSubsystem("controller http v1"),
-		companyUseCase: do.MustInvoke[*usecase.Company](i),
-		userUseCase:    do.MustInvoke[*usecase.User](i),
+		logger:               do.MustInvoke[*usecase.Logger](i).WithSubsystem("controller http v1"),
+		companyUseCase:       do.MustInvoke[*usecase.Company](i),
+		userUseCase:          do.MustInvoke[*usecase.User](i),
+		userToCompanyUseCase: do.MustInvoke[*usecase.UserToCompany](i),
 	}
 
 	return httpV1, nil
@@ -36,6 +37,7 @@ type httpV1Implem struct {
 	userUseCase           *usecase.User
 	authbossAuthenticator *authboss.Authboss
 	logger                *usecase.Logger
+	userToCompanyUseCase  *usecase.UserToCompany
 }
 
 func (v1 httpV1Implem) AddCompany(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +129,61 @@ func (v1 httpV1Implem) GetCompanyByUUID(w http.ResponseWriter, r *http.Request, 
 	}
 
 	respondWithJson(w, r, http.StatusOK, company)
+}
+
+func (v1 httpV1Implem) AddUserRole(w http.ResponseWriter, r *http.Request) {
+
+	var requestBody AddUserRoleJSONRequestBody
+
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		respondWithError(w, r, "invalid company json object found", http.StatusBadRequest)
+		return
+	}
+
+	var assignerUUID uuid.UUID
+	var userUUID uuid.UUID
+
+	if requestBody.UserUUID == nil {
+
+		domainUser, err := v1.loadDomainUser(r)
+
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		userUUID = domainUser.UUID
+		assignerUUID = domainUser.UUID
+	} else {
+		userUUID, err = uuid.Parse(*requestBody.UserUUID)
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("invalid user UUID: %v", err), http.StatusBadRequest)
+			return
+		}
+	}
+
+	companyUUID, err := uuid.Parse(requestBody.CompanyUUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("invalid user UUID: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	role, err := v1.userToCompanyUseCase.Add(r.Context(), domain.UserToCompany{
+		CompanyUUID: companyUUID,
+		UserUUID:    userUUID,
+		RoleType:    domain.Role(requestBody.RoleType),
+		Approved:    *requestBody.Approved,
+	}, assignerUUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to create company: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	respondWithJson(w, r, http.StatusCreated, role)
+
 }
 
 func (v1 httpV1Implem) GetUserBy(w http.ResponseWriter, r *http.Request, params GetUserByParams) {

@@ -33,30 +33,63 @@ type UserToCompany struct {
 	logger        *Logger
 }
 
-func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (err error) {
+func (c UserToCompany) Add(ctx context.Context, dutc domain.UserToCompany, assignerUUID uuid.UUID) (role domain.UserToCompany, err error) {
+
+	if dutc.RoleType == domain.RolePrimaryOwner {
+		return domain.UserToCompany{}, errors.New("cannot assign primary owner role")
+	}
+
+	if assignerUUID == dutc.UserUUID {
+		if dutc.Approved {
+			return domain.UserToCompany{}, errors.New("cannot approve self-assigned role")
+		}
+		return c.Create(ctx, dutc)
+	}
+
+	allowed, err := c.AllowedToEdit(ctx, assignerUUID, dutc.CompanyUUID)
+
+	if err != nil {
+		return domain.UserToCompany{}, err
+	}
+
+	if !allowed {
+		return domain.UserToCompany{}, ErrUnauthorized
+	}
+
+	role, err = c.Create(ctx, dutc)
+
+	if err != nil {
+		c.logger.Info(fmt.Sprintf("invalid UserToCompany %v-%v role mapping creation failed", dutc.UserUUID, dutc.CompanyUUID))
+		return domain.UserToCompany{}, err
+	}
+
+	return role, nil
+}
+
+func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (role domain.UserToCompany, err error) {
 
 	exists, err := c.userToCompany.Exists(ctx, dutc.UserUUID, dutc.CompanyUUID)
 
 	if err != nil {
-		return err
+		return domain.UserToCompany{}, err
 	}
 
 	// role mapping already exists
 	if exists {
 		c.logger.Info(fmt.Sprintf("userToCompany %v-%v role mapping already exists in database", dutc.UserUUID, dutc.CompanyUUID))
-		return ErrUserToCompanyFound
+		return domain.UserToCompany{}, ErrUserToCompanyFound
 	}
 
 	// Save role mapping to the database
-	_, err = c.userToCompany.Create(ctx, dutc)
+	role, err = c.userToCompany.Create(ctx, dutc)
 
 	if err != nil {
-		return err
+		return domain.UserToCompany{}, err
 	}
 
 	c.logger.Info(fmt.Sprintf("userToCompany %v-%v role mapping created in database", dutc.UserUUID, dutc.CompanyUUID))
 
-	return nil
+	return role, nil
 }
 
 func (c UserToCompany) AllowedToEdit(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
