@@ -5,7 +5,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/casbin/casbin/v2/model"
 	"github.com/google/uuid"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
@@ -18,24 +17,6 @@ type (
 	ConfigRepo interface {
 		Load(string) error
 		Get() *domain.Config
-	}
-
-	// AuthorizationPolicyRepo -
-	AuthorizationPolicyRepo interface {
-		// LoadPolicy loads all policy rules from the storage.
-		LoadPolicy(model model.Model) error
-		// SavePolicy saves all policy rules to the storage.
-		SavePolicy(model model.Model) error
-
-		// AddPolicy adds a policy rule to the storage.
-		// This is part of the Auto-Save feature.
-		AddPolicy(sec string, ptype string, rule []string) error
-		// RemovePolicy removes a policy rule from the storage.
-		// This is part of the Auto-Save feature.
-		RemovePolicy(sec string, ptype string, rule []string) error
-		// RemoveFilteredPolicy removes policy rules that match the filter from the storage.
-		// This is part of the Auto-Save feature.
-		RemoveFilteredPolicy(sec string, ptype string, fieldIndex int, fieldValues ...string) error
 	}
 
 	// UserRepo -
@@ -57,10 +38,40 @@ type (
 		Error(msg string, fields ...map[string]interface{})
 	}
 
-	// AuthorizationEnforcerRepo -
-	AuthorizationEnforcerRepo interface {
+	// IAuthorizationEnforcerRepo -
+	IAuthorizationEnforcerRepo interface {
+		AddPolicyRolePathMethod(role, path, method string) (bool, error)
+		RemovePolicyRolePathMethod(role, path, method string) (bool, error)
 		EnforceRolePathMethod(role, path, method string) (bool, error)
-		ReloadPolicy() error
+
+		// AddPolicyRBAC is responsible for adding policy actions.
+		// For example either adding a policy for a group like
+		// "role:company1:member, data_group:company1:certs, read"
+		// Or for an individual like
+		// "matt, data_group:company1:certs, read"
+		AddPolicyRBAC(role, data, action string) (bool, error)
+		// RemovePolicyRBAC is responsible for  removing policy actions
+		RemovePolicyRBAC(role, data, action string) (bool, error)
+
+		// AddGroupRBAC is responsible for adding a group mapping for
+		// role to role mappings and user to role mappings like
+		// "role:company1:primary_owner, role:company1:owner"
+		// which means the primary_owner has all the policies that a
+		// owner has. With all policies being additive this works.
+		// Adding a user to a  group is the very similar to before
+		// "bob, role:company1:primary_owner"
+		AddGroupRBAC(role1, role2 string) (bool, error)
+		// RemoveGroupRBAC is responsible for  removing group mappings
+		RemoveGroupRBAC(role1, role2 string) (bool, error)
+
+		// AddGroupDataRBAC is responsible for adding group data mappings
+		// like "data:cert1, data_group:company1:certs"
+		AddGroupDataRBAC(data, role string) (bool, error)
+		// RemoveGroupDataRBAC is responsible for removing a group data mapping
+		RemoveGroupDataRBAC(data, role string) (bool, error)
+
+		// EnforceRBAC determines if a user can perform an action on a data
+		EnforceRBAC(user, data, action string) (bool, error)
 	}
 
 	// SessionStateRepo -
@@ -78,7 +89,7 @@ type (
 		GetByUUID(context.Context, uuid.UUID) (domain.Company, error)
 	}
 
-	// userToCompanyRepo -
+	// UserToCompanyRepo -
 	UserToCompanyRepo interface {
 		Exists(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error)
 		Create(context.Context, domain.UserToCompany) (domain.UserToCompany, error)

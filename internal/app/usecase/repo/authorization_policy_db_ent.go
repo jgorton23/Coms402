@@ -10,7 +10,6 @@ import (
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/samber/do"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
@@ -18,13 +17,12 @@ import (
 
 // Pattern to verify authorizationPolicyDBEntImplem conforms to the required interfaces
 var (
-	_assertAuthorizationPolicyImplem                                 = &authorizationPolicyDBEntImplem{}
-	_                                usecase.AuthorizationPolicyRepo = _assertAuthorizationPolicyImplem
-	_                                persist.Adapter                 = _assertAuthorizationPolicyImplem
+	_assertAuthorizationPolicyImplem                 = &authorizationPolicyDBEntImplem{}
+	_                                persist.Adapter = _assertAuthorizationPolicyImplem
 )
 
 // NewAuthorizationPolicyRepo -.
-func NewAuthorizationPolicyRepo(i *do.Injector) (usecase.AuthorizationPolicyRepo, error) {
+func NewAuthorizationPolicyRepo(i *do.Injector) (persist.Adapter, error) {
 	dbServiceCasbin := &authorizationPolicyDBEntImplem{
 		client: do.MustInvoke[*DatabaseConnection](i).Client(),
 		ctx:    context.Background(),
