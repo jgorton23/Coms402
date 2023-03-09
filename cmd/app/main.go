@@ -31,8 +31,16 @@ func main() {
 	do.Provide(injector, repo.NewDatabaseConnection)
 	do.Provide(injector, repo.NewUserRepo)
 	do.Provide(injector, repo.NewAuthorizationPolicyRepo)
+
 	do.Provide(injector, repo.NewAuthorizationEnforcer)
-	// do.Provide(injector, repo.NewGorillaSessionRepo) // Gorilla has been deprecated
+	auth := do.MustInvoke[usecase.IAuthorizationEnforcerRepo](injector)
+	auth.AddPolicyRolePathMethod("*", "/metrics", "*")
+	auth.AddPolicyRolePathMethod("*", "/healthz", "*")
+	auth.AddPolicyRolePathMethod("*", "/docs", "*")
+	auth.AddPolicyRolePathMethod("*", "/docs/*", "*")
+	auth.AddPolicyRolePathMethod("*", "/api/auth/*", "*")
+	auth.AddPolicyRolePathMethod("user", "/api/v1/*", "*")
+
 	do.Provide(injector, repo.NewSCSRepo)
 	do.Provide(injector, repo.NewSCSSessionRepo)
 	do.Provide(injector, repo.NewUserToCompanyRepo)

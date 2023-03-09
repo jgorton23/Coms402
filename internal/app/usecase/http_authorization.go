@@ -8,9 +8,8 @@ import (
 
 func NewHTTPAuthorization(i *do.Injector) (*HTTPAuthorization, error) {
 	a := &HTTPAuthorization{
-		userRepo:                do.MustInvoke[UserRepo](i),
-		authorizationPolicyRepo: do.MustInvoke[AuthorizationPolicyRepo](i),
-		authorizationEnforcer:   do.MustInvoke[AuthorizationEnforcerRepo](i),
+		userRepo:              do.MustInvoke[UserRepo](i),
+		authorizationEnforcer: do.MustInvoke[IAuthorizationEnforcerRepo](i),
 	}
 
 	do.MustInvoke[*Logger](i).WithSubsystem("http_authorization").Info("http authorization service started")
@@ -19,9 +18,8 @@ func NewHTTPAuthorization(i *do.Injector) (*HTTPAuthorization, error) {
 }
 
 type HTTPAuthorization struct {
-	userRepo                UserRepo
-	authorizationPolicyRepo AuthorizationPolicyRepo
-	authorizationEnforcer   AuthorizationEnforcerRepo
+	userRepo              UserRepo
+	authorizationEnforcer IAuthorizationEnforcerRepo
 }
 
 func (a HTTPAuthorization) EnforceUser(user, path, method string) (bool, error) {
@@ -44,11 +42,6 @@ func (a HTTPAuthorization) EnforceUser(user, path, method string) (bool, error) 
 		}
 
 		role = u.Role
-	}
-
-	err := a.authorizationEnforcer.ReloadPolicy()
-	if err != nil {
-		return false, err
 	}
 
 	enf, err := a.authorizationEnforcer.EnforceRolePathMethod(role, path, method)
