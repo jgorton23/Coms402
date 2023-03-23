@@ -3,6 +3,7 @@ package httpserver
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"time"
 )
@@ -48,7 +49,18 @@ func New(handler http.Handler, opts ...Option) *Server {
 
 func (s *Server) start() {
 	go func() {
-		s.notify <- s.server.ListenAndServe()
+		l, err := net.Listen("tcp", s.server.Addr)
+
+		if err != nil {
+			s.notify <- err
+		}
+
+		// TODO use a cannel to send a notification that the server has started correctly. 
+		// useful to have the server run in the background but block until the server has started.
+
+		s.notify <- s.server.Serve(l)
+
+		// s.notify <- s.server.ListenAndServe()
 		close(s.notify)
 	}()
 }

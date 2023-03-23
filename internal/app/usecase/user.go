@@ -17,7 +17,7 @@ var (
 
 func NewUser(i *do.Injector) (*User, error) {
 	c := &User{
-		User:   do.MustInvoke[UserRepo](i),
+		user:   do.MustInvoke[UserRepo](i),
 		logger: do.MustInvoke[*Logger](i),
 	}
 
@@ -25,14 +25,14 @@ func NewUser(i *do.Injector) (*User, error) {
 }
 
 type User struct {
-	User   UserRepo
+	user   UserRepo
 	logger *Logger
 }
 
 func (u User) FindByEmail(ctx context.Context, email string) (domain.User, error) {
-	return u.User.GetByEmail(ctx, email)
+	return u.user.GetByEmail(ctx, email)
 }
 
 func (u User) FindByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
-	return u.User.GetByUUID(ctx, uuid)
+	return u.user.GetByUUID(ctx, uuid)
 }

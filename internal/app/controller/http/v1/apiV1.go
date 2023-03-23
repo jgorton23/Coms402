@@ -144,17 +144,17 @@ func (v1 httpV1Implem) AddUserRole(w http.ResponseWriter, r *http.Request) {
 	var assignerUUID uuid.UUID
 	var userUUID uuid.UUID
 
+	domainUser, err := v1.loadDomainUser(r)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	assignerUUID = domainUser.UUID
+
 	if requestBody.UserUUID == nil {
-
-		domainUser, err := v1.loadDomainUser(r)
-
-		if err != nil {
-			respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
-			return
-		}
-
 		userUUID = domainUser.UUID
-		assignerUUID = domainUser.UUID
 	} else {
 		userUUID, err = uuid.Parse(*requestBody.UserUUID)
 		if err != nil {
