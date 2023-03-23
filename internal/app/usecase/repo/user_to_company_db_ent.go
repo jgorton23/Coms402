@@ -147,6 +147,26 @@ func (ur *userToCompanyDBEntImplem) GetByCompanyUUID(ctx context.Context, compan
 	return roles, nil
 }
 
+func (ur *userToCompanyDBEntImplem) GetByUserUUID(ctx context.Context, userUUID uuid.UUID) ([]domain.UserToCompany, error) {
+	utcs, err := ur.Client.UsersToCompany.
+		Query().
+		Where(
+			userstocompany.UserUUID(userUUID),
+		).
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	roles := make([]domain.UserToCompany, 0)
+
+	for _, v := range utcs {
+		roles = append(roles, ur.databaseToEntity(v))
+	}
+	return roles, nil
+}
+
 // // Update -.
 // func (ur *userToCompanyDBEntImplem) Update(ctx context.Context, u domain.Company) error {
 // 	_, err := ur.Client.Company.

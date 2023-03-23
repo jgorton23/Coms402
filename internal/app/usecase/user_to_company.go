@@ -97,6 +97,10 @@ func (c UserToCompany) FindByCompanyUUID(ctx context.Context, companyUUID uuid.U
 	return c.userToCompany.GetByCompanyUUID(ctx, companyUUID)
 }
 
+func (c UserToCompany) FindByUserUUID(ctx context.Context, userUUID uuid.UUID) (roles []domain.UserToCompany, err error) {
+	return c.userToCompany.GetByUserUUID(ctx, userUUID)
+}
+
 func (c UserToCompany) FindByUUIDS(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID) (role domain.UserToCompany, err error) {
 	exists, err := c.userToCompany.Exists(ctx, userUUID, companyUUID)
 	if err != nil {
