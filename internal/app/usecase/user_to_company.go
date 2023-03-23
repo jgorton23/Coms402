@@ -94,6 +94,16 @@ func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (r
 
 func (c UserToCompany) Approve(ctx context.Context, dutc domain.UserToCompany, userUUID uuid.UUID) (role domain.UserToCompany, err error) {
 
+	exists, err := c.userToCompany.Exists(ctx, dutc.UserUUID, dutc.CompanyUUID)
+
+	if err != nil {
+		return domain.UserToCompany{}, err
+	}
+
+	if !exists {
+		return domain.UserToCompany{}, ErrUserToCompanyNotFound
+	}
+
 	allowed, err := c.AllowedToEdit(ctx, userUUID, dutc.CompanyUUID)
 
 	if err != nil {
