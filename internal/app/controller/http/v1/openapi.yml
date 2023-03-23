@@ -112,6 +112,38 @@ paths:
           $ref: '#/components/responses/DefaultErrorResponse'
         default:
           $ref: '#/components/responses/DefaultErrorResponse'  
+  /role/approve:
+    put:
+      -tags:
+        - userRole
+      summary: Approve the given role
+      description: "Approves the given role"
+      operationId: approveRole
+      requestBody:
+        description: Role to approve
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRole'
+      responses:
+        "200":
+          description: Successfully approved role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRole'
+        "400":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        "401":
+          $ref: '#/components/responses/DefaultUnauthenticatedErrorResponse'
+        "403":
+          $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
+        "404":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+
   /company:
     post:
       tags:

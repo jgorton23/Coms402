@@ -100,6 +100,9 @@ type UpdateCompanyJSONRequestBody = Company
 // AddUserRoleJSONRequestBody defines body for AddUserRole for application/json ContentType.
 type AddUserRoleJSONRequestBody = NewUserRole
 
+// ApproveRoleJSONRequestBody defines body for ApproveRole for application/json ContentType.
+type ApproveRoleJSONRequestBody = UserRole
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Create a new Company
@@ -117,6 +120,9 @@ type ServerInterface interface {
 	// Create a new User Role
 	// (POST /role)
 	AddUserRole(w http.ResponseWriter, r *http.Request)
+	// Approve the given role
+	// (PUT /role/approve)
+	ApproveRole(w http.ResponseWriter, r *http.Request)
 	// Find user by *
 	// (GET /user)
 	GetUserBy(w http.ResponseWriter, r *http.Request, params GetUserByParams)
@@ -229,6 +235,21 @@ func (siw *ServerInterfaceWrapper) AddUserRole(w http.ResponseWriter, r *http.Re
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.AddUserRole(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// ApproveRole operation middleware
+func (siw *ServerInterfaceWrapper) ApproveRole(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ApproveRole(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -401,6 +422,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/role", wrapper.AddUserRole)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/role/approve", wrapper.ApproveRole)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/user", wrapper.GetUserBy)
