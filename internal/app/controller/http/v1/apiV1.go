@@ -256,8 +256,19 @@ func (v1 httpV1Implem) GetRolesBy(w http.ResponseWriter, r *http.Request, params
 		roles = append(roles, role)
 
 	} else if params.UserUUID != nil {
-		respondWithError(w, r, "This is coming soon", http.StatusNotImplemented)
-		return
+		id, err := uuid.Parse(*params.UserUUID)
+
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		roles, err = v1.userToCompanyUseCase.FindByUserUUID(r.Context(), id)
+
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+			return
+		}
 	} else if params.CompanyUUID != nil {
 		id, err := uuid.Parse(*params.CompanyUUID)
 
