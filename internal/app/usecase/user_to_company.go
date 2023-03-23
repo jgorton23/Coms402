@@ -97,6 +97,23 @@ func (c UserToCompany) FindByCompanyUUID(ctx context.Context, companyUUID uuid.U
 	return c.userToCompany.GetByCompanyUUID(ctx, companyUUID)
 }
 
+func (c UserToCompany) FindByUserUUID(ctx context.Context, userUUID uuid.UUID) (roles []domain.UserToCompany, err error) {
+	return c.userToCompany.GetByUserUUID(ctx, userUUID)
+}
+
+func (c UserToCompany) FindByUUIDS(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID) (role domain.UserToCompany, err error) {
+	exists, err := c.userToCompany.Exists(ctx, userUUID, companyUUID)
+	if err != nil {
+		return domain.UserToCompany{}, err
+	}
+
+	if exists {
+		return c.userToCompany.GetByUUIDS(ctx, userUUID, companyUUID)
+	} else {
+		return domain.UserToCompany{}, nil
+	}
+}
+
 func (c UserToCompany) AllowedToEdit(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
 
 	utc, err := c.userToCompany.GetByUUIDS(ctx, userUUID, companyUUID)
