@@ -127,6 +127,18 @@ func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserT
 	return ur.databaseToEntity(utc), nil
 }
 
+func (ur *userToCompanyDBEntImplem) Update(ctx context.Context, role domain.UserToCompany) error {
+	_, err := ur.Client.UsersToCompany.
+		Update().
+		SetApproved(role.Approved).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ur *userToCompanyDBEntImplem) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.UserToCompany, error) {
 	utcs, err := ur.Client.UsersToCompany.
 		Query().
