@@ -73,6 +73,15 @@ type DefaultUnauthenticatedErrorResponse = Error
 // DefaultUnauthorizedErrorResponse defines model for DefaultUnauthorizedErrorResponse.
 type DefaultUnauthorizedErrorResponse = Error
 
+// GetRolesByParams defines parameters for GetRolesBy.
+type GetRolesByParams struct {
+	// UserUUID UUID of user for which to get roles
+	UserUUID *string `form:"userUUID,omitempty" json:"userUUID,omitempty"`
+
+	// CompanyUUID uuid of company for which to get
+	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
+}
+
 // GetUserByParams defines parameters for GetUserBy.
 type GetUserByParams struct {
 	// UserEmail email of user to return
@@ -102,12 +111,15 @@ type ServerInterface interface {
 	// Find company by UUID
 	// (GET /company/{companyUUID})
 	GetCompanyByUUID(w http.ResponseWriter, r *http.Request, companyUUID string)
+	// Find roles by *
+	// (GET /role)
+	GetRolesBy(w http.ResponseWriter, r *http.Request, params GetRolesByParams)
+	// Create a new User Role
+	// (POST /role)
+	AddUserRole(w http.ResponseWriter, r *http.Request)
 	// Find user by *
 	// (GET /user)
 	GetUserBy(w http.ResponseWriter, r *http.Request, params GetUserByParams)
-	// Create a new User Role
-	// (POST /user/role)
-	AddUserRole(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -175,6 +187,57 @@ func (siw *ServerInterfaceWrapper) GetCompanyByUUID(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetRolesBy operation middleware
+func (siw *ServerInterfaceWrapper) GetRolesBy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetRolesByParams
+
+	// ------------- Optional query parameter "userUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "userUUID", r.URL.Query(), &params.UserUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userUUID", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "companyUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "companyUUID", r.URL.Query(), &params.CompanyUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "companyUUID", Err: err})
+		return
+	}
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRolesBy(w, r, params)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddUserRole operation middleware
+func (siw *ServerInterfaceWrapper) AddUserRole(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddUserRole(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetUserBy operation middleware
 func (siw *ServerInterfaceWrapper) GetUserBy(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -202,21 +265,6 @@ func (siw *ServerInterfaceWrapper) GetUserBy(w http.ResponseWriter, r *http.Requ
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetUserBy(w, r, params)
-	})
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// AddUserRole operation middleware
-func (siw *ServerInterfaceWrapper) AddUserRole(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.AddUserRole(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -349,10 +397,13 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/company/{companyUUID}", wrapper.GetCompanyByUUID)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/user", wrapper.GetUserBy)
+		r.Get(options.BaseURL+"/role", wrapper.GetRolesBy)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/user/role", wrapper.AddUserRole)
+		r.Post(options.BaseURL+"/role", wrapper.AddUserRole)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/user", wrapper.GetUserBy)
 	})
 
 	return r
