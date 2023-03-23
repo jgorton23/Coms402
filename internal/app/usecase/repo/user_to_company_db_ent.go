@@ -107,8 +107,8 @@ func (ur *userToCompanyDBEntImplem) GetByUUIDS(ctx context.Context, userUUID uui
 	if err != nil {
 		return domain.UserToCompany{}, err
 	}
-	
-	return  ur.databaseToEntity(utc), nil
+
+	return ur.databaseToEntity(utc), nil
 }
 
 // Create -.
@@ -125,6 +125,26 @@ func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserT
 	}
 
 	return ur.databaseToEntity(utc), nil
+}
+
+func (ur *userToCompanyDBEntImplem) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.UserToCompany, error) {
+	utcs, err := ur.Client.UsersToCompany.
+		Query().
+		Where(
+			userstocompany.CompanyUUID(companyUUID),
+		).
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	roles := make([]domain.UserToCompany, 0)
+
+	for _, v := range utcs {
+		roles = append(roles, ur.databaseToEntity(v))
+	}
+	return roles, nil
 }
 
 // // Update -.

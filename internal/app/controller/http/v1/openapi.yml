@@ -51,7 +51,7 @@ paths:
           $ref: '#/components/responses/DefaultErrorResponse'
         default:
           $ref: '#/components/responses/DefaultErrorResponse'    
-  /user/role:
+  /role:
     post:
       tags:
         - userRole
@@ -80,6 +80,38 @@ paths:
           $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
         default:
           $ref: '#/components/responses/DefaultErrorResponse'
+    get:
+      tags:
+        - user
+      summary: Find roles by *
+      description: Returns a the roles associated with the given UUID
+      operationId: getRolesBy*
+      parameters:
+        - name: userUUID
+          in: query
+          description: UUID of user for which to get roles
+          required: false
+          schema:
+            type: string
+        - name: companyUUID
+          in: query
+          description: uuid of company for which to get
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserRole"
+        "404":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'  
   /company:
     post:
       tags:

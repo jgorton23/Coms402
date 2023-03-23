@@ -92,6 +92,11 @@ func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (r
 	return role, nil
 }
 
+func (c UserToCompany) FindByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) (roles []domain.UserToCompany, err error) {
+	// TODO https://git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/administration/-/issues/34
+	return c.userToCompany.GetByCompanyUUID(ctx, companyUUID)
+}
+
 func (c UserToCompany) AllowedToEdit(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
 
 	utc, err := c.userToCompany.GetByUUIDS(ctx, userUUID, companyUUID)
