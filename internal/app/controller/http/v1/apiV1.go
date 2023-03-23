@@ -186,15 +186,9 @@ func (v1 httpV1Implem) AddUserRole(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (v1 httpV1Implem) ApproveRole(w http.ResponseWriter, r *http.Request) {
-
-	var requestBody ApproveRoleJSONRequestBody
-
-	err := json.NewDecoder(r.Body).Decode(&requestBody)
-	if err != nil {
-		respondWithError(w, r, "invalid user role json object found", http.StatusBadRequest)
-		return
-	}
+func (v1 httpV1Implem) ApproveRole(w http.ResponseWriter, r *http.Request, params ApproveRoleParams) {
+	// var userUUID uuid.UUID
+	// var companyUUID uuid.UUID
 
 }
 

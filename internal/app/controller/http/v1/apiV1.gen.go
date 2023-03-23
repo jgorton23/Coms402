@@ -78,8 +78,17 @@ type GetRolesByParams struct {
 	// UserUUID UUID of user for which to get roles
 	UserUUID *string `form:"userUUID,omitempty" json:"userUUID,omitempty"`
 
-	// CompanyUUID uuid of company for which to get
+	// CompanyUUID uuid of company for which to get roles
 	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
+}
+
+// ApproveRoleParams defines parameters for ApproveRole.
+type ApproveRoleParams struct {
+	// CompanyUUID uuid of the company for which the role belongs
+	CompanyUUID string `form:"companyUUID" json:"companyUUID"`
+
+	// UserUUID uuid of the user for which the role belongs
+	UserUUID string `form:"userUUID" json:"userUUID"`
 }
 
 // GetUserByParams defines parameters for GetUserBy.
@@ -100,9 +109,6 @@ type UpdateCompanyJSONRequestBody = Company
 // AddUserRoleJSONRequestBody defines body for AddUserRole for application/json ContentType.
 type AddUserRoleJSONRequestBody = NewUserRole
 
-// ApproveRoleJSONRequestBody defines body for ApproveRole for application/json ContentType.
-type ApproveRoleJSONRequestBody = UserRole
-
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Create a new Company
@@ -122,7 +128,7 @@ type ServerInterface interface {
 	AddUserRole(w http.ResponseWriter, r *http.Request)
 	// Approve the given role
 	// (PUT /role/approve)
-	ApproveRole(w http.ResponseWriter, r *http.Request)
+	ApproveRole(w http.ResponseWriter, r *http.Request, params ApproveRoleParams)
 	// Find user by *
 	// (GET /user)
 	GetUserBy(w http.ResponseWriter, r *http.Request, params GetUserByParams)
@@ -248,8 +254,43 @@ func (siw *ServerInterfaceWrapper) AddUserRole(w http.ResponseWriter, r *http.Re
 func (siw *ServerInterfaceWrapper) ApproveRole(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ApproveRoleParams
+
+	// ------------- Required query parameter "companyUUID" -------------
+
+	if paramValue := r.URL.Query().Get("companyUUID"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "companyUUID"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "companyUUID", r.URL.Query(), &params.CompanyUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "companyUUID", Err: err})
+		return
+	}
+
+	// ------------- Required query parameter "userUUID" -------------
+
+	if paramValue := r.URL.Query().Get("userUUID"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "userUUID"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "userUUID", r.URL.Query(), &params.UserUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "userUUID", Err: err})
+		return
+	}
+
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ApproveRole(w, r)
+		siw.Handler.ApproveRole(w, r, params)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {

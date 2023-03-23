@@ -95,7 +95,7 @@ paths:
             type: string
         - name: companyUUID
           in: query
-          description: uuid of company for which to get
+          description: uuid of company for which to get roles
           required: false
           schema:
             type: string
@@ -114,18 +114,24 @@ paths:
           $ref: '#/components/responses/DefaultErrorResponse'  
   /role/approve:
     put:
-      -tags:
+      tags:
         - userRole
       summary: Approve the given role
       description: "Approves the given role"
       operationId: approveRole
-      requestBody:
-        description: Role to approve
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRole'
+      parameters:
+        - name: companyUUID
+          in: query
+          description: uuid of the company for which the role belongs
+          required: true
+          schema:
+            type: string
+        - name: userUUID
+          in: query
+          description: uuid of the user for which the role belongs
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Successfully approved role
