@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"coverage-gutters.showLineCoverage": true,
+		"coverage-gutters.coverageReportFileName": "cov.xml",
+		// "coverage-gutters.remotePathResolve": ["/var/www/", "./"]
+	}
+}

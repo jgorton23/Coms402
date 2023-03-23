@@ -49,3 +49,12 @@ func (Api) Gen() error {
 
 	return nil
 }
+
+func (Api) GenClient() error {
+	//TODO install openapi-generator
+
+	cmd := "openapi-generator generate -i ./internal/app/controller/http/v1/openapi.yml -g go -o ./pkg/openapi"
+	_, err := sh.Exec(nil, os.Stdout, os.Stderr, "bash", "-c", cmd)
+
+	return err
+}
