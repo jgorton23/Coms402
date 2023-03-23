@@ -13,7 +13,7 @@ import (
 type Compose mg.Namespace
 
 // Start docker compose development dependencies
-func (Compose) UpDev() error {
+func (Compose) UpPostgres() error {
 	fmt.Println("Starting Dependencies...")
 
 	err := sh.Run("docker-compose", "up", "--build", "-d", "postgres")

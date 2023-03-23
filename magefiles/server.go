@@ -15,7 +15,7 @@ type Server mg.Namespace
 
 // Start the Server
 func (Server) Run() error {
-	mg.Deps(Compose.UpDev)
+	mg.Deps(Compose.UpPostgres)
 
 	fmt.Println("Running Server")
 

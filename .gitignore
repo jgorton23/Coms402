@@ -1,3 +1,8 @@
+cov.xml
+cov.out 
+cov.html
+cov.txt
+
 # Created by https://www.toptal.com/developers/gitignore/api/goland,linux,macos,windows,go,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=goland,linux,macos,windows,go,visualstudiocode
 
