@@ -130,6 +130,11 @@ func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserT
 func (ur *userToCompanyDBEntImplem) Update(ctx context.Context, role domain.UserToCompany) error {
 	_, err := ur.Client.UsersToCompany.
 		Update().
+		Where(userstocompany.And(
+			userstocompany.CompanyUUID(role.CompanyUUID),
+			userstocompany.UserUUID(role.UserUUID),
+		),
+		).
 		SetApproved(role.Approved).
 		Save(ctx)
 	if err != nil {
