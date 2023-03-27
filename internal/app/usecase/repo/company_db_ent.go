@@ -115,6 +115,9 @@ func (ur *companyDBEntImplem) Create(ctx context.Context, usr domain.Company) (d
 func (ur *companyDBEntImplem) Update(ctx context.Context, u domain.Company) error {
 	_, err := ur.Client.Company.
 		Update().
+		Where(
+			company.ID(u.UUID),
+		).
 		SetName(u.Name).
 		Save(ctx)
 	if err != nil {
