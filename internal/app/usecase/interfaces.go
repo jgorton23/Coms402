@@ -93,6 +93,7 @@ type (
 	UserToCompanyRepo interface {
 		Exists(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error)
 		Create(context.Context, domain.UserToCompany) (domain.UserToCompany, error)
+		Update(context.Context, domain.UserToCompany) error
 		GetByUUIDS(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (domain.UserToCompany, error)
 		GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.UserToCompany, error)
 		GetByUserUUID(ctx context.Context, userUUID uuid.UUID) ([]domain.UserToCompany, error)
