@@ -29,10 +29,37 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// ItemBatch defines model for ItemBatch.
+type ItemBatch struct {
+	// CompanyUuid uuid of the company
+	CompanyUuid string `json:"company_uuid"`
+
+	// Description description of item batch
+	Description *string `json:"description,omitempty"`
+
+	// ItemNumber item number of the batch
+	ItemNumber string `json:"itemNumber"`
+
+	// Uuid uuid of the item batch
+	Uuid string `json:"uuid"`
+}
+
 // NewCompany defines model for NewCompany.
 type NewCompany struct {
 	// Name Name of the company
 	Name string `json:"name"`
+}
+
+// NewItemBatch defines model for NewItemBatch.
+type NewItemBatch struct {
+	// CompanyUuid uuid of the company
+	CompanyUuid string `json:"company_uuid"`
+
+	// Description description of item batch
+	Description *string `json:"description,omitempty"`
+
+	// ItemNumber item number of the batch
+	ItemNumber string `json:"itemNumber"`
 }
 
 // NewUserRole defines model for NewUserRole.
@@ -73,6 +100,15 @@ type DefaultUnauthenticatedErrorResponse = Error
 // DefaultUnauthorizedErrorResponse defines model for DefaultUnauthorizedErrorResponse.
 type DefaultUnauthorizedErrorResponse = Error
 
+// GetItemBatchByParams defines parameters for GetItemBatchBy.
+type GetItemBatchByParams struct {
+	// ItemBatchUUID UUID of the item batch
+	ItemBatchUUID *string `form:"itemBatchUUID,omitempty" json:"itemBatchUUID,omitempty"`
+
+	// CompanyUUID uuid of company for which to get
+	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
+}
+
 // GetRolesByParams defines parameters for GetRolesBy.
 type GetRolesByParams struct {
 	// UserUUID UUID of user for which to get roles
@@ -106,6 +142,12 @@ type AddCompanyJSONRequestBody = NewCompany
 // UpdateCompanyJSONRequestBody defines body for UpdateCompany for application/json ContentType.
 type UpdateCompanyJSONRequestBody = Company
 
+// AddItemBatchJSONRequestBody defines body for AddItemBatch for application/json ContentType.
+type AddItemBatchJSONRequestBody = NewItemBatch
+
+// UpdateItemBatchJSONRequestBody defines body for UpdateItemBatch for application/json ContentType.
+type UpdateItemBatchJSONRequestBody = ItemBatch
+
 // AddUserRoleJSONRequestBody defines body for AddUserRole for application/json ContentType.
 type AddUserRoleJSONRequestBody = NewUserRole
 
@@ -120,6 +162,15 @@ type ServerInterface interface {
 	// Find company by UUID
 	// (GET /company/{companyUUID})
 	GetCompanyByUUID(w http.ResponseWriter, r *http.Request, companyUUID string)
+	// Find itembatch by *
+	// (GET /itembatch)
+	GetItemBatchBy(w http.ResponseWriter, r *http.Request, params GetItemBatchByParams)
+	// Create a new item batch
+	// (POST /itembatch)
+	AddItemBatch(w http.ResponseWriter, r *http.Request)
+	// Update an existing item batch
+	// (PUT /itembatch)
+	UpdateItemBatch(w http.ResponseWriter, r *http.Request)
 	// Find roles by *
 	// (GET /role)
 	GetRolesBy(w http.ResponseWriter, r *http.Request, params GetRolesByParams)
@@ -190,6 +241,72 @@ func (siw *ServerInterfaceWrapper) GetCompanyByUUID(w http.ResponseWriter, r *ht
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCompanyByUUID(w, r, companyUUID)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetItemBatchBy operation middleware
+func (siw *ServerInterfaceWrapper) GetItemBatchBy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetItemBatchByParams
+
+	// ------------- Optional query parameter "itemBatchUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "itemBatchUUID", r.URL.Query(), &params.ItemBatchUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "itemBatchUUID", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "companyUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "companyUUID", r.URL.Query(), &params.CompanyUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "companyUUID", Err: err})
+		return
+	}
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetItemBatchBy(w, r, params)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddItemBatch operation middleware
+func (siw *ServerInterfaceWrapper) AddItemBatch(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddItemBatch(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// UpdateItemBatch operation middleware
+func (siw *ServerInterfaceWrapper) UpdateItemBatch(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateItemBatch(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -457,6 +574,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/company/{companyUUID}", wrapper.GetCompanyByUUID)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/itembatch", wrapper.GetItemBatchBy)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/itembatch", wrapper.AddItemBatch)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/itembatch", wrapper.UpdateItemBatch)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/role", wrapper.GetRolesBy)

@@ -3,11 +3,12 @@ package app
 import (
 	"context"
 	"fmt"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 
 	"github.com/samber/do"
 
@@ -38,6 +39,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, repo.NewSCSSessionRepo)
 	do.Provide(injector, repo.NewUserToCompanyRepo)
 	do.Provide(injector, repo.NewCompanyRepo)
+	do.Provide(injector, repo.NewItemBatchRepo)
 
 	do.Provide(injector, usecase.NewLogger)
 	do.Provide(injector, usecase.NewAuthBossLogger)
@@ -47,6 +49,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, usecase.NewCompany)
 	do.Provide(injector, usecase.NewUserToCompany)
 	do.Provide(injector, usecase.NewUser)
+	do.Provide(injector, usecase.NewItemBatch)
 
 	// HTTP stuff
 	do.Provide(injector, v1.NewHttpAuthenticator)

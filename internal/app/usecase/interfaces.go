@@ -98,4 +98,12 @@ type (
 		GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.UserToCompany, error)
 		GetByUserUUID(ctx context.Context, userUUID uuid.UUID) ([]domain.UserToCompany, error)
 	}
+
+	ItemBatchRepo interface {
+		Exists(ctx context.Context, itemNumber string) (bool, error)
+		Create(ctx context.Context, itemBatch domain.ItemBatch) (domain.ItemBatch, error)
+		Update(ctx context.Context, itemBatch domain.ItemBatch) error
+		GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.ItemBatch, error)
+		GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.ItemBatch, error)
+	}
 )

@@ -179,3 +179,27 @@ func (c UserToCompany) AllowedToEdit(ctx context.Context, userUUID uuid.UUID, co
 		return false, nil
 	}
 }
+
+func (c UserToCompany) AllowedToEditData(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
+
+	utc, err := c.userToCompany.GetByUUIDS(ctx, userUUID, companyUUID)
+
+	if err != nil {
+		return false, err
+	}
+
+	if !utc.Approved {
+		return false, nil
+	}
+
+	switch utc.RoleType {
+	case domain.RolePrimaryOwner:
+		return true, nil
+	case domain.RoleOwner:
+		return true, nil
+	case domain.RoleUser:
+		return true, nil
+	default:
+		return false, nil
+	}
+}
