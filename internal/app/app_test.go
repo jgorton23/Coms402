@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/testhelp"
 	"github.com/docker/go-connections/nat"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go/wait"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/testhelp"
 )
 
 // Useful artical to help understand how this test operates

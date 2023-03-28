@@ -26,6 +26,7 @@ func NewHttpV1(i *do.Injector) (ServerInterface, error) {
 		userUseCase:          do.MustInvoke[*usecase.User](i),
 		userToCompanyUseCase: do.MustInvoke[*usecase.UserToCompany](i),
 		itemBatchUseCase:     do.MustInvoke[*usecase.ItemBatch](i),
+		certificationUseCase: do.MustInvoke[*usecase.Certification](i),
 	}
 
 	return httpV1, nil
@@ -36,6 +37,7 @@ type httpV1Implem struct {
 	userUseCase          *usecase.User
 	itemBatchUseCase     *usecase.ItemBatch
 	userToCompanyUseCase *usecase.UserToCompany
+	certificationUseCase *usecase.Certification
 
 	logger                *usecase.Logger
 	authbossAuthenticator *authboss.Authboss

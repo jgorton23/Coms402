@@ -19,14 +19,10 @@ const (
 	FieldItemBatchUUID = "item_batch_uuid"
 	// FieldImageUUID holds the string denoting the imageuuid field in the database.
 	FieldImageUUID = "image_uuid"
-	// FieldTemplateUUID holds the string denoting the templateuuid field in the database.
-	FieldTemplateUUID = "template_uuid"
 	// EdgeCompany holds the string denoting the company edge name in mutations.
 	EdgeCompany = "company"
 	// EdgeItemBatch holds the string denoting the itembatch edge name in mutations.
 	EdgeItemBatch = "itemBatch"
-	// EdgeTemplate holds the string denoting the template edge name in mutations.
-	EdgeTemplate = "template"
 	// Table holds the table name of the certification in the database.
 	Table = "certifications"
 	// CompanyTable is the table that holds the company relation/edge.
@@ -43,13 +39,6 @@ const (
 	ItemBatchInverseTable = "item_batches"
 	// ItemBatchColumn is the table column denoting the itemBatch relation/edge.
 	ItemBatchColumn = "item_batch_uuid"
-	// TemplateTable is the table that holds the template relation/edge.
-	TemplateTable = "certifications"
-	// TemplateInverseTable is the table name for the CertificationTemplate entity.
-	// It exists in this package in order to avoid circular dependency with the "certificationtemplate" package.
-	TemplateInverseTable = "certification_templates"
-	// TemplateColumn is the table column denoting the template relation/edge.
-	TemplateColumn = "template_uuid"
 )
 
 // Columns holds all SQL columns for certification fields.
@@ -59,7 +48,6 @@ var Columns = []string{
 	FieldCompanyUUID,
 	FieldItemBatchUUID,
 	FieldImageUUID,
-	FieldTemplateUUID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

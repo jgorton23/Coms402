@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"github.com/google/uuid"
 	"github.com/samber/do"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
 var (

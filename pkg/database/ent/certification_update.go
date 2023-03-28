@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
@@ -56,26 +55,6 @@ func (cu *CertificationUpdate) SetImageUUID(u uuid.UUID) *CertificationUpdate {
 	return cu
 }
 
-// SetTemplateUUID sets the "templateUUID" field.
-func (cu *CertificationUpdate) SetTemplateUUID(u uuid.UUID) *CertificationUpdate {
-	cu.mutation.SetTemplateUUID(u)
-	return cu
-}
-
-// SetNillableTemplateUUID sets the "templateUUID" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableTemplateUUID(u *uuid.UUID) *CertificationUpdate {
-	if u != nil {
-		cu.SetTemplateUUID(*u)
-	}
-	return cu
-}
-
-// ClearTemplateUUID clears the value of the "templateUUID" field.
-func (cu *CertificationUpdate) ClearTemplateUUID() *CertificationUpdate {
-	cu.mutation.ClearTemplateUUID()
-	return cu
-}
-
 // SetCompanyID sets the "company" edge to the Company entity by ID.
 func (cu *CertificationUpdate) SetCompanyID(id uuid.UUID) *CertificationUpdate {
 	cu.mutation.SetCompanyID(id)
@@ -98,25 +77,6 @@ func (cu *CertificationUpdate) SetItemBatch(i *ItemBatch) *CertificationUpdate {
 	return cu.SetItemBatchID(i.ID)
 }
 
-// SetTemplateID sets the "template" edge to the CertificationTemplate entity by ID.
-func (cu *CertificationUpdate) SetTemplateID(id uuid.UUID) *CertificationUpdate {
-	cu.mutation.SetTemplateID(id)
-	return cu
-}
-
-// SetNillableTemplateID sets the "template" edge to the CertificationTemplate entity by ID if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableTemplateID(id *uuid.UUID) *CertificationUpdate {
-	if id != nil {
-		cu = cu.SetTemplateID(*id)
-	}
-	return cu
-}
-
-// SetTemplate sets the "template" edge to the CertificationTemplate entity.
-func (cu *CertificationUpdate) SetTemplate(c *CertificationTemplate) *CertificationUpdate {
-	return cu.SetTemplateID(c.ID)
-}
-
 // Mutation returns the CertificationMutation object of the builder.
 func (cu *CertificationUpdate) Mutation() *CertificationMutation {
 	return cu.mutation
@@ -131,12 +91,6 @@ func (cu *CertificationUpdate) ClearCompany() *CertificationUpdate {
 // ClearItemBatch clears the "itemBatch" edge to the ItemBatch entity.
 func (cu *CertificationUpdate) ClearItemBatch() *CertificationUpdate {
 	cu.mutation.ClearItemBatch()
-	return cu
-}
-
-// ClearTemplate clears the "template" edge to the CertificationTemplate entity.
-func (cu *CertificationUpdate) ClearTemplate() *CertificationUpdate {
-	cu.mutation.ClearTemplate()
 	return cu
 }
 
@@ -266,41 +220,6 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.TemplateCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   certification.TemplateTable,
-			Columns: []string{certification.TemplateColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certificationtemplate.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cu.mutation.TemplateIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   certification.TemplateTable,
-			Columns: []string{certification.TemplateColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certificationtemplate.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certification.Label}
@@ -345,26 +264,6 @@ func (cuo *CertificationUpdateOne) SetImageUUID(u uuid.UUID) *CertificationUpdat
 	return cuo
 }
 
-// SetTemplateUUID sets the "templateUUID" field.
-func (cuo *CertificationUpdateOne) SetTemplateUUID(u uuid.UUID) *CertificationUpdateOne {
-	cuo.mutation.SetTemplateUUID(u)
-	return cuo
-}
-
-// SetNillableTemplateUUID sets the "templateUUID" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableTemplateUUID(u *uuid.UUID) *CertificationUpdateOne {
-	if u != nil {
-		cuo.SetTemplateUUID(*u)
-	}
-	return cuo
-}
-
-// ClearTemplateUUID clears the value of the "templateUUID" field.
-func (cuo *CertificationUpdateOne) ClearTemplateUUID() *CertificationUpdateOne {
-	cuo.mutation.ClearTemplateUUID()
-	return cuo
-}
-
 // SetCompanyID sets the "company" edge to the Company entity by ID.
 func (cuo *CertificationUpdateOne) SetCompanyID(id uuid.UUID) *CertificationUpdateOne {
 	cuo.mutation.SetCompanyID(id)
@@ -387,25 +286,6 @@ func (cuo *CertificationUpdateOne) SetItemBatch(i *ItemBatch) *CertificationUpda
 	return cuo.SetItemBatchID(i.ID)
 }
 
-// SetTemplateID sets the "template" edge to the CertificationTemplate entity by ID.
-func (cuo *CertificationUpdateOne) SetTemplateID(id uuid.UUID) *CertificationUpdateOne {
-	cuo.mutation.SetTemplateID(id)
-	return cuo
-}
-
-// SetNillableTemplateID sets the "template" edge to the CertificationTemplate entity by ID if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableTemplateID(id *uuid.UUID) *CertificationUpdateOne {
-	if id != nil {
-		cuo = cuo.SetTemplateID(*id)
-	}
-	return cuo
-}
-
-// SetTemplate sets the "template" edge to the CertificationTemplate entity.
-func (cuo *CertificationUpdateOne) SetTemplate(c *CertificationTemplate) *CertificationUpdateOne {
-	return cuo.SetTemplateID(c.ID)
-}
-
 // Mutation returns the CertificationMutation object of the builder.
 func (cuo *CertificationUpdateOne) Mutation() *CertificationMutation {
 	return cuo.mutation
@@ -420,12 +300,6 @@ func (cuo *CertificationUpdateOne) ClearCompany() *CertificationUpdateOne {
 // ClearItemBatch clears the "itemBatch" edge to the ItemBatch entity.
 func (cuo *CertificationUpdateOne) ClearItemBatch() *CertificationUpdateOne {
 	cuo.mutation.ClearItemBatch()
-	return cuo
-}
-
-// ClearTemplate clears the "template" edge to the CertificationTemplate entity.
-func (cuo *CertificationUpdateOne) ClearTemplate() *CertificationUpdateOne {
-	cuo.mutation.ClearTemplate()
 	return cuo
 }
 
@@ -577,41 +451,6 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: itembatch.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if cuo.mutation.TemplateCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   certification.TemplateTable,
-			Columns: []string{certification.TemplateColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certificationtemplate.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := cuo.mutation.TemplateIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   certification.TemplateTable,
-			Columns: []string{certification.TemplateColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certificationtemplate.FieldID,
 				},
 			},
 		}

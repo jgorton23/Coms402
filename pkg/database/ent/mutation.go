@@ -2294,8 +2294,6 @@ type CertificationMutation struct {
 	clearedcompany   bool
 	itemBatch        *uuid.UUID
 	cleareditemBatch bool
-	template         *uuid.UUID
-	clearedtemplate  bool
 	done             bool
 	oldValue         func(context.Context) (*Certification, error)
 	predicates       []predicate.Certification
@@ -2549,55 +2547,6 @@ func (m *CertificationMutation) ResetImageUUID() {
 	m.imageUUID = nil
 }
 
-// SetTemplateUUID sets the "templateUUID" field.
-func (m *CertificationMutation) SetTemplateUUID(u uuid.UUID) {
-	m.template = &u
-}
-
-// TemplateUUID returns the value of the "templateUUID" field in the mutation.
-func (m *CertificationMutation) TemplateUUID() (r uuid.UUID, exists bool) {
-	v := m.template
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTemplateUUID returns the old "templateUUID" field's value of the Certification entity.
-// If the Certification object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertificationMutation) OldTemplateUUID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTemplateUUID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTemplateUUID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTemplateUUID: %w", err)
-	}
-	return oldValue.TemplateUUID, nil
-}
-
-// ClearTemplateUUID clears the value of the "templateUUID" field.
-func (m *CertificationMutation) ClearTemplateUUID() {
-	m.template = nil
-	m.clearedFields[certification.FieldTemplateUUID] = struct{}{}
-}
-
-// TemplateUUIDCleared returns if the "templateUUID" field was cleared in this mutation.
-func (m *CertificationMutation) TemplateUUIDCleared() bool {
-	_, ok := m.clearedFields[certification.FieldTemplateUUID]
-	return ok
-}
-
-// ResetTemplateUUID resets all changes to the "templateUUID" field.
-func (m *CertificationMutation) ResetTemplateUUID() {
-	m.template = nil
-	delete(m.clearedFields, certification.FieldTemplateUUID)
-}
-
 // SetCompanyID sets the "company" edge to the Company entity by id.
 func (m *CertificationMutation) SetCompanyID(id uuid.UUID) {
 	m.company = &id
@@ -2676,45 +2625,6 @@ func (m *CertificationMutation) ResetItemBatch() {
 	m.cleareditemBatch = false
 }
 
-// SetTemplateID sets the "template" edge to the CertificationTemplate entity by id.
-func (m *CertificationMutation) SetTemplateID(id uuid.UUID) {
-	m.template = &id
-}
-
-// ClearTemplate clears the "template" edge to the CertificationTemplate entity.
-func (m *CertificationMutation) ClearTemplate() {
-	m.clearedtemplate = true
-}
-
-// TemplateCleared reports if the "template" edge to the CertificationTemplate entity was cleared.
-func (m *CertificationMutation) TemplateCleared() bool {
-	return m.TemplateUUIDCleared() || m.clearedtemplate
-}
-
-// TemplateID returns the "template" edge ID in the mutation.
-func (m *CertificationMutation) TemplateID() (id uuid.UUID, exists bool) {
-	if m.template != nil {
-		return *m.template, true
-	}
-	return
-}
-
-// TemplateIDs returns the "template" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TemplateID instead. It exists only for internal usage by the builders.
-func (m *CertificationMutation) TemplateIDs() (ids []uuid.UUID) {
-	if id := m.template; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTemplate resets all changes to the "template" edge.
-func (m *CertificationMutation) ResetTemplate() {
-	m.template = nil
-	m.clearedtemplate = false
-}
-
 // Where appends a list predicates to the CertificationMutation builder.
 func (m *CertificationMutation) Where(ps ...predicate.Certification) {
 	m.predicates = append(m.predicates, ps...)
@@ -2749,7 +2659,7 @@ func (m *CertificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertificationMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.primaryAttribute != nil {
 		fields = append(fields, certification.FieldPrimaryAttribute)
 	}
@@ -2761,9 +2671,6 @@ func (m *CertificationMutation) Fields() []string {
 	}
 	if m.imageUUID != nil {
 		fields = append(fields, certification.FieldImageUUID)
-	}
-	if m.template != nil {
-		fields = append(fields, certification.FieldTemplateUUID)
 	}
 	return fields
 }
@@ -2781,8 +2688,6 @@ func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
 		return m.ItemBatchUUID()
 	case certification.FieldImageUUID:
 		return m.ImageUUID()
-	case certification.FieldTemplateUUID:
-		return m.TemplateUUID()
 	}
 	return nil, false
 }
@@ -2800,8 +2705,6 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldItemBatchUUID(ctx)
 	case certification.FieldImageUUID:
 		return m.OldImageUUID(ctx)
-	case certification.FieldTemplateUUID:
-		return m.OldTemplateUUID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Certification field %s", name)
 }
@@ -2839,13 +2742,6 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetImageUUID(v)
 		return nil
-	case certification.FieldTemplateUUID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTemplateUUID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
 }
@@ -2875,11 +2771,7 @@ func (m *CertificationMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CertificationMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(certification.FieldTemplateUUID) {
-		fields = append(fields, certification.FieldTemplateUUID)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2892,11 +2784,6 @@ func (m *CertificationMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CertificationMutation) ClearField(name string) error {
-	switch name {
-	case certification.FieldTemplateUUID:
-		m.ClearTemplateUUID()
-		return nil
-	}
 	return fmt.Errorf("unknown Certification nullable field %s", name)
 }
 
@@ -2916,24 +2803,18 @@ func (m *CertificationMutation) ResetField(name string) error {
 	case certification.FieldImageUUID:
 		m.ResetImageUUID()
 		return nil
-	case certification.FieldTemplateUUID:
-		m.ResetTemplateUUID()
-		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CertificationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.company != nil {
 		edges = append(edges, certification.EdgeCompany)
 	}
 	if m.itemBatch != nil {
 		edges = append(edges, certification.EdgeItemBatch)
-	}
-	if m.template != nil {
-		edges = append(edges, certification.EdgeTemplate)
 	}
 	return edges
 }
@@ -2950,17 +2831,13 @@ func (m *CertificationMutation) AddedIDs(name string) []ent.Value {
 		if id := m.itemBatch; id != nil {
 			return []ent.Value{*id}
 		}
-	case certification.EdgeTemplate:
-		if id := m.template; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *CertificationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -2972,15 +2849,12 @@ func (m *CertificationMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CertificationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedcompany {
 		edges = append(edges, certification.EdgeCompany)
 	}
 	if m.cleareditemBatch {
 		edges = append(edges, certification.EdgeItemBatch)
-	}
-	if m.clearedtemplate {
-		edges = append(edges, certification.EdgeTemplate)
 	}
 	return edges
 }
@@ -2993,8 +2867,6 @@ func (m *CertificationMutation) EdgeCleared(name string) bool {
 		return m.clearedcompany
 	case certification.EdgeItemBatch:
 		return m.cleareditemBatch
-	case certification.EdgeTemplate:
-		return m.clearedtemplate
 	}
 	return false
 }
@@ -3009,9 +2881,6 @@ func (m *CertificationMutation) ClearEdge(name string) error {
 	case certification.EdgeItemBatch:
 		m.ClearItemBatch()
 		return nil
-	case certification.EdgeTemplate:
-		m.ClearTemplate()
-		return nil
 	}
 	return fmt.Errorf("unknown Certification unique edge %s", name)
 }
@@ -3025,9 +2894,6 @@ func (m *CertificationMutation) ResetEdge(name string) error {
 		return nil
 	case certification.EdgeItemBatch:
 		m.ResetItemBatch()
-		return nil
-	case certification.EdgeTemplate:
-		m.ResetTemplate()
 		return nil
 	}
 	return fmt.Errorf("unknown Certification edge %s", name)

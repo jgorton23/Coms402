@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
 // Find itembatch by *
@@ -36,7 +37,7 @@ func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, pa
 			return
 		}
 
-		respondWithJson(w, r, http.StatusCreated, itemBatches)
+		respondWithJson(w, r, http.StatusFound, itemBatches)
 		return
 	} else if params.CompanyUUID != nil && params.ItemBatchUUID != nil {
 		itemBatchUUID, err := uuid.Parse(*params.ItemBatchUUID)
@@ -53,7 +54,7 @@ func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, pa
 			return
 		}
 
-		respondWithJson(w, r, http.StatusCreated, itemBatches)
+		respondWithJson(w, r, http.StatusFound, itemBatches)
 		return
 	} else {
 		respondWithError(w, r, "invalid prams", http.StatusBadRequest)

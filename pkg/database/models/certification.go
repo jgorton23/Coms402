@@ -22,8 +22,9 @@ func (Certification) Fields() []ent.Field {
 		field.UUID("companyUUID", uuid.UUID{}),
 		field.UUID("itemBatchUUID", uuid.UUID{}),
 		field.UUID("imageUUID", uuid.UUID{}),
-		field.UUID("templateUUID", uuid.UUID{}).
-			Optional(),
+		// field.UUID("templateUUID", uuid.UUID{}).
+		// 	Nillable().
+		// 	Optional(),
 	}
 }
 
@@ -38,8 +39,8 @@ func (Certification) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("itemBatchUUID"),
-		edge.To("template", CertificationTemplate.Type).
-			Unique().
-			Field("templateUUID"),
+		// edge.To("template", CertificationTemplate.Type).
+		// 	Unique().
+		// 	Field("templateUUID"),
 	}
 }

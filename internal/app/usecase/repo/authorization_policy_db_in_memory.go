@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+
 	sqladapter "github.com/Blank-Xu/sql-adapter"
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/samber/do"

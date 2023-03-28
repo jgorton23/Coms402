@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 )
@@ -28,8 +27,6 @@ type Certification struct {
 	ItemBatchUUID uuid.UUID `json:"itemBatchUUID,omitempty"`
 	// ImageUUID holds the value of the "imageUUID" field.
 	ImageUUID uuid.UUID `json:"imageUUID,omitempty"`
-	// TemplateUUID holds the value of the "templateUUID" field.
-	TemplateUUID uuid.UUID `json:"templateUUID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CertificationQuery when eager-loading is set.
 	Edges CertificationEdges `json:"edges"`
@@ -41,11 +38,9 @@ type CertificationEdges struct {
 	Company *Company `json:"company,omitempty"`
 	// ItemBatch holds the value of the itemBatch edge.
 	ItemBatch *ItemBatch `json:"itemBatch,omitempty"`
-	// Template holds the value of the template edge.
-	Template *CertificationTemplate `json:"template,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // CompanyOrErr returns the Company value or an error if the edge
@@ -74,19 +69,6 @@ func (e CertificationEdges) ItemBatchOrErr() (*ItemBatch, error) {
 	return nil, &NotLoadedError{edge: "itemBatch"}
 }
 
-// TemplateOrErr returns the Template value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e CertificationEdges) TemplateOrErr() (*CertificationTemplate, error) {
-	if e.loadedTypes[2] {
-		if e.Template == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: certificationtemplate.Label}
-		}
-		return e.Template, nil
-	}
-	return nil, &NotLoadedError{edge: "template"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Certification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -94,7 +76,7 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case certification.FieldPrimaryAttribute:
 			values[i] = new(sql.NullString)
-		case certification.FieldID, certification.FieldCompanyUUID, certification.FieldItemBatchUUID, certification.FieldImageUUID, certification.FieldTemplateUUID:
+		case certification.FieldID, certification.FieldCompanyUUID, certification.FieldItemBatchUUID, certification.FieldImageUUID:
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Certification", columns[i])
@@ -141,12 +123,6 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				c.ImageUUID = *value
 			}
-		case certification.FieldTemplateUUID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field templateUUID", values[i])
-			} else if value != nil {
-				c.TemplateUUID = *value
-			}
 		}
 	}
 	return nil
@@ -160,11 +136,6 @@ func (c *Certification) QueryCompany() *CompanyQuery {
 // QueryItemBatch queries the "itemBatch" edge of the Certification entity.
 func (c *Certification) QueryItemBatch() *ItemBatchQuery {
 	return NewCertificationClient(c.config).QueryItemBatch(c)
-}
-
-// QueryTemplate queries the "template" edge of the Certification entity.
-func (c *Certification) QueryTemplate() *CertificationTemplateQuery {
-	return NewCertificationClient(c.config).QueryTemplate(c)
 }
 
 // Update returns a builder for updating this Certification.
@@ -201,9 +172,6 @@ func (c *Certification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("imageUUID=")
 	builder.WriteString(fmt.Sprintf("%v", c.ImageUUID))
-	builder.WriteString(", ")
-	builder.WriteString("templateUUID=")
-	builder.WriteString(fmt.Sprintf("%v", c.TemplateUUID))
 	builder.WriteByte(')')
 	return builder.String()
 }

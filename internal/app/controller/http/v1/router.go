@@ -19,7 +19,6 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/httpserver"
 
 	_ "embed"
-
 	_ "github.com/volatiletech/authboss/v3/auth"
 	_ "github.com/volatiletech/authboss/v3/logout"
 	_ "github.com/volatiletech/authboss/v3/register"

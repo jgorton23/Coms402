@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"github.com/google/uuid"
+
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
 func (v1 httpV1Implem) AddCompany(w http.ResponseWriter, r *http.Request) {

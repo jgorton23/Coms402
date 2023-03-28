@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/predicate"
@@ -29,7 +28,6 @@ type CertificationQuery struct {
 	predicates    []predicate.Certification
 	withCompany   *CompanyQuery
 	withItemBatch *ItemBatchQuery
-	withTemplate  *CertificationTemplateQuery
 	modifiers     []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -104,28 +102,6 @@ func (cq *CertificationQuery) QueryItemBatch() *ItemBatchQuery {
 			sqlgraph.From(certification.Table, certification.FieldID, selector),
 			sqlgraph.To(itembatch.Table, itembatch.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, certification.ItemBatchTable, certification.ItemBatchColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryTemplate chains the current query on the "template" edge.
-func (cq *CertificationQuery) QueryTemplate() *CertificationTemplateQuery {
-	query := (&CertificationTemplateClient{config: cq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := cq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(certification.Table, certification.FieldID, selector),
-			sqlgraph.To(certificationtemplate.Table, certificationtemplate.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, certification.TemplateTable, certification.TemplateColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -327,7 +303,6 @@ func (cq *CertificationQuery) Clone() *CertificationQuery {
 		predicates:    append([]predicate.Certification{}, cq.predicates...),
 		withCompany:   cq.withCompany.Clone(),
 		withItemBatch: cq.withItemBatch.Clone(),
-		withTemplate:  cq.withTemplate.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -353,17 +328,6 @@ func (cq *CertificationQuery) WithItemBatch(opts ...func(*ItemBatchQuery)) *Cert
 		opt(query)
 	}
 	cq.withItemBatch = query
-	return cq
-}
-
-// WithTemplate tells the query-builder to eager-load the nodes that are connected to
-// the "template" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *CertificationQuery) WithTemplate(opts ...func(*CertificationTemplateQuery)) *CertificationQuery {
-	query := (&CertificationTemplateClient{config: cq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	cq.withTemplate = query
 	return cq
 }
 
@@ -445,10 +409,9 @@ func (cq *CertificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	var (
 		nodes       = []*Certification{}
 		_spec       = cq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			cq.withCompany != nil,
 			cq.withItemBatch != nil,
-			cq.withTemplate != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -481,12 +444,6 @@ func (cq *CertificationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if query := cq.withItemBatch; query != nil {
 		if err := cq.loadItemBatch(ctx, query, nodes, nil,
 			func(n *Certification, e *ItemBatch) { n.Edges.ItemBatch = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := cq.withTemplate; query != nil {
-		if err := cq.loadTemplate(ctx, query, nodes, nil,
-			func(n *Certification, e *CertificationTemplate) { n.Edges.Template = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -544,35 +501,6 @@ func (cq *CertificationQuery) loadItemBatch(ctx context.Context, query *ItemBatc
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "itemBatchUUID" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (cq *CertificationQuery) loadTemplate(ctx context.Context, query *CertificationTemplateQuery, nodes []*Certification, init func(*Certification), assign func(*Certification, *CertificationTemplate)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Certification)
-	for i := range nodes {
-		fk := nodes[i].TemplateUUID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(certificationtemplate.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "templateUUID" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
