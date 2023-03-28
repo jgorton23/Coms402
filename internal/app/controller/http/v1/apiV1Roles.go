@@ -70,3 +70,42 @@ func (v1 httpV1Implem) GetRolesBy(w http.ResponseWriter, r *http.Request, params
 
 	respondWithJson(w, r, http.StatusOK, roles)
 }
+
+func (v1 httpV1Implem) ApproveRole(w http.ResponseWriter, r *http.Request, params ApproveRoleParams) {
+
+	var user domain.User
+
+	userUUID, err := uuid.Parse(params.UserUUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error parsing UUID: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	companyUUID, err := uuid.Parse(params.CompanyUUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error parsing UUID: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	user, err = v1.loadDomainUser(r)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	role, err := v1.userToCompanyUseCase.Approve(r.Context(), domain.UserToCompany{
+		CompanyUUID: companyUUID,
+		UserUUID:    userUUID,
+	}, user.UUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to approve role mapping: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	respondWithJson(w, r, http.StatusOK, role)
+
+}
