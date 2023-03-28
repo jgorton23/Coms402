@@ -11,6 +11,27 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Certification defines model for Certification.
+type Certification struct {
+	// CompanyUUID uuid of the company
+	CompanyUUID string `json:"companyUUID"`
+
+	// ImageUUID uuid of the image
+	ImageUUID *string `json:"imageUUID,omitempty"`
+
+	// ItemBatchUUID uuid of the item batch
+	ItemBatchUUID string `json:"itemBatchUUID"`
+
+	// PrimaryAttribute primaryAttribute
+	PrimaryAttribute string `json:"primaryAttribute"`
+
+	// TemplateUUID uuid of the template
+	TemplateUUID *string `json:"templateUUID,omitempty"`
+
+	// Uuid uuid of the item batch
+	Uuid string `json:"uuid"`
+}
+
 // Company defines model for Company.
 type Company struct {
 	// Name Name of the company
@@ -42,6 +63,21 @@ type ItemBatch struct {
 
 	// Uuid uuid of the item batch
 	Uuid string `json:"uuid"`
+}
+
+// NewCertification defines model for NewCertification.
+type NewCertification struct {
+	// CompanyUUID uuid of the company
+	CompanyUUID string `json:"companyUUID"`
+
+	// ImageUUID uuid of the image
+	ImageUUID *string `json:"imageUUID,omitempty"`
+
+	// ItemBatchUUID uuid of the item batch
+	ItemBatchUUID string `json:"itemBatchUUID"`
+
+	// PrimaryAttribute primaryAttribute
+	PrimaryAttribute string `json:"primaryAttribute"`
 }
 
 // NewCompany defines model for NewCompany.
@@ -100,6 +136,15 @@ type DefaultUnauthenticatedErrorResponse = Error
 // DefaultUnauthorizedErrorResponse defines model for DefaultUnauthorizedErrorResponse.
 type DefaultUnauthorizedErrorResponse = Error
 
+// GetCertificationByParams defines parameters for GetCertificationBy.
+type GetCertificationByParams struct {
+	// CertificationUUID UUID of the item batch
+	CertificationUUID *string `form:"certificationUUID,omitempty" json:"certificationUUID,omitempty"`
+
+	// CompanyUUID uuid of company for which to get
+	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
+}
+
 // GetItemBatchByParams defines parameters for GetItemBatchBy.
 type GetItemBatchByParams struct {
 	// ItemBatchUUID UUID of the item batch
@@ -127,6 +172,12 @@ type GetUserByParams struct {
 	UserUUID *string `form:"userUUID,omitempty" json:"userUUID,omitempty"`
 }
 
+// AddCertificationJSONRequestBody defines body for AddCertification for application/json ContentType.
+type AddCertificationJSONRequestBody = NewCertification
+
+// UpdateCertificationJSONRequestBody defines body for UpdateCertification for application/json ContentType.
+type UpdateCertificationJSONRequestBody = Certification
+
 // AddCompanyJSONRequestBody defines body for AddCompany for application/json ContentType.
 type AddCompanyJSONRequestBody = NewCompany
 
@@ -144,6 +195,15 @@ type AddUserRoleJSONRequestBody = NewUserRole
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Find certification by *
+	// (GET /certification)
+	GetCertificationBy(w http.ResponseWriter, r *http.Request, params GetCertificationByParams)
+	// Create a new item batch
+	// (POST /certification)
+	AddCertification(w http.ResponseWriter, r *http.Request)
+	// Update an existing item batch
+	// (PUT /certification)
+	UpdateCertification(w http.ResponseWriter, r *http.Request)
 	// Create a new Company
 	// (POST /company)
 	AddCompany(w http.ResponseWriter, r *http.Request)
@@ -181,6 +241,72 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetCertificationBy operation middleware
+func (siw *ServerInterfaceWrapper) GetCertificationBy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetCertificationByParams
+
+	// ------------- Optional query parameter "certificationUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "certificationUUID", r.URL.Query(), &params.CertificationUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "certificationUUID", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "companyUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "companyUUID", r.URL.Query(), &params.CompanyUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "companyUUID", Err: err})
+		return
+	}
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCertificationBy(w, r, params)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddCertification operation middleware
+func (siw *ServerInterfaceWrapper) AddCertification(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddCertification(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// UpdateCertification operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCertification(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateCertification(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
 
 // AddCompany operation middleware
 func (siw *ServerInterfaceWrapper) AddCompany(w http.ResponseWriter, r *http.Request) {
@@ -504,6 +630,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/certification", wrapper.GetCertificationBy)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/certification", wrapper.AddCertification)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/certification", wrapper.UpdateCertification)
+	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/company", wrapper.AddCompany)
 	})

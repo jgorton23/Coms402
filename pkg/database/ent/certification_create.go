@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
 )
@@ -48,20 +47,6 @@ func (cc *CertificationCreate) SetItemBatchUUID(u uuid.UUID) *CertificationCreat
 // SetImageUUID sets the "imageUUID" field.
 func (cc *CertificationCreate) SetImageUUID(u uuid.UUID) *CertificationCreate {
 	cc.mutation.SetImageUUID(u)
-	return cc
-}
-
-// SetTemplateUUID sets the "templateUUID" field.
-func (cc *CertificationCreate) SetTemplateUUID(u uuid.UUID) *CertificationCreate {
-	cc.mutation.SetTemplateUUID(u)
-	return cc
-}
-
-// SetNillableTemplateUUID sets the "templateUUID" field if the given value is not nil.
-func (cc *CertificationCreate) SetNillableTemplateUUID(u *uuid.UUID) *CertificationCreate {
-	if u != nil {
-		cc.SetTemplateUUID(*u)
-	}
 	return cc
 }
 
@@ -99,25 +84,6 @@ func (cc *CertificationCreate) SetItemBatchID(id uuid.UUID) *CertificationCreate
 // SetItemBatch sets the "itemBatch" edge to the ItemBatch entity.
 func (cc *CertificationCreate) SetItemBatch(i *ItemBatch) *CertificationCreate {
 	return cc.SetItemBatchID(i.ID)
-}
-
-// SetTemplateID sets the "template" edge to the CertificationTemplate entity by ID.
-func (cc *CertificationCreate) SetTemplateID(id uuid.UUID) *CertificationCreate {
-	cc.mutation.SetTemplateID(id)
-	return cc
-}
-
-// SetNillableTemplateID sets the "template" edge to the CertificationTemplate entity by ID if the given value is not nil.
-func (cc *CertificationCreate) SetNillableTemplateID(id *uuid.UUID) *CertificationCreate {
-	if id != nil {
-		cc = cc.SetTemplateID(*id)
-	}
-	return cc
-}
-
-// SetTemplate sets the "template" edge to the CertificationTemplate entity.
-func (cc *CertificationCreate) SetTemplate(c *CertificationTemplate) *CertificationCreate {
-	return cc.SetTemplateID(c.ID)
 }
 
 // Mutation returns the CertificationMutation object of the builder.
@@ -265,26 +231,6 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_node.ItemBatchUUID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.TemplateIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   certification.TemplateTable,
-			Columns: []string{certification.TemplateColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certificationtemplate.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.TemplateUUID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	return _node, _spec
 }
 
@@ -382,24 +328,6 @@ func (u *CertificationUpsert) SetImageUUID(v uuid.UUID) *CertificationUpsert {
 // UpdateImageUUID sets the "imageUUID" field to the value that was provided on create.
 func (u *CertificationUpsert) UpdateImageUUID() *CertificationUpsert {
 	u.SetExcluded(certification.FieldImageUUID)
-	return u
-}
-
-// SetTemplateUUID sets the "templateUUID" field.
-func (u *CertificationUpsert) SetTemplateUUID(v uuid.UUID) *CertificationUpsert {
-	u.Set(certification.FieldTemplateUUID, v)
-	return u
-}
-
-// UpdateTemplateUUID sets the "templateUUID" field to the value that was provided on create.
-func (u *CertificationUpsert) UpdateTemplateUUID() *CertificationUpsert {
-	u.SetExcluded(certification.FieldTemplateUUID)
-	return u
-}
-
-// ClearTemplateUUID clears the value of the "templateUUID" field.
-func (u *CertificationUpsert) ClearTemplateUUID() *CertificationUpsert {
-	u.SetNull(certification.FieldTemplateUUID)
 	return u
 }
 
@@ -504,27 +432,6 @@ func (u *CertificationUpsertOne) SetImageUUID(v uuid.UUID) *CertificationUpsertO
 func (u *CertificationUpsertOne) UpdateImageUUID() *CertificationUpsertOne {
 	return u.Update(func(s *CertificationUpsert) {
 		s.UpdateImageUUID()
-	})
-}
-
-// SetTemplateUUID sets the "templateUUID" field.
-func (u *CertificationUpsertOne) SetTemplateUUID(v uuid.UUID) *CertificationUpsertOne {
-	return u.Update(func(s *CertificationUpsert) {
-		s.SetTemplateUUID(v)
-	})
-}
-
-// UpdateTemplateUUID sets the "templateUUID" field to the value that was provided on create.
-func (u *CertificationUpsertOne) UpdateTemplateUUID() *CertificationUpsertOne {
-	return u.Update(func(s *CertificationUpsert) {
-		s.UpdateTemplateUUID()
-	})
-}
-
-// ClearTemplateUUID clears the value of the "templateUUID" field.
-func (u *CertificationUpsertOne) ClearTemplateUUID() *CertificationUpsertOne {
-	return u.Update(func(s *CertificationUpsert) {
-		s.ClearTemplateUUID()
 	})
 }
 
@@ -792,27 +699,6 @@ func (u *CertificationUpsertBulk) SetImageUUID(v uuid.UUID) *CertificationUpsert
 func (u *CertificationUpsertBulk) UpdateImageUUID() *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
 		s.UpdateImageUUID()
-	})
-}
-
-// SetTemplateUUID sets the "templateUUID" field.
-func (u *CertificationUpsertBulk) SetTemplateUUID(v uuid.UUID) *CertificationUpsertBulk {
-	return u.Update(func(s *CertificationUpsert) {
-		s.SetTemplateUUID(v)
-	})
-}
-
-// UpdateTemplateUUID sets the "templateUUID" field to the value that was provided on create.
-func (u *CertificationUpsertBulk) UpdateTemplateUUID() *CertificationUpsertBulk {
-	return u.Update(func(s *CertificationUpsert) {
-		s.UpdateTemplateUUID()
-	})
-}
-
-// ClearTemplateUUID clears the value of the "templateUUID" field.
-func (u *CertificationUpsertBulk) ClearTemplateUUID() *CertificationUpsertBulk {
-	return u.Update(func(s *CertificationUpsert) {
-		s.ClearTemplateUUID()
 	})
 }
 

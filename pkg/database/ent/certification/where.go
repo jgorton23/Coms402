@@ -75,11 +75,6 @@ func ImageUUID(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldImageUUID, v))
 }
 
-// TemplateUUID applies equality check predicate on the "templateUUID" field. It's identical to TemplateUUIDEQ.
-func TemplateUUID(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(sql.FieldEQ(FieldTemplateUUID, v))
-}
-
 // PrimaryAttributeEQ applies the EQ predicate on the "primaryAttribute" field.
 func PrimaryAttributeEQ(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldPrimaryAttribute, v))
@@ -225,36 +220,6 @@ func ImageUUIDLTE(v uuid.UUID) predicate.Certification {
 	return predicate.Certification(sql.FieldLTE(FieldImageUUID, v))
 }
 
-// TemplateUUIDEQ applies the EQ predicate on the "templateUUID" field.
-func TemplateUUIDEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(sql.FieldEQ(FieldTemplateUUID, v))
-}
-
-// TemplateUUIDNEQ applies the NEQ predicate on the "templateUUID" field.
-func TemplateUUIDNEQ(v uuid.UUID) predicate.Certification {
-	return predicate.Certification(sql.FieldNEQ(FieldTemplateUUID, v))
-}
-
-// TemplateUUIDIn applies the In predicate on the "templateUUID" field.
-func TemplateUUIDIn(vs ...uuid.UUID) predicate.Certification {
-	return predicate.Certification(sql.FieldIn(FieldTemplateUUID, vs...))
-}
-
-// TemplateUUIDNotIn applies the NotIn predicate on the "templateUUID" field.
-func TemplateUUIDNotIn(vs ...uuid.UUID) predicate.Certification {
-	return predicate.Certification(sql.FieldNotIn(FieldTemplateUUID, vs...))
-}
-
-// TemplateUUIDIsNil applies the IsNil predicate on the "templateUUID" field.
-func TemplateUUIDIsNil() predicate.Certification {
-	return predicate.Certification(sql.FieldIsNull(FieldTemplateUUID))
-}
-
-// TemplateUUIDNotNil applies the NotNil predicate on the "templateUUID" field.
-func TemplateUUIDNotNil() predicate.Certification {
-	return predicate.Certification(sql.FieldNotNull(FieldTemplateUUID))
-}
-
 // HasCompany applies the HasEdge predicate on the "company" edge.
 func HasCompany() predicate.Certification {
 	return predicate.Certification(func(s *sql.Selector) {
@@ -300,33 +265,6 @@ func HasItemBatchWith(preds ...predicate.ItemBatch) predicate.Certification {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ItemBatchInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, ItemBatchTable, ItemBatchColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasTemplate applies the HasEdge predicate on the "template" edge.
-func HasTemplate() predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, TemplateTable, TemplateColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTemplateWith applies the HasEdge predicate on the "template" edge with a given conditions (other predicates).
-func HasTemplateWith(preds ...predicate.CertificationTemplate) predicate.Certification {
-	return predicate.Certification(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TemplateInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, TemplateTable, TemplateColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

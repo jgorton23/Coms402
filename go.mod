@@ -5,9 +5,11 @@ go 1.18
 require (
 	entgo.io/ent v0.11.8
 	github.com/Blank-Xu/sql-adapter v0.0.0-20210714092925-0bdd0d548758
+	github.com/Eun/go-hit v0.5.23
 	github.com/alexedwards/scs/v2 v2.5.0
 	github.com/casbin/casbin/v2 v2.65.0
 	github.com/deepmap/oapi-codegen v1.12.2
+	github.com/docker/go-connections v0.4.0
 	github.com/flowchartsman/swaggerui v0.0.0-20221017034628-909ed4f3701b
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/cors v1.2.1
@@ -20,6 +22,8 @@ require (
 	github.com/prometheus/client_golang v1.13.1
 	github.com/samber/do v1.4.1
 	github.com/sirupsen/logrus v1.9.0
+	github.com/stretchr/testify v1.8.2
+	github.com/testcontainers/testcontainers-go v0.19.0
 	github.com/volatiletech/authboss/v3 v3.2.1
 	golang.org/x/mod v0.8.0
 	logur.dev/logur v0.17.0
@@ -28,19 +32,16 @@ require (
 require (
 	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
 	ariga.io/entviz v0.0.0-20230125130633-6c9be8e08c7c // indirect
-	github.com/AlekSi/gocov-xml v1.1.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/Eun/go-convert v0.0.0-20200421145326-bef6c56666ee // indirect
 	github.com/Eun/go-doppelgangerreader v0.0.0-20190911075941-30f1527f16b2 // indirect
-	github.com/Eun/go-hit v0.5.23 // indirect
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/araddon/dateparse v0.0.0-20200409225146-d820a6159ab1 // indirect
-	github.com/axw/gocov v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -49,7 +50,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/docker v23.0.1+incompatible // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
@@ -86,8 +86,6 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
-	github.com/testcontainers/testcontainers-go v0.19.0 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
@@ -96,7 +94,6 @@ require (
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
-	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220617124728-180714bec0ad // indirect

@@ -3,9 +3,10 @@ package repo_test
 import (
 	"testing"
 
+	"github.com/samber/do"
+
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase/repo"
-	"github.com/samber/do"
 )
 
 // Interface Testing for the usecase.IAuthorizationEnforcerRepo casbin implementations

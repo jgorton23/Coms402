@@ -16,6 +16,11 @@ tags:
     description: User
   - name: userRole
     description: userRoles
+  - name: itembatch
+    description: itemBatch
+  - name: certification
+    description: certification
+   
 #     externalDocs:
 #       description: Find out more
 #       url: http://swagger.io
@@ -295,6 +300,97 @@ paths:
           $ref: '#/components/responses/DefaultErrorResponse'
         default:
           $ref: '#/components/responses/DefaultErrorResponse'
+  /certification:
+    get:
+      tags:
+        - certification
+      summary: Find certification by *
+      description: Returns a the certification associated with the given *
+      operationId: getCertificationBy*
+      parameters: # We can always add more optional prams to search by 
+        - name: certificationUUID
+          in: query
+          description: UUID of the item batch
+          required: false
+          schema:
+            type: string
+        - name: companyUUID
+          in: query
+          description: uuid of company for which to get
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserRole"
+        "404":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'  
+    post:
+      tags:
+        - certification
+      summary: Create a new item batch
+      description: "Creates a new item batch"
+      operationId: addCertification
+      requestBody:
+        description: item batch to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewCertification"              
+      responses:
+        "201":
+          description: Certification created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certification"
+        "400":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        "401":
+          $ref: '#/components/responses/DefaultUnauthenticatedErrorResponse'
+        "403":
+          $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+    put:
+      tags:
+        - certification
+      summary: Update an existing item batch
+      description: "Update an existing item batch"
+      operationId: updateCertification
+      requestBody:
+        description: item batch to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Certification"
+      responses:
+        "200":
+          description: Successively updated Certification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certification"
+        "400":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        "401":
+          $ref: '#/components/responses/DefaultUnauthenticatedErrorResponse'
+        "403":
+          $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
+        "404":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
 # externalDocs:
 #   description: Find out more about Swagger
 #   url: http://swagger.io
@@ -356,10 +452,6 @@ components:
     UserRole:
       allOf:
         - $ref: '#/components/schemas/NewUserRole'
-          required:
-          - "userUUID"
-          - "roleType"
-          - "approved"
         - type: object
           required:
             - "uuid"
@@ -421,6 +513,47 @@ components:
             uuid: 
               type: string
               description: uuid of the item batch
+              pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+          additionalProperties: false
+      additionalProperties: false
+    NewCertification:
+      type: object
+      required:
+        - companyUUID
+        - itemBatchUUID
+        - primaryAttribute
+      properties:
+        imageUUID: 
+          type: string
+          description: uuid of the image
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+        companyUUID: 
+          type: string
+          description: uuid of the company
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+        itemBatchUUID: 
+          type: string
+          description: uuid of the item batch
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$      
+        primaryAttribute:
+          type: string
+          description:  primaryAttribute
+          pattern: "[A-Za-z0-9_]"
+      additionalProperties: false
+    Certification:
+      allOf:
+        - $ref: '#/components/schemas/NewCertification'
+        - type: object
+          required:
+            - "uuid"
+          properties:
+            uuid: 
+              type: string
+              description: uuid of the item batch
+              pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+            templateUUID: 
+              type: string
+              description: uuid of the template
               pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
           additionalProperties: false
       additionalProperties: false

@@ -55,7 +55,7 @@ func (s *Server) start() {
 			s.notify <- err
 		}
 
-		// TODO use a cannel to send a notification that the server has started correctly. 
+		// TODO use a cannel to send a notification that the server has started correctly.
 		// useful to have the server run in the background but block until the server has started.
 
 		s.notify <- s.server.Serve(l)

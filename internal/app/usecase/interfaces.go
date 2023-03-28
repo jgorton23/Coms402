@@ -105,4 +105,12 @@ type (
 		GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.ItemBatch, error)
 		GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.ItemBatch, error)
 	}
+
+	CertificationRepo interface {
+		Exists(ctx context.Context, PrimaryAttribute string) (bool, error)
+		Create(ctx context.Context, certification domain.Certification) (domain.Certification, error)
+		Update(ctx context.Context, certification domain.Certification) error
+		GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.Certification, error)
+		GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.Certification, error)
+	}
 )

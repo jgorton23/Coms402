@@ -926,22 +926,6 @@ func (c *CertificationClient) QueryItemBatch(ce *Certification) *ItemBatchQuery 
 	return query
 }
 
-// QueryTemplate queries the template edge of a Certification.
-func (c *CertificationClient) QueryTemplate(ce *Certification) *CertificationTemplateQuery {
-	query := (&CertificationTemplateClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ce.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(certification.Table, certification.FieldID, id),
-			sqlgraph.To(certificationtemplate.Table, certificationtemplate.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, certification.TemplateTable, certification.TemplateColumn),
-		)
-		fromV = sqlgraph.Neighbors(ce.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *CertificationClient) Hooks() []Hook {
 	return c.hooks.Certification

@@ -8,11 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
-
 	"github.com/samber/do"
 
 	v1 "git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/controller/http/v1"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase/repo"
 )
@@ -40,6 +39,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, repo.NewUserToCompanyRepo)
 	do.Provide(injector, repo.NewCompanyRepo)
 	do.Provide(injector, repo.NewItemBatchRepo)
+	do.Provide(injector, repo.NewCertificationRepo)
 
 	do.Provide(injector, usecase.NewLogger)
 	do.Provide(injector, usecase.NewAuthBossLogger)
@@ -50,6 +50,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, usecase.NewUserToCompany)
 	do.Provide(injector, usecase.NewUser)
 	do.Provide(injector, usecase.NewItemBatch)
+	do.Provide(injector, usecase.NewCertification)
 
 	// HTTP stuff
 	do.Provide(injector, v1.NewHttpAuthenticator)

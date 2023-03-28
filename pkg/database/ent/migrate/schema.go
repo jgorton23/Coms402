@@ -106,7 +106,6 @@ var (
 		{Name: "image_uuid", Type: field.TypeUUID},
 		{Name: "company_uuid", Type: field.TypeUUID},
 		{Name: "item_batch_uuid", Type: field.TypeUUID},
-		{Name: "template_uuid", Type: field.TypeUUID, Nullable: true},
 	}
 	// CertificationsTable holds the schema information for the "certifications" table.
 	CertificationsTable = &schema.Table{
@@ -125,12 +124,6 @@ var (
 				Columns:    []*schema.Column{CertificationsColumns[4]},
 				RefColumns: []*schema.Column{ItemBatchesColumns[0]},
 				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "certifications_certification_templates_template",
-				Columns:    []*schema.Column{CertificationsColumns[5]},
-				RefColumns: []*schema.Column{CertificationTemplatesColumns[0]},
-				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -296,7 +289,6 @@ func init() {
 	AttributeTypesToTemplatesTable.ForeignKeys[1].RefTable = CertificationTemplatesTable
 	CertificationsTable.ForeignKeys[0].RefTable = CompaniesTable
 	CertificationsTable.ForeignKeys[1].RefTable = ItemBatchesTable
-	CertificationsTable.ForeignKeys[2].RefTable = CertificationTemplatesTable
 	CertificationTemplatesTable.ForeignKeys[0].RefTable = CompaniesTable
 	ItemBatchesTable.ForeignKeys[0].RefTable = CompaniesTable
 	ItemBatchToItemBatchesTable.ForeignKeys[0].RefTable = ItemBatchesTable
