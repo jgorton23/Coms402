@@ -113,7 +113,7 @@ func (ur *companyDBEntImplem) Create(ctx context.Context, usr domain.Company) (d
 
 // Update -.
 func (ur *companyDBEntImplem) Update(ctx context.Context, u domain.Company) error {
-	_, err := ur.Client.Company.
+	_, err := ur.Client.Company. //todo this might be broken
 		Update().
 		Where(
 			company.ID(u.UUID),
