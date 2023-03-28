@@ -27,6 +27,7 @@ require (
 
 require (
 	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
+	ariga.io/entviz v0.0.0-20230125130633-6c9be8e08c7c // indirect
 	github.com/AlekSi/gocov-xml v1.1.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
