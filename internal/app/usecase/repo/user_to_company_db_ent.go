@@ -72,7 +72,8 @@ type userToCompanyDBEntImplem struct {
 // 	return ur.databaseCompanyToEntityCompany(u), nil
 // }
 
-// Exists -.
+// Exists
+// returns if the given role exists
 func (ur *userToCompanyDBEntImplem) Exists(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
 
 	exists, err := ur.Client.UsersToCompany.
@@ -91,7 +92,8 @@ func (ur *userToCompanyDBEntImplem) Exists(ctx context.Context, userUUID uuid.UU
 	return exists, nil
 }
 
-// GetByUUIDS -.
+// GetByUUIDS
+// returns the role of a given user in a given company
 func (ur *userToCompanyDBEntImplem) GetByUUIDS(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (domain.UserToCompany, error) {
 
 	utc, err := ur.Client.UsersToCompany.
@@ -111,7 +113,8 @@ func (ur *userToCompanyDBEntImplem) GetByUUIDS(ctx context.Context, userUUID uui
 	return ur.databaseToEntity(utc), nil
 }
 
-// Create -.
+// Create
+// creates a new role
 func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserToCompany) (domain.UserToCompany, error) {
 	utc, err := ur.Client.UsersToCompany.
 		Create().
@@ -127,6 +130,8 @@ func (ur *userToCompanyDBEntImplem) Create(ctx context.Context, usr domain.UserT
 	return ur.databaseToEntity(utc), nil
 }
 
+// Update
+// updates the given role
 func (ur *userToCompanyDBEntImplem) Update(ctx context.Context, role domain.UserToCompany) error {
 	_, err := ur.Client.UsersToCompany.
 		Update().
@@ -144,6 +149,8 @@ func (ur *userToCompanyDBEntImplem) Update(ctx context.Context, role domain.User
 	return nil
 }
 
+// GetByCompanyUUID
+// returns all roles for the given company
 func (ur *userToCompanyDBEntImplem) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.UserToCompany, error) {
 	utcs, err := ur.Client.UsersToCompany.
 		Query().
@@ -164,6 +171,8 @@ func (ur *userToCompanyDBEntImplem) GetByCompanyUUID(ctx context.Context, compan
 	return roles, nil
 }
 
+// GetByUserUUID
+// returns all of a users roles
 func (ur *userToCompanyDBEntImplem) GetByUserUUID(ctx context.Context, userUUID uuid.UUID) ([]domain.UserToCompany, error) {
 	utcs, err := ur.Client.UsersToCompany.
 		Query().

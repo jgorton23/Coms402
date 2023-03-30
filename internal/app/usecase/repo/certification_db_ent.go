@@ -31,7 +31,8 @@ type certificationDBEntImplem struct {
 	*ent.Client
 }
 
-// Exists -.
+// Exists
+// returns true if the cert exists
 func (ur *certificationDBEntImplem) Exists(ctx context.Context, primaryAttribute string) (bool, error) {
 
 	exists, err := ur.Client.Certification.
@@ -47,7 +48,8 @@ func (ur *certificationDBEntImplem) Exists(ctx context.Context, primaryAttribute
 	return exists, nil
 }
 
-// Create -.
+// Create
+// Creates a new cert
 func (ur *certificationDBEntImplem) Create(ctx context.Context, c domain.Certification) (domain.Certification, error) {
 	utc, err := ur.Client.Certification.
 		Create().
@@ -64,7 +66,8 @@ func (ur *certificationDBEntImplem) Create(ctx context.Context, c domain.Certifi
 	return ur.databaseToEntity(utc), nil
 }
 
-// Update -.
+// Update
+// Update a given cert
 func (ur *certificationDBEntImplem) Update(ctx context.Context, c domain.Certification) error {
 	_, err := ur.Client.Certification.
 		Update().
@@ -86,6 +89,8 @@ func (ur *certificationDBEntImplem) Update(ctx context.Context, c domain.Certifi
 	return nil
 }
 
+// GetByCompanyUUID
+// returns certs with the given companyUUID
 func (ur *certificationDBEntImplem) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) (certificates []domain.Certification, err error) {
 	u, err := ur.Client.Certification.
 		Query().
@@ -104,6 +109,8 @@ func (ur *certificationDBEntImplem) GetByCompanyUUID(ctx context.Context, compan
 	return certificates, nil
 }
 
+// GetByUUID
+// returns the cert with the given UUID
 func (ur *certificationDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.Certification, error) {
 	u, err := ur.Client.Certification.
 		Query().
@@ -116,6 +123,7 @@ func (ur *certificationDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUI
 	return ur.databaseToEntity(u), nil
 }
 
+// databaseToEntity
 func (ur *certificationDBEntImplem) databaseToEntity(ib *ent.Certification) domain.Certification {
 	return domain.Certification{
 		UUID:             ib.ID,
