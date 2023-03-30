@@ -32,6 +32,8 @@ type ItemBatch struct {
 	logger        *Logger
 }
 
+// Create
+// creates a new itemBatch
 func (u ItemBatch) Create(ctx context.Context, ib domain.ItemBatch, userUUID uuid.UUID) (domain.ItemBatch, error) {
 	// verify a user is allowed to create an item batch user a company
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, ib.CompanyUUID)
@@ -66,6 +68,8 @@ func (u ItemBatch) Create(ctx context.Context, ib domain.ItemBatch, userUUID uui
 	return repoItemBatch, nil
 }
 
+// Update
+// updates the given itemBatch
 func (u ItemBatch) Update(ctx context.Context, ib domain.ItemBatch, userUUID uuid.UUID) error {
 	// verify a user is allowed to create an item batch user a company
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, ib.CompanyUUID)
@@ -100,6 +104,8 @@ func (u ItemBatch) Update(ctx context.Context, ib domain.ItemBatch, userUUID uui
 	return nil
 }
 
+// GetByCompanyUUID
+// returns all itembatches belonging to a given company
 func (u ItemBatch) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID) ([]domain.ItemBatch, error) {
 	//TODO switch to using the RBAC system / change how roles work
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, companyUUID)
@@ -121,6 +127,8 @@ func (u ItemBatch) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID, 
 	return itemBatches, nil
 }
 
+// GetByUUID
+// returns the itemBatch with the given UUID
 func (u ItemBatch) GetByUUID(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID, uuid uuid.UUID) (domain.ItemBatch, error) {
 	//TODO switch to using the RBAC system / change how roles work
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, companyUUID)

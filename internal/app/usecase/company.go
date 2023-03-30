@@ -41,6 +41,8 @@ type Company struct {
 	logger        *Logger
 }
 
+// Create
+// creates a new company
 func (c Company) Create(ctx context.Context, dc domain.Company, userUUID uuid.UUID) (domain.Company, error) {
 
 	exists, err := c.companyRepo.ExistsNamed(ctx, dc.Name)
@@ -78,6 +80,8 @@ func (c Company) Create(ctx context.Context, dc domain.Company, userUUID uuid.UU
 	return dc, nil
 }
 
+// Update
+// updates the given company
 func (c Company) Update(ctx context.Context, dc domain.Company, userUUID uuid.UUID) error {
 	existsCompany, err := c.companyRepo.ExistsUUID(ctx, dc.UUID)
 
@@ -111,6 +115,8 @@ func (c Company) Update(ctx context.Context, dc domain.Company, userUUID uuid.UU
 	return nil
 }
 
+// GetByUUID
+// returns the company with the given UUID
 func (c Company) GetByUUID(ctx context.Context, companyUUID uuid.UUID) (domain.Company, error) {
 	return c.companyRepo.GetByUUID(ctx, companyUUID)
 }
