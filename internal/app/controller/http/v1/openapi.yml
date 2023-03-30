@@ -87,7 +87,7 @@ paths:
           $ref: '#/components/responses/DefaultErrorResponse'
     get:
       tags:
-        - user
+        - userRole
       summary: Find roles by *
       description: Returns a the roles associated with the given UUID
       operationId: getRolesBy*
