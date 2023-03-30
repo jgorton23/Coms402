@@ -341,7 +341,7 @@ func (cq *CertificationQuery) WithItemBatch(opts ...func(*ItemBatchQuery)) *Cert
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Certification.Query().
+//	httpclient.Certification.Query().
 //		GroupBy(certification.FieldPrimaryAttribute).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -363,7 +363,7 @@ func (cq *CertificationQuery) GroupBy(field string, fields ...string) *Certifica
 //		PrimaryAttribute string `json:"primaryAttribute,omitempty"`
 //	}
 //
-//	client.Certification.Query().
+//	httpclient.Certification.Query().
 //		Select(certification.FieldPrimaryAttribute).
 //		Scan(ctx, &v)
 func (cq *CertificationQuery) Select(fields ...string) *CertificationSelect {

@@ -7,10 +7,10 @@ import (
 	"entgo.io/ent/dialect"
 )
 
-// Option function to configure the client.
+// Option function to configure the httpclient.
 type Option func(*config)
 
-// Config is the configuration for the client and its builder.
+// Config is the configuration for the httpclient and its builder.
 type config struct {
 	// driver used for executing database requests.
 	driver dialect.Driver
@@ -24,7 +24,7 @@ type config struct {
 	inters *inters
 }
 
-// hooks and interceptors per client, for fast access.
+// hooks and interceptors per httpclient, for fast access.
 type (
 	hooks struct {
 		Attribute                 []ent.Hook
@@ -80,7 +80,7 @@ func Log(fn func(...any)) Option {
 	}
 }
 
-// Driver configures the client driver.
+// Driver configures the httpclient driver.
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver

@@ -305,7 +305,7 @@ func (ctq *CertificationTemplateQuery) WithCompany(opts ...func(*CompanyQuery)) 
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.CertificationTemplate.Query().
+//	httpclient.CertificationTemplate.Query().
 //		GroupBy(certificationtemplate.FieldDescription).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -327,7 +327,7 @@ func (ctq *CertificationTemplateQuery) GroupBy(field string, fields ...string) *
 //		Description string `json:"description,omitempty"`
 //	}
 //
-//	client.CertificationTemplate.Query().
+//	httpclient.CertificationTemplate.Query().
 //		Select(certificationtemplate.FieldDescription).
 //		Scan(ctx, &v)
 func (ctq *CertificationTemplateQuery) Select(fields ...string) *CertificationTemplateSelect {

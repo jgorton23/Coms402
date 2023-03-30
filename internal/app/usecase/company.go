@@ -50,7 +50,7 @@ func (c Company) Create(ctx context.Context, dc domain.Company, userUUID uuid.UU
 	}
 	// The company already exists
 	if exists {
-		c.logger.Info(fmt.Sprintf("Company %v already exists in database", dc.UUID))
+		c.logger.Info(fmt.Sprintf("Company %v already exists in database", dc.Name))
 
 		return domain.Company{}, ErrCompanyFound
 	}
@@ -63,7 +63,7 @@ func (c Company) Create(ctx context.Context, dc domain.Company, userUUID uuid.UU
 		return domain.Company{}, err
 	}
 
-	c.logger.Info(fmt.Sprintf("Company %v created in database", dc.UUID))
+	c.logger.Info(fmt.Sprintf("Company %v created in database", dc.Name))
 
 	// Add initial Company Owner
 
@@ -88,6 +88,17 @@ func (c Company) Update(ctx context.Context, dc domain.Company, userUUID uuid.UU
 	if !existsCompany {
 		c.logger.Info(fmt.Sprintf("company %v does not exists in database", dc.UUID))
 		return ErrCompanyNotFound
+	}
+
+	existsCompanyNamed, err := c.companyRepo.ExistsNamed(ctx, dc.Name)
+
+	if err != nil {
+		return err
+	}
+
+	if existsCompanyNamed {
+		c.logger.Info(fmt.Sprintf("company %v exists in database", dc.Name))
+		return ErrCompanyFound
 	}
 
 	//Check if user is allowed to update the company

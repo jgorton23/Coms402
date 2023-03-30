@@ -1,25 +1,19 @@
 package e2e
 
 import (
-	"net/http"
 	"testing"
 
-	"github.com/Eun/go-hit"
-)
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/h2non/gentleman.v2"
 
-const (
-	basePath  = "http://localhost:8082"
-	apiV1Path = "/api/v1"
-	authPath  = "/auth"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/httpclient"
 )
 
 func TestHealth(t *testing.T) {
-	err := hit.Do(
-		hit.Get(basePath+"/healthz"),
-		hit.Expect().Status().Equal(http.StatusOK),
-	)
+	cli := gentleman.New()
+	cli.URL(basePath)
+	cli.CookieJar()
 
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	err := httpclient.Healthz(cli)
+	assert.NoError(t, err, "Failed health testing")
 }

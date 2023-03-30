@@ -121,7 +121,7 @@ func withAttribute(node *Attribute) attributeOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m AttributeMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -736,7 +736,7 @@ func withAttributeType(node *AttributeType) attributetypeOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m AttributeTypeMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -1189,7 +1189,7 @@ func withAttributeTypesToTemplates(node *AttributeTypesToTemplates) attributetyp
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m AttributeTypesToTemplatesMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -1702,7 +1702,7 @@ func withAuthorizationPolicy(node *AuthorizationPolicy) authorizationpolicyOptio
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m AuthorizationPolicyMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -2351,7 +2351,7 @@ func withCertification(node *Certification) certificationOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m CertificationMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -2966,7 +2966,7 @@ func withCertificationTemplate(node *CertificationTemplate) certificationtemplat
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m CertificationTemplateMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -3416,7 +3416,7 @@ func withCompany(node *Company) companyOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m CompanyMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -3751,7 +3751,7 @@ func withItemBatch(node *ItemBatch) itembatchOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m ItemBatchMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -4257,7 +4257,7 @@ func withItemBatchToItemBatch(node *ItemBatchToItemBatch) itembatchtoitembatchOp
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m ItemBatchToItemBatchMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -4766,7 +4766,7 @@ func withSession(node *Session) sessionOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m SessionMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -5206,7 +5206,7 @@ func withUser(node *User) userOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m UserMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
@@ -6029,7 +6029,7 @@ func withUsersToCompany(node *UsersToCompany) userstocompanyOption {
 }
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
+// executed in a transaction (ent.Tx), a transactional httpclient is returned.
 func (m UsersToCompanyMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()

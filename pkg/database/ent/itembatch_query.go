@@ -305,7 +305,7 @@ func (ibq *ItemBatchQuery) WithCompany(opts ...func(*CompanyQuery)) *ItemBatchQu
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.ItemBatch.Query().
+//	httpclient.ItemBatch.Query().
 //		GroupBy(itembatch.FieldItemNumber).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -327,7 +327,7 @@ func (ibq *ItemBatchQuery) GroupBy(field string, fields ...string) *ItemBatchGro
 //		ItemNumber string `json:"itemNumber,omitempty"`
 //	}
 //
-//	client.ItemBatch.Query().
+//	httpclient.ItemBatch.Query().
 //		Select(itembatch.FieldItemNumber).
 //		Scan(ctx, &v)
 func (ibq *ItemBatchQuery) Select(fields ...string) *ItemBatchSelect {

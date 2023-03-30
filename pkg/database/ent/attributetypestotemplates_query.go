@@ -341,7 +341,7 @@ func (atttq *AttributeTypesToTemplatesQuery) WithTemplate(opts ...func(*Certific
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.AttributeTypesToTemplates.Query().
+//	httpclient.AttributeTypesToTemplates.Query().
 //		GroupBy(attributetypestotemplates.FieldAttributeTypeUUID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -363,7 +363,7 @@ func (atttq *AttributeTypesToTemplatesQuery) GroupBy(field string, fields ...str
 //		AttributeTypeUUID uuid.UUID `json:"attributeTypeUUID,omitempty"`
 //	}
 //
-//	client.AttributeTypesToTemplates.Query().
+//	httpclient.AttributeTypesToTemplates.Query().
 //		Select(attributetypestotemplates.FieldAttributeTypeUUID).
 //		Scan(ctx, &v)
 func (atttq *AttributeTypesToTemplatesQuery) Select(fields ...string) *AttributeTypesToTemplatesSelect {

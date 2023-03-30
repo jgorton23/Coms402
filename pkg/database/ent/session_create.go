@@ -134,7 +134,7 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Session.Create().
+//	httpclient.Session.Create().
 //		SetToken(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -157,7 +157,7 @@ func (sc *SessionCreate) OnConflict(opts ...sql.ConflictOption) *SessionUpsertOn
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	httpclient.Session.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (sc *SessionCreate) OnConflictColumns(columns ...string) *SessionUpsertOne {
@@ -219,7 +219,7 @@ func (u *SessionUpsert) UpdateExpiry() *SessionUpsert {
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	httpclient.Session.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //		).
@@ -232,7 +232,7 @@ func (u *SessionUpsertOne) UpdateNewValues() *SessionUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	httpclient.Session.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
 func (u *SessionUpsertOne) Ignore() *SessionUpsertOne {
@@ -419,7 +419,7 @@ func (scb *SessionCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Session.CreateBulk(builders...).
+//	httpclient.Session.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -441,7 +441,7 @@ func (scb *SessionCreateBulk) OnConflict(opts ...sql.ConflictOption) *SessionUps
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	httpclient.Session.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (scb *SessionCreateBulk) OnConflictColumns(columns ...string) *SessionUpsertBulk {
@@ -460,7 +460,7 @@ type SessionUpsertBulk struct {
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	httpclient.Session.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //		).
@@ -473,7 +473,7 @@ func (u *SessionUpsertBulk) UpdateNewValues() *SessionUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Session.Create().
+//	httpclient.Session.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 func (u *SessionUpsertBulk) Ignore() *SessionUpsertBulk {

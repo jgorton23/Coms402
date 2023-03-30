@@ -268,7 +268,7 @@ func (sq *SessionQuery) Clone() *SessionQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Session.Query().
+//	httpclient.Session.Query().
 //		GroupBy(session.FieldToken).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -290,7 +290,7 @@ func (sq *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy 
 //		Token string `json:"token,omitempty"`
 //	}
 //
-//	client.Session.Query().
+//	httpclient.Session.Query().
 //		Select(session.FieldToken).
 //		Scan(ctx, &v)
 func (sq *SessionQuery) Select(fields ...string) *SessionSelect {

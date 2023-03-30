@@ -22,7 +22,7 @@ type (
 		Error(...any)
 	}
 
-	// Option configures client creation.
+	// Option configures httpclient creation.
 	Option func(*options)
 
 	options struct {
@@ -31,7 +31,7 @@ type (
 	}
 )
 
-// WithOptions forwards options to client creation.
+// WithOptions forwards options to httpclient creation.
 func WithOptions(opts ...ent.Option) Option {
 	return func(o *options) {
 		o.opts = append(o.opts, opts...)

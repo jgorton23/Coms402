@@ -28,38 +28,38 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
 )
 
-// Client is the client that holds all ent builders.
+// Client is the httpclient that holds all ent builders.
 type Client struct {
 	config
-	// Schema is the client for creating, migrating and dropping schema.
+	// Schema is the httpclient for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Attribute is the client for interacting with the Attribute builders.
+	// Attribute is the httpclient for interacting with the Attribute builders.
 	Attribute *AttributeClient
-	// AttributeType is the client for interacting with the AttributeType builders.
+	// AttributeType is the httpclient for interacting with the AttributeType builders.
 	AttributeType *AttributeTypeClient
-	// AttributeTypesToTemplates is the client for interacting with the AttributeTypesToTemplates builders.
+	// AttributeTypesToTemplates is the httpclient for interacting with the AttributeTypesToTemplates builders.
 	AttributeTypesToTemplates *AttributeTypesToTemplatesClient
-	// AuthorizationPolicy is the client for interacting with the AuthorizationPolicy builders.
+	// AuthorizationPolicy is the httpclient for interacting with the AuthorizationPolicy builders.
 	AuthorizationPolicy *AuthorizationPolicyClient
-	// Certification is the client for interacting with the Certification builders.
+	// Certification is the httpclient for interacting with the Certification builders.
 	Certification *CertificationClient
-	// CertificationTemplate is the client for interacting with the CertificationTemplate builders.
+	// CertificationTemplate is the httpclient for interacting with the CertificationTemplate builders.
 	CertificationTemplate *CertificationTemplateClient
-	// Company is the client for interacting with the Company builders.
+	// Company is the httpclient for interacting with the Company builders.
 	Company *CompanyClient
-	// ItemBatch is the client for interacting with the ItemBatch builders.
+	// ItemBatch is the httpclient for interacting with the ItemBatch builders.
 	ItemBatch *ItemBatchClient
-	// ItemBatchToItemBatch is the client for interacting with the ItemBatchToItemBatch builders.
+	// ItemBatchToItemBatch is the httpclient for interacting with the ItemBatchToItemBatch builders.
 	ItemBatchToItemBatch *ItemBatchToItemBatchClient
-	// Session is the client for interacting with the Session builders.
+	// Session is the httpclient for interacting with the Session builders.
 	Session *SessionClient
-	// User is the client for interacting with the User builders.
+	// User is the httpclient for interacting with the User builders.
 	User *UserClient
-	// UsersToCompany is the client for interacting with the UsersToCompany builders.
+	// UsersToCompany is the httpclient for interacting with the UsersToCompany builders.
 	UsersToCompany *UsersToCompanyClient
 }
 
-// NewClient creates a new client configured with the given options.
+// NewClient creates a new httpclient configured with the given options.
 func NewClient(opts ...Option) *Client {
 	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
@@ -85,8 +85,8 @@ func (c *Client) init() {
 }
 
 // Open opens a database/sql.DB specified by the driver name and
-// the data source name, and returns a new client attached to it.
-// Optional parameters can be added for configuring the client.
+// the data source name, and returns a new httpclient attached to it.
+// Optional parameters can be added for configuring the httpclient.
 func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
 	switch driverName {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
@@ -100,7 +100,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client. The provided context
+// Tx returns a new transactional httpclient. The provided context
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
@@ -130,7 +130,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}, nil
 }
 
-// BeginTx returns a transactional client with specified options.
+// BeginTx returns a transactional httpclient with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, errors.New("ent: cannot start a transaction within a transaction")
@@ -161,9 +161,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	}, nil
 }
 
-// Debug returns a new debug-client. It's used to get verbose logging on specific operations.
+// Debug returns a new debug-httpclient. It's used to get verbose logging on specific operations.
 //
-//	client.Debug().
+//	httpclient.Debug().
 //		Attribute.
 //		Query().
 //		Count(ctx)
@@ -184,7 +184,7 @@ func (c *Client) Close() error {
 }
 
 // Use adds the mutation hooks to all the entity clients.
-// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
+// In order to add hooks to a specific httpclient, call: `httpclient.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Attribute.Use(hooks...)
 	c.AttributeType.Use(hooks...)
@@ -201,7 +201,7 @@ func (c *Client) Use(hooks ...Hook) {
 }
 
 // Intercept adds the query interceptors to all the entity clients.
-// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+// In order to add interceptors to a specific httpclient, call: `httpclient.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Attribute.Intercept(interceptors...)
 	c.AttributeType.Intercept(interceptors...)
@@ -249,12 +249,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	}
 }
 
-// AttributeClient is a client for the Attribute schema.
+// AttributeClient is a httpclient for the Attribute schema.
 type AttributeClient struct {
 	config
 }
 
-// NewAttributeClient returns a client for the Attribute from the given config.
+// NewAttributeClient returns a httpclient for the Attribute from the given config.
 func NewAttributeClient(c config) *AttributeClient {
 	return &AttributeClient{config: c}
 }
@@ -374,12 +374,12 @@ func (c *AttributeClient) QueryAttributeType(a *Attribute) *AttributeTypeQuery {
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *AttributeClient) Hooks() []Hook {
 	return c.hooks.Attribute
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *AttributeClient) Interceptors() []Interceptor {
 	return c.inters.Attribute
 }
@@ -399,12 +399,12 @@ func (c *AttributeClient) mutate(ctx context.Context, m *AttributeMutation) (Val
 	}
 }
 
-// AttributeTypeClient is a client for the AttributeType schema.
+// AttributeTypeClient is a httpclient for the AttributeType schema.
 type AttributeTypeClient struct {
 	config
 }
 
-// NewAttributeTypeClient returns a client for the AttributeType from the given config.
+// NewAttributeTypeClient returns a httpclient for the AttributeType from the given config.
 func NewAttributeTypeClient(c config) *AttributeTypeClient {
 	return &AttributeTypeClient{config: c}
 }
@@ -508,12 +508,12 @@ func (c *AttributeTypeClient) QueryCompany(at *AttributeType) *CompanyQuery {
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *AttributeTypeClient) Hooks() []Hook {
 	return c.hooks.AttributeType
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *AttributeTypeClient) Interceptors() []Interceptor {
 	return c.inters.AttributeType
 }
@@ -533,12 +533,12 @@ func (c *AttributeTypeClient) mutate(ctx context.Context, m *AttributeTypeMutati
 	}
 }
 
-// AttributeTypesToTemplatesClient is a client for the AttributeTypesToTemplates schema.
+// AttributeTypesToTemplatesClient is a httpclient for the AttributeTypesToTemplates schema.
 type AttributeTypesToTemplatesClient struct {
 	config
 }
 
-// NewAttributeTypesToTemplatesClient returns a client for the AttributeTypesToTemplates from the given config.
+// NewAttributeTypesToTemplatesClient returns a httpclient for the AttributeTypesToTemplates from the given config.
 func NewAttributeTypesToTemplatesClient(c config) *AttributeTypesToTemplatesClient {
 	return &AttributeTypesToTemplatesClient{config: c}
 }
@@ -658,12 +658,12 @@ func (c *AttributeTypesToTemplatesClient) QueryTemplate(attt *AttributeTypesToTe
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *AttributeTypesToTemplatesClient) Hooks() []Hook {
 	return c.hooks.AttributeTypesToTemplates
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *AttributeTypesToTemplatesClient) Interceptors() []Interceptor {
 	return c.inters.AttributeTypesToTemplates
 }
@@ -683,12 +683,12 @@ func (c *AttributeTypesToTemplatesClient) mutate(ctx context.Context, m *Attribu
 	}
 }
 
-// AuthorizationPolicyClient is a client for the AuthorizationPolicy schema.
+// AuthorizationPolicyClient is a httpclient for the AuthorizationPolicy schema.
 type AuthorizationPolicyClient struct {
 	config
 }
 
-// NewAuthorizationPolicyClient returns a client for the AuthorizationPolicy from the given config.
+// NewAuthorizationPolicyClient returns a httpclient for the AuthorizationPolicy from the given config.
 func NewAuthorizationPolicyClient(c config) *AuthorizationPolicyClient {
 	return &AuthorizationPolicyClient{config: c}
 }
@@ -776,12 +776,12 @@ func (c *AuthorizationPolicyClient) GetX(ctx context.Context, id int) *Authoriza
 	return obj
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *AuthorizationPolicyClient) Hooks() []Hook {
 	return c.hooks.AuthorizationPolicy
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *AuthorizationPolicyClient) Interceptors() []Interceptor {
 	return c.inters.AuthorizationPolicy
 }
@@ -801,12 +801,12 @@ func (c *AuthorizationPolicyClient) mutate(ctx context.Context, m *Authorization
 	}
 }
 
-// CertificationClient is a client for the Certification schema.
+// CertificationClient is a httpclient for the Certification schema.
 type CertificationClient struct {
 	config
 }
 
-// NewCertificationClient returns a client for the Certification from the given config.
+// NewCertificationClient returns a httpclient for the Certification from the given config.
 func NewCertificationClient(c config) *CertificationClient {
 	return &CertificationClient{config: c}
 }
@@ -926,12 +926,12 @@ func (c *CertificationClient) QueryItemBatch(ce *Certification) *ItemBatchQuery 
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *CertificationClient) Hooks() []Hook {
 	return c.hooks.Certification
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *CertificationClient) Interceptors() []Interceptor {
 	return c.inters.Certification
 }
@@ -951,12 +951,12 @@ func (c *CertificationClient) mutate(ctx context.Context, m *CertificationMutati
 	}
 }
 
-// CertificationTemplateClient is a client for the CertificationTemplate schema.
+// CertificationTemplateClient is a httpclient for the CertificationTemplate schema.
 type CertificationTemplateClient struct {
 	config
 }
 
-// NewCertificationTemplateClient returns a client for the CertificationTemplate from the given config.
+// NewCertificationTemplateClient returns a httpclient for the CertificationTemplate from the given config.
 func NewCertificationTemplateClient(c config) *CertificationTemplateClient {
 	return &CertificationTemplateClient{config: c}
 }
@@ -1060,12 +1060,12 @@ func (c *CertificationTemplateClient) QueryCompany(ct *CertificationTemplate) *C
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *CertificationTemplateClient) Hooks() []Hook {
 	return c.hooks.CertificationTemplate
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *CertificationTemplateClient) Interceptors() []Interceptor {
 	return c.inters.CertificationTemplate
 }
@@ -1085,12 +1085,12 @@ func (c *CertificationTemplateClient) mutate(ctx context.Context, m *Certificati
 	}
 }
 
-// CompanyClient is a client for the Company schema.
+// CompanyClient is a httpclient for the Company schema.
 type CompanyClient struct {
 	config
 }
 
-// NewCompanyClient returns a client for the Company from the given config.
+// NewCompanyClient returns a httpclient for the Company from the given config.
 func NewCompanyClient(c config) *CompanyClient {
 	return &CompanyClient{config: c}
 }
@@ -1178,12 +1178,12 @@ func (c *CompanyClient) GetX(ctx context.Context, id uuid.UUID) *Company {
 	return obj
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *CompanyClient) Hooks() []Hook {
 	return c.hooks.Company
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *CompanyClient) Interceptors() []Interceptor {
 	return c.inters.Company
 }
@@ -1203,12 +1203,12 @@ func (c *CompanyClient) mutate(ctx context.Context, m *CompanyMutation) (Value, 
 	}
 }
 
-// ItemBatchClient is a client for the ItemBatch schema.
+// ItemBatchClient is a httpclient for the ItemBatch schema.
 type ItemBatchClient struct {
 	config
 }
 
-// NewItemBatchClient returns a client for the ItemBatch from the given config.
+// NewItemBatchClient returns a httpclient for the ItemBatch from the given config.
 func NewItemBatchClient(c config) *ItemBatchClient {
 	return &ItemBatchClient{config: c}
 }
@@ -1312,12 +1312,12 @@ func (c *ItemBatchClient) QueryCompany(ib *ItemBatch) *CompanyQuery {
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *ItemBatchClient) Hooks() []Hook {
 	return c.hooks.ItemBatch
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *ItemBatchClient) Interceptors() []Interceptor {
 	return c.inters.ItemBatch
 }
@@ -1337,12 +1337,12 @@ func (c *ItemBatchClient) mutate(ctx context.Context, m *ItemBatchMutation) (Val
 	}
 }
 
-// ItemBatchToItemBatchClient is a client for the ItemBatchToItemBatch schema.
+// ItemBatchToItemBatchClient is a httpclient for the ItemBatchToItemBatch schema.
 type ItemBatchToItemBatchClient struct {
 	config
 }
 
-// NewItemBatchToItemBatchClient returns a client for the ItemBatchToItemBatch from the given config.
+// NewItemBatchToItemBatchClient returns a httpclient for the ItemBatchToItemBatch from the given config.
 func NewItemBatchToItemBatchClient(c config) *ItemBatchToItemBatchClient {
 	return &ItemBatchToItemBatchClient{config: c}
 }
@@ -1462,12 +1462,12 @@ func (c *ItemBatchToItemBatchClient) QueryChild(ibtib *ItemBatchToItemBatch) *It
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *ItemBatchToItemBatchClient) Hooks() []Hook {
 	return c.hooks.ItemBatchToItemBatch
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *ItemBatchToItemBatchClient) Interceptors() []Interceptor {
 	return c.inters.ItemBatchToItemBatch
 }
@@ -1487,12 +1487,12 @@ func (c *ItemBatchToItemBatchClient) mutate(ctx context.Context, m *ItemBatchToI
 	}
 }
 
-// SessionClient is a client for the Session schema.
+// SessionClient is a httpclient for the Session schema.
 type SessionClient struct {
 	config
 }
 
-// NewSessionClient returns a client for the Session from the given config.
+// NewSessionClient returns a httpclient for the Session from the given config.
 func NewSessionClient(c config) *SessionClient {
 	return &SessionClient{config: c}
 }
@@ -1580,12 +1580,12 @@ func (c *SessionClient) GetX(ctx context.Context, id int) *Session {
 	return obj
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *SessionClient) Hooks() []Hook {
 	return c.hooks.Session
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *SessionClient) Interceptors() []Interceptor {
 	return c.inters.Session
 }
@@ -1605,12 +1605,12 @@ func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, 
 	}
 }
 
-// UserClient is a client for the User schema.
+// UserClient is a httpclient for the User schema.
 type UserClient struct {
 	config
 }
 
-// NewUserClient returns a client for the User from the given config.
+// NewUserClient returns a httpclient for the User from the given config.
 func NewUserClient(c config) *UserClient {
 	return &UserClient{config: c}
 }
@@ -1698,12 +1698,12 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	return obj
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *UserClient) Interceptors() []Interceptor {
 	return c.inters.User
 }
@@ -1723,12 +1723,12 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
-// UsersToCompanyClient is a client for the UsersToCompany schema.
+// UsersToCompanyClient is a httpclient for the UsersToCompany schema.
 type UsersToCompanyClient struct {
 	config
 }
 
-// NewUsersToCompanyClient returns a client for the UsersToCompany from the given config.
+// NewUsersToCompanyClient returns a httpclient for the UsersToCompany from the given config.
 func NewUsersToCompanyClient(c config) *UsersToCompanyClient {
 	return &UsersToCompanyClient{config: c}
 }
@@ -1848,12 +1848,12 @@ func (c *UsersToCompanyClient) QueryCompany(utc *UsersToCompany) *CompanyQuery {
 	return query
 }
 
-// Hooks returns the client hooks.
+// Hooks returns the httpclient hooks.
 func (c *UsersToCompanyClient) Hooks() []Hook {
 	return c.hooks.UsersToCompany
 }
 
-// Interceptors returns the client interceptors.
+// Interceptors returns the httpclient interceptors.
 func (c *UsersToCompanyClient) Interceptors() []Interceptor {
 	return c.inters.UsersToCompany
 }
