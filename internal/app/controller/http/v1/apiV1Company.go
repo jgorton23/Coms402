@@ -10,6 +10,9 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
+// AddCompany
+// creates a new company
+// (POST /company)
 func (v1 httpV1Implem) AddCompany(w http.ResponseWriter, r *http.Request) {
 
 	var requestBody AddCompanyJSONRequestBody
@@ -39,6 +42,9 @@ func (v1 httpV1Implem) AddCompany(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, r, http.StatusCreated, company)
 }
 
+// UpdateCompany
+// updates the given company
+// (PUT /company)
 func (v1 httpV1Implem) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	var requestBody UpdateCompanyJSONRequestBody
 
@@ -82,6 +88,9 @@ func (v1 httpV1Implem) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, r, http.StatusOK, company)
 }
 
+// GetCompanyByUUID
+// returns a company with the given UUID
+// (GET /company/{companyUUID})
 func (v1 httpV1Implem) GetCompanyByUUID(w http.ResponseWriter, r *http.Request, companyUUID string) {
 
 	id, err := uuid.Parse(companyUUID)
@@ -101,6 +110,9 @@ func (v1 httpV1Implem) GetCompanyByUUID(w http.ResponseWriter, r *http.Request, 
 	respondWithJson(w, r, http.StatusOK, company)
 }
 
+// AddUserRole
+// creates a new userRole
+// (POST /role)
 func (v1 httpV1Implem) AddUserRole(w http.ResponseWriter, r *http.Request) {
 
 	var requestBody AddUserRoleJSONRequestBody

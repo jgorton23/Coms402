@@ -29,10 +29,14 @@ type User struct {
 	logger *Logger
 }
 
+// FindByEmail
+// returns the user with the given email
 func (u User) FindByEmail(ctx context.Context, email string) (domain.User, error) {
 	return u.user.GetByEmail(ctx, email)
 }
 
+// FindByUUID
+// returns the user with the given UUID
 func (u User) FindByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
 	return u.user.GetByUUID(ctx, uuid)
 }

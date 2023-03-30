@@ -10,6 +10,7 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
+// GetItemBatchBy
 // Find itembatch by *
 // (GET /itembatch)
 func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, params GetItemBatchByParams) {
@@ -62,6 +63,7 @@ func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, pa
 	}
 }
 
+// AddItemBatch
 // Create a new item batch
 // (POST /itembatch)
 func (v1 httpV1Implem) AddItemBatch(w http.ResponseWriter, r *http.Request) {
@@ -101,6 +103,7 @@ func (v1 httpV1Implem) AddItemBatch(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, r, http.StatusCreated, itemBatch)
 }
 
+// UpdateItemBatch
 // Update an existing item batch
 // (PUT /itembatch)
 func (v1 httpV1Implem) UpdateItemBatch(w http.ResponseWriter, r *http.Request) {
