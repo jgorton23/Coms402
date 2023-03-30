@@ -15,16 +15,16 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/testhelp"
 )
 
+// TestApp sets up and runs the whole app from api to database to allow full end to end testing
 // Useful artical to help understand how this test operates
 // https://medium.com/@manabie/test-coverage-of-go-services-during-integration-tests-6ff1bdbe33e0
-
-// This test also sets up and runs its own postgres testing container
 func TestAap(t *testing.T) {
+	// Setup kill server
 	ctx, cancel := context.WithCancel(context.Background())
-
 	killServer := testhelp.NewKillServer(":19999", cancel)
 	go killServer.Start()
 
+	// Setup postgres test container
 	const dbname = "test-db"
 	const user = "postgres"
 	const password = "password"
@@ -54,8 +54,7 @@ func TestAap(t *testing.T) {
 	host, err := container.Host(ctx)
 	assert.NoError(t, err)
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, containerPort.Port(), user, password, dbname)
-
+	// Run the app with the set config
 	Run(&domain.Config{
 		App: domain.App{},
 		HTTP: domain.HTTP{
@@ -70,7 +69,7 @@ func TestAap(t *testing.T) {
 		},
 		PG: domain.PG{
 			PoolMax: 0,
-			URL:     connStr,
+			URL:     fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, containerPort.Port(), user, password, dbname),
 		},
 	}, ctx)
 

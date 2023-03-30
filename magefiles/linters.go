@@ -47,7 +47,7 @@ func (Linter) Gci() error {
 		return err
 	}
 
-	return sh.Run("gci", "write", ".", "-s", "standard", "-s", "default", "-s", "blank", "-s", "\"prefix("+moduleName+")\"")
+	return sh.Run("gci", "write", ".", "-s", "standard", "-s", "default", "-s", "blank", "-s", "prefix("+moduleName+")")
 }
 
 // Currently gofumpt conflicts with the wls linter so like.... Just keeping this code block here
@@ -90,7 +90,7 @@ func (Linter) Golangci() error {
 
 	fmt.Println("Version: " + version)
 
-	ok, err := sh.Exec(nil, os.Stdout, os.Stdout, "docker", "run", "--rm", "-v", path+":/app", "-w", "/app", "golangci/golangci-lint:"+version, "golangci-lint", "run")
+	ok, err := sh.Exec(nil, os.Stdout, os.Stdout, "docker", "run", "--rm", "-v", path+"/internal:/app/internal", "-v", path+"/cmd:/app/cmd", "-w", "/app", "golangci/golangci-lint:"+version, "golangci-lint", "run")
 
 	if !ok {
 		fmt.Println("Program failed to run")

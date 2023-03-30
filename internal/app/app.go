@@ -16,6 +16,7 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase/repo"
 )
 
+// Run sets all dependencies of the app and starts the http server
 func Run(conf *domain.Config, ctx context.Context) {
 	injector := do.New()
 

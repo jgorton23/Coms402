@@ -16,6 +16,7 @@ type Server mg.Namespace
 // Start the Server
 func (Server) Run() error {
 	mg.Deps(Compose.UpPostgres)
+	mg.Deps(Linter.Gci)
 
 	fmt.Println("Running Server")
 

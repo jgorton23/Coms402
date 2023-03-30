@@ -237,7 +237,7 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Certification.Create().
+//	httpclient.Certification.Create().
 //		SetPrimaryAttribute(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -260,7 +260,7 @@ func (cc *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *Certifica
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Certification.Create().
+//	httpclient.Certification.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (cc *CertificationCreate) OnConflictColumns(columns ...string) *CertificationUpsertOne {
@@ -334,7 +334,7 @@ func (u *CertificationUpsert) UpdateImageUUID() *CertificationUpsert {
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	client.Certification.Create().
+//	httpclient.Certification.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -355,7 +355,7 @@ func (u *CertificationUpsertOne) UpdateNewValues() *CertificationUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Certification.Create().
+//	httpclient.Certification.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
 func (u *CertificationUpsertOne) Ignore() *CertificationUpsertOne {
@@ -558,7 +558,7 @@ func (ccb *CertificationCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Certification.CreateBulk(builders...).
+//	httpclient.Certification.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -580,7 +580,7 @@ func (ccb *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *Cert
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Certification.Create().
+//	httpclient.Certification.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (ccb *CertificationCreateBulk) OnConflictColumns(columns ...string) *CertificationUpsertBulk {
@@ -599,7 +599,7 @@ type CertificationUpsertBulk struct {
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.Certification.Create().
+//	httpclient.Certification.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -622,7 +622,7 @@ func (u *CertificationUpsertBulk) UpdateNewValues() *CertificationUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Certification.Create().
+//	httpclient.Certification.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 func (u *CertificationUpsertBulk) Ignore() *CertificationUpsertBulk {

@@ -1,47 +1,63 @@
 package usecase_test
 
-// import (
-// 	"testing"
+import (
+	"context"
+	"testing"
 
-// 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
-// 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
-// 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase/repo"
-// 	"github.com/golang/mock/gomock"
-// 	"github.com/samber/do"
-// )
+	"github.com/golang/mock/gomock"
+	"github.com/samber/do"
+	"github.com/stretchr/testify/assert"
 
-// func TestUsecaseUserFindByEmail(t *testing.T) {
-// 	injector := do.New()
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase/repo"
+)
 
-// 	do.ProvideValue(injector, &domain.Config{
-// 		LOG: domain.LOG{
-// 			Format:  "json",
-// 			Level:   "info",
-// 			NoColor: true,
-// 		},
-// 	})
-// 	do.Provide(injector, repo.NewLoggerRepo)
-// 	do.Provide(injector, usecase.NewLogger)
+// Reuseable user usecase test setup
+func usecaseUserTestSetup(t *testing.T, fun func(i *do.Injector) (usecase.UserRepo, error)) (*usecase.User, error) {
+	injector := do.New()
 
-// 	do.Provide(injector, func(i *do.Injector) (usecase.UserRepo, error) {
-// 		return NewMockUserRepo(ctrl), nil
-// 	})
-// 	do.Provide(injector, usecase.NewUser)
+	// The usecase requires the logging interface to be fulfilled but
+	// during unit tests we do not want any logs, so we are using a noop logger
+	do.Provide(injector, repo.NewLoggerNoopRepo)
+	do.Provide(injector, usecase.NewLogger)
+	do.Provide(injector, fun)
+	do.Provide(injector, usecase.NewUser)
 
-// 	_ = do.MustInvoke[*usecase.User](injector)
-// 	// ur := do.MustInvoke[usecase.UserRepo](injector)
+	return do.MustInvoke[*usecase.User](injector), nil
+}
 
+func TestUsecaseUserFindByEmail(t *testing.T) {
+	tests := []struct {
+		mock func(i *do.Injector) (usecase.UserRepo, error)
+		call func(*usecase.User)
+	}{
+		{ // Testing
+			mock: func(i *do.Injector) (usecase.UserRepo, error) {
+				ctrl := gomock.NewController(t)
+				mur := NewMockUserRepo(ctrl)
+				mur.
+					EXPECT().
+					GetByEmail(context.Background(), "test@test.com").
+					Return(domain.User{
+						Email: "test@test.com",
+					}, nil)
 
-// 	m := NewMockUserRepo(ctrl)
+				return mur, nil
+			},
+			call: func(u *usecase.User) {
+				foundUser, err := u.FindByEmail(context.Background(), "test@test.com")
 
-// 	m.EXPECT()
+				assert.NoError(t, err)
+				assert.Equal(t, foundUser.Email, "test@test.com")
+			},
+		},
+	}
 
-// 	// _, err := user.FindByEmail(context.Background(), "test@test.com")
+	for _, v := range tests {
+		user, err := usecaseUserTestSetup(t, v.mock)
+		assert.NoError(t, err)
 
-// 	// if assert.Error(t, err) {
-// 	// 	t.Fail()
-// 	// }
-
-// }
+		v.call(user)
+	}
+}

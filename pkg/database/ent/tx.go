@@ -9,32 +9,32 @@ import (
 	"entgo.io/ent/dialect"
 )
 
-// Tx is a transactional client that is created by calling Client.Tx().
+// Tx is a transactional httpclient that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Attribute is the client for interacting with the Attribute builders.
+	// Attribute is the httpclient for interacting with the Attribute builders.
 	Attribute *AttributeClient
-	// AttributeType is the client for interacting with the AttributeType builders.
+	// AttributeType is the httpclient for interacting with the AttributeType builders.
 	AttributeType *AttributeTypeClient
-	// AttributeTypesToTemplates is the client for interacting with the AttributeTypesToTemplates builders.
+	// AttributeTypesToTemplates is the httpclient for interacting with the AttributeTypesToTemplates builders.
 	AttributeTypesToTemplates *AttributeTypesToTemplatesClient
-	// AuthorizationPolicy is the client for interacting with the AuthorizationPolicy builders.
+	// AuthorizationPolicy is the httpclient for interacting with the AuthorizationPolicy builders.
 	AuthorizationPolicy *AuthorizationPolicyClient
-	// Certification is the client for interacting with the Certification builders.
+	// Certification is the httpclient for interacting with the Certification builders.
 	Certification *CertificationClient
-	// CertificationTemplate is the client for interacting with the CertificationTemplate builders.
+	// CertificationTemplate is the httpclient for interacting with the CertificationTemplate builders.
 	CertificationTemplate *CertificationTemplateClient
-	// Company is the client for interacting with the Company builders.
+	// Company is the httpclient for interacting with the Company builders.
 	Company *CompanyClient
-	// ItemBatch is the client for interacting with the ItemBatch builders.
+	// ItemBatch is the httpclient for interacting with the ItemBatch builders.
 	ItemBatch *ItemBatchClient
-	// ItemBatchToItemBatch is the client for interacting with the ItemBatchToItemBatch builders.
+	// ItemBatchToItemBatch is the httpclient for interacting with the ItemBatchToItemBatch builders.
 	ItemBatchToItemBatch *ItemBatchToItemBatchClient
-	// Session is the client for interacting with the Session builders.
+	// Session is the httpclient for interacting with the Session builders.
 	Session *SessionClient
-	// User is the client for interacting with the User builders.
+	// User is the httpclient for interacting with the User builders.
 	User *UserClient
-	// UsersToCompany is the client for interacting with the UsersToCompany builders.
+	// UsersToCompany is the httpclient for interacting with the UsersToCompany builders.
 	UsersToCompany *UsersToCompanyClient
 
 	// lazily loaded.

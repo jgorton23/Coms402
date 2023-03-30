@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	ErrUserFound    = errors.New("User found")
-	ErrUserNotFound = errors.New("User not found")
+	ErrUserFound    = errors.New("user found")
+	ErrUserNotFound = errors.New("user not found")
 )
 
 func NewUser(i *do.Injector) (*User, error) {

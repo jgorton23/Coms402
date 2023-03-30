@@ -269,7 +269,7 @@ func (apc *AuthorizationPolicyCreate) createSpec() (*AuthorizationPolicy, *sqlgr
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.AuthorizationPolicy.Create().
+//	httpclient.AuthorizationPolicy.Create().
 //		SetPtype(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -292,7 +292,7 @@ func (apc *AuthorizationPolicyCreate) OnConflict(opts ...sql.ConflictOption) *Au
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.AuthorizationPolicy.Create().
+//	httpclient.AuthorizationPolicy.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (apc *AuthorizationPolicyCreate) OnConflictColumns(columns ...string) *AuthorizationPolicyUpsertOne {
@@ -402,7 +402,7 @@ func (u *AuthorizationPolicyUpsert) UpdateV5() *AuthorizationPolicyUpsert {
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
-//	client.AuthorizationPolicy.Create().
+//	httpclient.AuthorizationPolicy.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //		).
@@ -415,7 +415,7 @@ func (u *AuthorizationPolicyUpsertOne) UpdateNewValues() *AuthorizationPolicyUps
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.AuthorizationPolicy.Create().
+//	httpclient.AuthorizationPolicy.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
 func (u *AuthorizationPolicyUpsertOne) Ignore() *AuthorizationPolicyUpsertOne {
@@ -659,7 +659,7 @@ func (apcb *AuthorizationPolicyCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.AuthorizationPolicy.CreateBulk(builders...).
+//	httpclient.AuthorizationPolicy.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -681,7 +681,7 @@ func (apcb *AuthorizationPolicyCreateBulk) OnConflict(opts ...sql.ConflictOption
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.AuthorizationPolicy.Create().
+//	httpclient.AuthorizationPolicy.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (apcb *AuthorizationPolicyCreateBulk) OnConflictColumns(columns ...string) *AuthorizationPolicyUpsertBulk {
@@ -700,7 +700,7 @@ type AuthorizationPolicyUpsertBulk struct {
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.AuthorizationPolicy.Create().
+//	httpclient.AuthorizationPolicy.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //		).
@@ -713,7 +713,7 @@ func (u *AuthorizationPolicyUpsertBulk) UpdateNewValues() *AuthorizationPolicyUp
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.AuthorizationPolicy.Create().
+//	httpclient.AuthorizationPolicy.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 func (u *AuthorizationPolicyUpsertBulk) Ignore() *AuthorizationPolicyUpsertBulk {

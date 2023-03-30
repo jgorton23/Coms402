@@ -275,7 +275,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/UserRole"
+                  $ref: "#/components/schemas/ItemBatch"
         "404":
           $ref: '#/components/responses/DefaultErrorResponse'
         default:

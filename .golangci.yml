@@ -131,6 +131,7 @@ linters:
     #     - godot
 
 run:
+  tests: false
   skip-dirs:
     - docs
-    - testing
+    - pkg/database/ent
