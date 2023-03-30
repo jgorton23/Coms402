@@ -9,6 +9,9 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
+// GetUserBy
+// Gets a user by email or UUID
+// (GET /user)
 func (v1 httpV1Implem) GetUserBy(w http.ResponseWriter, r *http.Request, params GetUserByParams) {
 
 	var user domain.User
