@@ -32,6 +32,8 @@ type Certification struct {
 	logger            *Logger
 }
 
+// Create
+// creates a new cert
 func (u Certification) Create(ctx context.Context, c domain.Certification, userUUID uuid.UUID) (domain.Certification, error) {
 	// verify a user is allowed to create a certification user a company
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, c.CompanyUUID)
@@ -66,6 +68,8 @@ func (u Certification) Create(ctx context.Context, c domain.Certification, userU
 	return repoCertification, nil
 }
 
+// Update
+// updates the given cert
 func (u Certification) Update(ctx context.Context, c domain.Certification, userUUID uuid.UUID) error {
 	// verify a user is allowed to create a certification user a company
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, c.CompanyUUID)
@@ -100,6 +104,8 @@ func (u Certification) Update(ctx context.Context, c domain.Certification, userU
 	return nil
 }
 
+// GetByCompanyUUID
+// returns the certs belonging to a given company
 func (u Certification) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID) ([]domain.Certification, error) {
 	//TODO switch to using the RBAC system / change how roles work
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, companyUUID)
@@ -121,6 +127,8 @@ func (u Certification) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UU
 	return itemBatches, nil
 }
 
+// GetByUUID
+// returns the cert with the given UUID
 func (u Certification) GetByUUID(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID, uuid uuid.UUID) (domain.Certification, error) {
 	//TODO switch to using the RBAC system / change how roles work
 	ok, err := u.roles.AllowedToEditData(ctx, userUUID, companyUUID)

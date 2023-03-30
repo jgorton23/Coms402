@@ -33,6 +33,8 @@ type UserToCompany struct {
 	logger        *Logger
 }
 
+// Add
+// adds a new role
 func (c UserToCompany) Add(ctx context.Context, dutc domain.UserToCompany, assignerUUID uuid.UUID) (role domain.UserToCompany, err error) {
 
 	if dutc.RoleType == domain.RolePrimaryOwner {
@@ -66,6 +68,8 @@ func (c UserToCompany) Add(ctx context.Context, dutc domain.UserToCompany, assig
 	return role, nil
 }
 
+// Create
+// creates a role in the DB
 func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (role domain.UserToCompany, err error) {
 
 	exists, err := c.userToCompany.Exists(ctx, dutc.UserUUID, dutc.CompanyUUID)
@@ -92,6 +96,8 @@ func (c UserToCompany) Create(ctx context.Context, dutc domain.UserToCompany) (r
 	return role, nil
 }
 
+// Approve
+// approves the given role
 func (c UserToCompany) Approve(ctx context.Context, dutc domain.UserToCompany, userUUID uuid.UUID) (role domain.UserToCompany, err error) {
 
 	exists, err := c.userToCompany.Exists(ctx, dutc.UserUUID, dutc.CompanyUUID)
@@ -132,19 +138,27 @@ func (c UserToCompany) Approve(ctx context.Context, dutc domain.UserToCompany, u
 
 }
 
+// Update
+// updates the given role
 func (c UserToCompany) Update(ctx context.Context, role domain.UserToCompany) (err error) {
 	return c.userToCompany.Update(ctx, role)
 }
 
+// FindByCompanyUUID
+// returns all roles for a given company
 func (c UserToCompany) FindByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) (roles []domain.UserToCompany, err error) {
 	// TODO https://git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/administration/-/issues/34
 	return c.userToCompany.GetByCompanyUUID(ctx, companyUUID)
 }
 
+// FindByUserUUID
+// returns all roles for a given user
 func (c UserToCompany) FindByUserUUID(ctx context.Context, userUUID uuid.UUID) (roles []domain.UserToCompany, err error) {
 	return c.userToCompany.GetByUserUUID(ctx, userUUID)
 }
 
+// FindByUUIDS
+// returns the role of a given user in a given company
 func (c UserToCompany) FindByUUIDS(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID) (role domain.UserToCompany, err error) {
 	exists, err := c.userToCompany.Exists(ctx, userUUID, companyUUID)
 	if err != nil {
@@ -158,6 +172,8 @@ func (c UserToCompany) FindByUUIDS(ctx context.Context, companyUUID uuid.UUID, u
 	}
 }
 
+// AllowedToEdit
+// returns true if the given user is an owner of the given company
 func (c UserToCompany) AllowedToEdit(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (bool, error) {
 
 	utc, err := c.userToCompany.GetByUUIDS(ctx, userUUID, companyUUID)

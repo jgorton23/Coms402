@@ -9,6 +9,9 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
+// GetRolesBy
+// Get user roles
+// (GET /role)
 func (v1 httpV1Implem) GetRolesBy(w http.ResponseWriter, r *http.Request, params GetRolesByParams) {
 
 	var roles []domain.UserToCompany
@@ -72,6 +75,9 @@ func (v1 httpV1Implem) GetRolesBy(w http.ResponseWriter, r *http.Request, params
 	respondWithJson(w, r, http.StatusOK, roles)
 }
 
+// ApproveRole
+// Approve the given role
+// (POST /role/approve)
 func (v1 httpV1Implem) ApproveRole(w http.ResponseWriter, r *http.Request, params ApproveRoleParams) {
 
 	var user domain.User

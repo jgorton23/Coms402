@@ -31,6 +31,8 @@ type userDBEntImplem struct {
 	*ent.Client
 }
 
+// Get
+// returns all users
 func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	us, err := ur.Client.User.
 		Query().
@@ -48,6 +50,8 @@ func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	return users, nil
 }
 
+// GetByUUID
+// returns the user with the give UUID
 func (ur *userDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
@@ -60,6 +64,8 @@ func (ur *userDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domai
 	return ur.databaseUserToEntityUser(u), nil
 }
 
+// GetByEmail
+// returns the user with the given email
 func (ur *userDBEntImplem) GetByEmail(ctx context.Context, email string) (domain.User, error) {
 	u, err := ur.Client.User.
 		Query().
@@ -72,7 +78,8 @@ func (ur *userDBEntImplem) GetByEmail(ctx context.Context, email string) (domain
 	return ur.databaseUserToEntityUser(u), nil
 }
 
-// Exists -.
+// Exists
+// returns if a user with the given email exists
 func (ur *userDBEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 	exists, err := ur.Client.User.
 		Query().
@@ -85,7 +92,8 @@ func (ur *userDBEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 	return exists, nil
 }
 
-// Create -.
+// Create
+// creates a new user
 func (ur *userDBEntImplem) Create(ctx context.Context, usr domain.User) (domain.User, error) {
 	u, err := ur.Client.User.
 		Create().
@@ -105,7 +113,8 @@ func (ur *userDBEntImplem) Create(ctx context.Context, usr domain.User) (domain.
 	return ur.databaseUserToEntityUser(u), nil
 }
 
-// Update -.
+// Update
+// updates the given user
 func (ur *userDBEntImplem) Update(ctx context.Context, u domain.User) error {
 	_, err := ur.Client.User.
 		Update().

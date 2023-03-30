@@ -72,7 +72,8 @@ func (ur *companyDBEntImplem) GetByUUID(ctx context.Context, companyUuid uuid.UU
 	return ur.databaseCompanyToEntityCompany(u), nil
 }
 
-// ExistsNamed -.
+// ExistsNamed
+// returns if a company exists with the given name
 func (ur *companyDBEntImplem) ExistsNamed(ctx context.Context, u string) (bool, error) {
 	exists, err := ur.Client.Company.
 		Query().
@@ -85,7 +86,8 @@ func (ur *companyDBEntImplem) ExistsNamed(ctx context.Context, u string) (bool, 
 	return exists, nil
 }
 
-// ExistsUUID -.
+// ExistsUUID
+// returns if a company exists with the given UUID
 func (ur *companyDBEntImplem) ExistsUUID(ctx context.Context, u uuid.UUID) (bool, error) {
 	exists, err := ur.Client.Company.
 		Query().
@@ -98,7 +100,8 @@ func (ur *companyDBEntImplem) ExistsUUID(ctx context.Context, u uuid.UUID) (bool
 	return exists, nil
 }
 
-// Create -.
+// Create
+// creates a new company
 func (ur *companyDBEntImplem) Create(ctx context.Context, usr domain.Company) (domain.Company, error) {
 	u, err := ur.Client.Company.
 		Create().
@@ -111,7 +114,8 @@ func (ur *companyDBEntImplem) Create(ctx context.Context, usr domain.Company) (d
 	return ur.databaseCompanyToEntityCompany(u), nil
 }
 
-// Update -.
+// Update
+// updates the given company
 func (ur *companyDBEntImplem) Update(ctx context.Context, u domain.Company) error {
 	_, err := ur.Client.Company. //todo this might be broken
 					Update().

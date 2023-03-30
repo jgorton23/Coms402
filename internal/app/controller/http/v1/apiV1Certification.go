@@ -10,6 +10,7 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 )
 
+// GetCertificationBy
 // Find certification by *
 // (GET /certification)
 func (v1 httpV1Implem) GetCertificationBy(w http.ResponseWriter, r *http.Request, params GetCertificationByParams) {
@@ -62,6 +63,7 @@ func (v1 httpV1Implem) GetCertificationBy(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// AddCertification
 // Create a new item batch
 // (POST /certification)
 func (v1 httpV1Implem) AddCertification(w http.ResponseWriter, r *http.Request) {
@@ -116,6 +118,7 @@ func (v1 httpV1Implem) AddCertification(w http.ResponseWriter, r *http.Request) 
 	respondWithJson(w, r, http.StatusCreated, itemBatch)
 }
 
+// UpdateCertification
 // Update an existing item batch
 // (PUT /certification)
 func (v1 httpV1Implem) UpdateCertification(w http.ResponseWriter, r *http.Request) {
