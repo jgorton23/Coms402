@@ -267,6 +267,12 @@ paths:
           required: false
           schema:
             type: string
+        # - name: parentItemUUID
+        #   in: query
+        #   description: uuid of the parent item for which to get
+        #   required: false
+        #   schema:
+        #     type: string
       responses:
         "200":
           description: successful operation
@@ -336,6 +342,50 @@ paths:
           $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
         "404":
           $ref: '#/components/responses/DefaultErrorResponse'
+        default:
+          $ref: '#/components/responses/DefaultErrorResponse'
+  /itembatch/children:
+    # get: do this by adding query param to itembatch GET?
+    # put: no need for this
+    # delete:
+    post:
+      tags:
+        - itembatch
+      summary: Create subcomponent mapping
+      description: Adds given items as children of the given parent
+      operationId: addSubItems
+      requestBody:
+        description: sub item batchs to add
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - parent
+                - children
+              properties:
+                parent:
+                  $ref: "#/components/schemas/ItemBatch"
+                children:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ItemBatch"
+      responses:
+        "201":
+          description: ItemToItem created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ItemToItem"
+        "400":
+          $ref: '#/components/responses/DefaultErrorResponse'
+        "401":
+          $ref: '#/components/responses/DefaultUnauthenticatedErrorResponse'
+        "403":
+          $ref: '#/components/responses/DefaultUnauthorizedErrorResponse'
         default:
           $ref: '#/components/responses/DefaultErrorResponse'
   /certification:
@@ -595,6 +645,27 @@ components:
               pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
           additionalProperties: false
       additionalProperties: false
+    ItemToItem:
+      type: object
+      required:
+        - uuid
+        - parentUUID
+        - childUUID
+      properties:
+        uuid:
+          type: string
+          description: uuid of the item to item relation
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+        parentUUID:
+          type: string
+          description: uuid of the parent item in the relationship
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+        childUUID:
+          type: string
+          description: uuid of the child item in the relationship
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
+      additionalProperties: false
+          
     Error:
       type: object
       required:

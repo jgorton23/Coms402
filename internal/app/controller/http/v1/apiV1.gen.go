@@ -154,6 +154,12 @@ type GetItemBatchByParams struct {
 	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
 }
 
+// AddSubItemsJSONBody defines parameters for AddSubItems.
+type AddSubItemsJSONBody struct {
+	Children []ItemBatch `json:"children"`
+	Parent   ItemBatch   `json:"parent"`
+}
+
 // GetRolesByParams defines parameters for GetRolesBy.
 type GetRolesByParams struct {
 	// UserUUID UUID of user for which to get roles
@@ -199,6 +205,9 @@ type AddItemBatchJSONRequestBody = NewItemBatch
 // UpdateItemBatchJSONRequestBody defines body for UpdateItemBatch for application/json ContentType.
 type UpdateItemBatchJSONRequestBody = ItemBatch
 
+// AddSubItemsJSONRequestBody defines body for AddSubItems for application/json ContentType.
+type AddSubItemsJSONRequestBody AddSubItemsJSONBody
+
 // AddUserRoleJSONRequestBody defines body for AddUserRole for application/json ContentType.
 type AddUserRoleJSONRequestBody = NewUserRole
 
@@ -231,6 +240,9 @@ type ServerInterface interface {
 	// Update an existing item batch
 	// (PUT /itembatch)
 	UpdateItemBatch(w http.ResponseWriter, r *http.Request)
+	// Create subcomponent mapping
+	// (POST /itembatch/children)
+	AddSubItems(w http.ResponseWriter, r *http.Request)
 	// Find roles by *
 	// (GET /role)
 	GetRolesBy(w http.ResponseWriter, r *http.Request, params GetRolesByParams)
@@ -433,6 +445,21 @@ func (siw *ServerInterfaceWrapper) UpdateItemBatch(w http.ResponseWriter, r *htt
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateItemBatch(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddSubItems operation middleware
+func (siw *ServerInterfaceWrapper) AddSubItems(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddSubItems(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -718,6 +745,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/itembatch", wrapper.UpdateItemBatch)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/itembatch/children", wrapper.AddSubItems)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/role", wrapper.GetRolesBy)

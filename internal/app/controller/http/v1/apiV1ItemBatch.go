@@ -150,3 +150,33 @@ func (v1 httpV1Implem) UpdateItemBatch(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJson(w, r, http.StatusAccepted, requestBody)
 }
+
+func (v1 httpV1Implem) AddSubItems(w http.ResponseWriter, r *http.Request) {
+	var requestBody AddSubItemsJSONRequestBody
+
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		respondWithError(w, r, "invalid request json object found", http.StatusBadRequest)
+		return
+	}
+
+	domainUser, err := v1.loadDomainUser(r)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	companyUUID, err := uuid.Parse(requestBody.Parent.CompanyUuid)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to parse company UUID: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	err = v1.itemToItemUseCase.Create(r.Context(), domain.ItemToItem{}, domainUser.UUID, companyUUID)
+	if err != nil {
+
+	}
+
+}

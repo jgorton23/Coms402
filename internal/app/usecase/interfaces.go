@@ -114,4 +114,8 @@ type (
 		GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) ([]domain.Certification, error)
 		GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.Certification, error)
 	}
+
+	ItemToItemRepo interface {
+		Create(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) error
+	}
 )
