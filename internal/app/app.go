@@ -41,6 +41,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, repo.NewCompanyRepo)
 	do.Provide(injector, repo.NewItemBatchRepo)
 	do.Provide(injector, repo.NewCertificationRepo)
+	do.Provide(injector, repo.NewItemToItemRepo)
 
 	do.Provide(injector, usecase.NewLogger)
 	do.Provide(injector, usecase.NewAuthBossLogger)
@@ -52,6 +53,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, usecase.NewUser)
 	do.Provide(injector, usecase.NewItemBatch)
 	do.Provide(injector, usecase.NewCertification)
+	do.Provide(injector, usecase.NewItemToItem)
 
 	// HTTP stuff
 	do.Provide(injector, v1.NewHttpAuthenticator)

@@ -65,6 +65,18 @@ type ItemBatch struct {
 	Uuid string `json:"uuid"`
 }
 
+// ItemToItem defines model for ItemToItem.
+type ItemToItem struct {
+	// ChildUUID uuid of the child item in the relationship
+	ChildUUID string `json:"childUUID"`
+
+	// ParentUUID uuid of the parent item in the relationship
+	ParentUUID string `json:"parentUUID"`
+
+	// Uuid uuid of the item to item relation
+	Uuid string `json:"uuid"`
+}
+
 // NewCertification defines model for NewCertification.
 type NewCertification struct {
 	// CompanyUUID uuid of the company
