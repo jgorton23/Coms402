@@ -41,7 +41,7 @@ func (u ItemToItem) CreateAll(ctx context.Context, iti domain.ItemToItem, userUU
 		return nil, err
 	}
 
-	allowed, err := u.roles.AllowedToEditData(ctx, parent.CompanyUUID, userUUID)
+	allowed, err := u.roles.AllowedToEditData(ctx, userUUID, parent.CompanyUUID)
 
 	if err != nil {
 		return nil, err
