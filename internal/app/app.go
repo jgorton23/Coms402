@@ -68,6 +68,11 @@ func Run(conf *domain.Config, ctx context.Context) {
 		return db.RepoCertification(), nil
 	})
 
+	do.Provide(injector, func(i *do.Injector) (usecase.ItemToItemRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return db.RepoItemToItem(), nil
+	})
+
 	do.Provide(injector, func(i *do.Injector) (usecase.SessionStateRepo, error) {
 		db := do.MustInvoke[*repo.DatabaseEnt](i)
 		return repo.SessionSCSBuilder().
@@ -104,6 +109,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, usecase.NewUser)
 	do.Provide(injector, usecase.NewItemBatch)
 	do.Provide(injector, usecase.NewCertification)
+	do.Provide(injector, usecase.NewItemToItem)
 
 	// HTTP stuff
 	do.Provide(injector, v1.NewHttpAuthenticator)

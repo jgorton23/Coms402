@@ -19,6 +19,7 @@ var (
 func NewItemBatch(i *do.Injector) (*ItemBatch, error) {
 	c := &ItemBatch{
 		itemBatchRepo: do.MustInvoke[ItemBatchRepo](i),
+		itemToItem:    do.MustInvoke[*ItemToItem](i),
 		roles:         do.MustInvoke[*UserToCompany](i),
 		logger:        do.MustInvoke[*Logger](i),
 	}
@@ -28,6 +29,7 @@ func NewItemBatch(i *do.Injector) (*ItemBatch, error) {
 
 type ItemBatch struct {
 	itemBatchRepo ItemBatchRepo
+	itemToItem    *ItemToItem
 	roles         *UserToCompany
 	logger        *Logger
 }
@@ -145,6 +147,38 @@ func (u ItemBatch) GetByUUID(ctx context.Context, companyUUID uuid.UUID, userUUI
 
 	if err != nil {
 		return domain.ItemBatch{}, err
+	}
+
+	return itemBatches, nil
+}
+
+func (u ItemBatch) GetByParentUUID(ctx context.Context, companyUUID uuid.UUID, userUUID uuid.UUID, parentUUID uuid.UUID) ([]domain.ItemBatch, error) {
+	allowed, err := u.roles.AllowedToEditData(ctx, userUUID, companyUUID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !allowed {
+		return nil, ErrUnauthorized
+	}
+
+	relations, err := u.itemToItem.FindByParentUUID(ctx, userUUID, parentUUID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var itemBatches []domain.ItemBatch
+
+	for _, iti := range relations {
+		itemBatch, err := u.GetByUUID(ctx, companyUUID, userUUID, iti.ChildUUID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		itemBatches = append(itemBatches, itemBatch)
 	}
 
 	return itemBatches, nil

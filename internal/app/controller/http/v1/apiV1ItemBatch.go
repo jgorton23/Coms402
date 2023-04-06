@@ -29,7 +29,7 @@ func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, pa
 		return
 	}
 
-	if params.CompanyUUID != nil && params.ItemBatchUUID == nil {
+	if params.CompanyUUID != nil && params.ItemBatchUUID == nil && params.ParentItemUUID == nil {
 
 		itemBatches, err := v1.itemBatchUseCase.GetByCompanyUUID(r.Context(), companyUUID, domainUser.UUID)
 
@@ -49,6 +49,23 @@ func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, pa
 		}
 
 		itemBatches, err := v1.itemBatchUseCase.GetByUUID(r.Context(), companyUUID, domainUser.UUID, itemBatchUUID)
+
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		respondWithJson(w, r, http.StatusFound, itemBatches)
+		return
+	} else if params.CompanyUUID != nil && params.ParentItemUUID != nil {
+		parentItemUUID, err := uuid.Parse(*params.ParentItemUUID)
+
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		itemBatches, err := v1.itemBatchUseCase.GetByParentUUID(r.Context(), companyUUID, domainUser.UUID, parentItemUUID)
 
 		if err != nil {
 			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
@@ -149,4 +166,93 @@ func (v1 httpV1Implem) UpdateItemBatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJson(w, r, http.StatusAccepted, requestBody)
+}
+
+func (v1 httpV1Implem) AddSubItems(w http.ResponseWriter, r *http.Request) {
+	var requestBody AddSubItemsJSONRequestBody
+
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		respondWithError(w, r, "invalid request json object found", http.StatusBadRequest)
+		return
+	}
+
+	domainUser, err := v1.loadDomainUser(r)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	parentUUID, err := uuid.Parse(requestBody.ParentUUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to parse parent UUID: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	var children []uuid.UUID
+
+	for _, c := range requestBody.ChildrenUUIDs {
+		child, err := uuid.Parse(c.UUID)
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("unable to parse child UUID: %v", err), http.StatusBadRequest)
+			return
+		}
+		children = append(children, child)
+	}
+
+	addedChildren, err := v1.itemToItemUseCase.CreateAll(r.Context(), domainUser.UUID, parentUUID, children)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to add all child itemBatches: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	respondWithJson(w, r, http.StatusCreated, addedChildren)
+
+}
+
+func (v1 httpV1Implem) DeleteSubItems(w http.ResponseWriter, r *http.Request) {
+	var requestBody DeleteSubItemsJSONRequestBody
+
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		respondWithError(w, r, "invalid request json object found", http.StatusBadRequest)
+		return
+	}
+
+	domainUser, err := v1.loadDomainUser(r)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to load user: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	parentUUID, err := uuid.Parse(requestBody.ParentUUID)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to parse parent UUID: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	var children []uuid.UUID
+
+	for _, c := range requestBody.ChildrenUUIDs {
+		child, err := uuid.Parse(c.UUID)
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("unable to parse child UUID: %v", err), http.StatusBadRequest)
+			return
+		}
+		children = append(children, child)
+	}
+
+	deletedChildren, err := v1.itemToItemUseCase.DeleteAll(r.Context(), domainUser.UUID, parentUUID, children)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to remove all child itemBatch mappings: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	respondWithJson(w, r, http.StatusOK, fmt.Sprintf("Removed %v child itemBatch mappings", deletedChildren))
 }

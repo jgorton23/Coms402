@@ -65,6 +65,18 @@ type ItemBatch struct {
 	Uuid string `json:"uuid"`
 }
 
+// ItemToItem defines model for ItemToItem.
+type ItemToItem struct {
+	// ChildUUID uuid of the child item in the relationship
+	ChildUUID string `json:"childUUID"`
+
+	// ParentUUID uuid of the parent item in the relationship
+	ParentUUID string `json:"parentUUID"`
+
+	// Uuid uuid of the item to item relation
+	Uuid string `json:"uuid"`
+}
+
 // NewCertification defines model for NewCertification.
 type NewCertification struct {
 	// CompanyUUID uuid of the company
@@ -152,6 +164,25 @@ type GetItemBatchByParams struct {
 
 	// CompanyUUID uuid of company for which to get
 	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
+
+	// ParentItemUUID uuid of the parent item for which to get
+	ParentItemUUID *string `form:"parentItemUUID,omitempty" json:"parentItemUUID,omitempty"`
+}
+
+// DeleteSubItemsJSONBody defines parameters for DeleteSubItems.
+type DeleteSubItemsJSONBody struct {
+	ChildrenUUIDs []struct {
+		UUID string `json:"UUID"`
+	} `json:"childrenUUIDs"`
+	ParentUUID string `json:"parentUUID"`
+}
+
+// AddSubItemsJSONBody defines parameters for AddSubItems.
+type AddSubItemsJSONBody struct {
+	ChildrenUUIDs []struct {
+		UUID string `json:"UUID"`
+	} `json:"childrenUUIDs"`
+	ParentUUID string `json:"parentUUID"`
 }
 
 // GetRolesByParams defines parameters for GetRolesBy.
@@ -199,6 +230,12 @@ type AddItemBatchJSONRequestBody = NewItemBatch
 // UpdateItemBatchJSONRequestBody defines body for UpdateItemBatch for application/json ContentType.
 type UpdateItemBatchJSONRequestBody = ItemBatch
 
+// DeleteSubItemsJSONRequestBody defines body for DeleteSubItems for application/json ContentType.
+type DeleteSubItemsJSONRequestBody DeleteSubItemsJSONBody
+
+// AddSubItemsJSONRequestBody defines body for AddSubItems for application/json ContentType.
+type AddSubItemsJSONRequestBody AddSubItemsJSONBody
+
 // AddUserRoleJSONRequestBody defines body for AddUserRole for application/json ContentType.
 type AddUserRoleJSONRequestBody = NewUserRole
 
@@ -231,6 +268,12 @@ type ServerInterface interface {
 	// Update an existing item batch
 	// (PUT /itembatch)
 	UpdateItemBatch(w http.ResponseWriter, r *http.Request)
+	// Delete children from the given parent item
+	// (DELETE /itembatch/children)
+	DeleteSubItems(w http.ResponseWriter, r *http.Request)
+	// Create subcomponent mapping
+	// (POST /itembatch/children)
+	AddSubItems(w http.ResponseWriter, r *http.Request)
 	// Find roles by *
 	// (GET /role)
 	GetRolesBy(w http.ResponseWriter, r *http.Request, params GetRolesByParams)
@@ -401,6 +444,14 @@ func (siw *ServerInterfaceWrapper) GetItemBatchBy(w http.ResponseWriter, r *http
 		return
 	}
 
+	// ------------- Optional query parameter "parentItemUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "parentItemUUID", r.URL.Query(), &params.ParentItemUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "parentItemUUID", Err: err})
+		return
+	}
+
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetItemBatchBy(w, r, params)
 	})
@@ -433,6 +484,36 @@ func (siw *ServerInterfaceWrapper) UpdateItemBatch(w http.ResponseWriter, r *htt
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateItemBatch(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteSubItems operation middleware
+func (siw *ServerInterfaceWrapper) DeleteSubItems(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteSubItems(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddSubItems operation middleware
+func (siw *ServerInterfaceWrapper) AddSubItems(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddSubItems(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -718,6 +799,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/itembatch", wrapper.UpdateItemBatch)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/itembatch/children", wrapper.DeleteSubItems)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/itembatch/children", wrapper.AddSubItems)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/role", wrapper.GetRolesBy)
