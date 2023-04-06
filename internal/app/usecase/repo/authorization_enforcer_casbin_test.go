@@ -3,7 +3,7 @@ package repo_test
 import (
 	"testing"
 
-	"github.com/samber/do"
+	"github.com/stretchr/testify/assert"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase/repo"
@@ -11,15 +11,23 @@ import (
 
 // Interface Testing for the usecase.IAuthorizationEnforcerRepo casbin implementations
 
+func helpInit(t *testing.T) usecase.IAuthorizationEnforcerRepo {
+	db, err := repo.DatabaseEntBuilder().
+		WithSqlite("file:ent?mode=memory&cache=shared&_fk=1")
+
+	assert.NoError(t, err, "error starting db")
+
+	auth, err := repo.AuthorizationEnforcerBuilder().
+		WithAdapter(db.RepoAuthorizationPolicy()).
+		New()
+
+	assert.NoError(t, err, "error starting enforcer")
+	return auth
+}
+
 func TestAuthorizationEnforcerCasbinRolePathMethod(t *testing.T) {
-	injector := do.New()
 
-	// The AuthorizationEnforcer needs a policy repo
-	do.Provide(injector, repo.NewAuthorizationPolicyInMemoryRepo)
-	// the repo we are testing
-	do.Provide(injector, repo.NewAuthorizationEnforcer)
-
-	auth := do.MustInvoke[usecase.IAuthorizationEnforcerRepo](injector)
+	auth := helpInit(t)
 
 	fn := func(ok bool, err error) {
 		if err != nil {
@@ -59,16 +67,8 @@ func TestAuthorizationEnforcerCasbinRolePathMethod(t *testing.T) {
 		}
 	}
 }
-
 func TestAuthorizationEnforcerCasbinRBAC(t *testing.T) {
-	injector := do.New()
-
-	// The AuthorizationEnforcer needs a policy repo
-	do.Provide(injector, repo.NewAuthorizationPolicyInMemoryRepo)
-	// the repo we are testing
-	do.Provide(injector, repo.NewAuthorizationEnforcer)
-
-	auth := do.MustInvoke[usecase.IAuthorizationEnforcerRepo](injector)
+	auth := helpInit(t)
 
 	fn := func(ok bool, err error) {
 		if err != nil {

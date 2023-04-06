@@ -4,7 +4,6 @@ import (
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
-	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
@@ -15,12 +14,20 @@ var (
 	_                                        usecase.IAuthorizationEnforcerRepo = _assertAuthorizationEnforcerCasbinImplem
 )
 
-// NewAuthorizationEnforcer -.
-func NewAuthorizationEnforcer(i *do.Injector) (usecase.IAuthorizationEnforcerRepo, error) {
-	authorizationEnforcer := &authorizationEnforcerCasbinImplem{
-		authorizationPolicy: do.MustInvoke[persist.Adapter](i),
-	}
+func AuthorizationEnforcerBuilder() *authorizationEnforcerBuilder {
+	return &authorizationEnforcerBuilder{}
+}
 
+type authorizationEnforcerBuilder struct {
+	adapter persist.Adapter
+}
+
+func (builder *authorizationEnforcerBuilder) WithAdapter(adapter persist.Adapter) *authorizationEnforcerBuilder {
+	builder.adapter = adapter
+	return builder
+}
+
+func (builder *authorizationEnforcerBuilder) New() (usecase.IAuthorizationEnforcerRepo, error) {
 	// A very helpful note... For some reason p1, r1 dose not work. Do not ask me why but I spent way too long
 	// trying to track down why it was not working. Also I think there can only be one policy_effect but don't quote me
 	text := `
@@ -47,18 +54,18 @@ func NewAuthorizationEnforcer(i *do.Injector) (usecase.IAuthorizationEnforcerRep
 	m, _ := model.NewModelFromString(text)
 
 	// Create the enforcer.
-	enforcer, err := casbin.NewEnforcer(m, authorizationEnforcer.authorizationPolicy)
+	enforcer, err := casbin.NewEnforcer(m, builder.adapter)
 	if err != nil {
 		return nil, err
 	}
 
-	authorizationEnforcer.enforcer = enforcer
-	return authorizationEnforcer, nil
+	return &authorizationEnforcerCasbinImplem{
+		enforcer: enforcer,
+	}, nil
 }
 
 type authorizationEnforcerCasbinImplem struct {
-	enforcer            *casbin.Enforcer
-	authorizationPolicy persist.Adapter
+	enforcer *casbin.Enforcer
 }
 
 func (a authorizationEnforcerCasbinImplem) enforce(enforcer casbin.EnforceContext, rvals ...interface{}) (bool, error) {

@@ -6,34 +6,85 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
 
 // Pattern to verify loggerLogrusImplem conforms to the required interfaces
 var (
-	_assertSCSSessionRepoImplem                          = &sessionSCSImplem{}
-	_                           usecase.SessionStateRepo = _assertSCSSessionRepoImplem
+	_assertSessionSCSImplem                          = &sessionSCSImplem{}
+	_                       usecase.SessionStateRepo = _assertSessionSCSImplem
 )
 
-func NewSCSSessionRepo(i *do.Injector) (usecase.SessionStateRepo, error) {
-	// config := do.MustInvoke[*domain.Config](i)
-	sessionManager := scs.New()
-	sessionManager.Store = do.MustInvoke[scs.Store](i)
-	sessionManager.Lifetime = 3 * time.Hour
-	sessionManager.IdleTimeout = 20 * time.Minute
-	sessionManager.Cookie.Name = "session_id"
-	sessionManager.Cookie.Domain = "localhost"
-	sessionManager.Cookie.HttpOnly = true
-	sessionManager.Cookie.Path = "/"
-	sessionManager.Cookie.Persist = false
-	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
-	sessionManager.Cookie.Secure = true
+func SessionSCSBuilder() *sessionSCSBuilder {
+	return &sessionSCSBuilder{
+		opts: struct {
+			Lifetime     time.Duration
+			IdleTimeout  time.Duration
+			CookieName   string
+			CookieDomain string
+			Store        scs.Store
+		}{
+			Lifetime:     3 * time.Hour,
+			IdleTimeout:  20 * time.Minute,
+			CookieName:   "session_id",
+			CookieDomain: "localhost",
+		},
+	}
+}
 
-	return &sessionSCSImplem{
-		sessionManager: sessionManager,
-	}, nil
+type sessionSCSBuilder struct {
+	opts struct {
+		Lifetime     time.Duration
+		IdleTimeout  time.Duration
+		CookieName   string
+		CookieDomain string
+		Store        scs.Store
+	}
+}
+
+func (builder *sessionSCSBuilder) WithLifetime(lifetime time.Duration) *sessionSCSBuilder {
+	builder.opts.Lifetime = lifetime
+	return builder
+}
+
+func (builder *sessionSCSBuilder) WithIdleTimeout(timeout time.Duration) *sessionSCSBuilder {
+	builder.opts.IdleTimeout = timeout
+	return builder
+}
+
+func (builder *sessionSCSBuilder) WithCookieName(name string) *sessionSCSBuilder {
+	builder.opts.CookieName = name
+	return builder
+}
+func (builder *sessionSCSBuilder) WithCookieDomain(domain string) *sessionSCSBuilder {
+	builder.opts.CookieDomain = domain
+	return builder
+}
+
+func (builder *sessionSCSBuilder) WithStore(store scs.Store) *sessionSCSBuilder {
+	builder.opts.Store = store
+	return builder
+}
+
+func (builder *sessionSCSBuilder) NewSCSSessionRepo() (usecase.SessionStateRepo, error) {
+
+	implem := &sessionSCSImplem{}
+
+	implem.sessionManager = scs.New()
+	implem.sessionManager.Store = builder.opts.Store
+
+	implem.sessionManager.Lifetime = builder.opts.Lifetime
+	implem.sessionManager.IdleTimeout = builder.opts.IdleTimeout
+	implem.sessionManager.Cookie.Name = builder.opts.CookieName
+	implem.sessionManager.Cookie.Domain = builder.opts.CookieDomain
+	implem.sessionManager.Cookie.HttpOnly = true
+	implem.sessionManager.Cookie.Path = "/"
+	implem.sessionManager.Cookie.Persist = false
+	implem.sessionManager.Cookie.SameSite = http.SameSiteLaxMode
+	implem.sessionManager.Cookie.Secure = true
+
+	return implem, nil
 }
 
 type sessionSCSImplem struct {

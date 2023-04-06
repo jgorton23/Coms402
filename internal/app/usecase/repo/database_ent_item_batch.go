@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
@@ -14,28 +13,25 @@ import (
 
 // Pattern to verify itemBatchDBEntImplem conforms to the required interfaces
 var (
-	_assertItemBatchImplem                       = &itemBatchDBEntImplem{}
-	_                      usecase.ItemBatchRepo = _assertItemBatchImplem
+	_assertDatabaseEntImplemItemBatch                       = &databaseEntImplemItemBatch{}
+	_                                 usecase.ItemBatchRepo = _assertDatabaseEntImplemItemBatch
 )
 
-// NewCompanyRepo -.
-func NewItemBatchRepo(i *do.Injector) (usecase.ItemBatchRepo, error) {
-	implem := &itemBatchDBEntImplem{
-		do.MustInvoke[*DatabaseConnection](i).Client(),
+func (implem *DatabaseEnt) RepoItemBatch() usecase.ItemBatchRepo {
+	return &databaseEntImplemItemBatch{
+		client: implem.client,
 	}
-
-	return implem, nil
 }
 
-type itemBatchDBEntImplem struct {
-	*ent.Client
+type databaseEntImplemItemBatch struct {
+	client *ent.Client
 }
 
 // Exists
 // returns if the given itembatch exists
-func (ur *itemBatchDBEntImplem) Exists(ctx context.Context, itemNumber string) (bool, error) {
+func (ur *databaseEntImplemItemBatch) Exists(ctx context.Context, itemNumber string) (bool, error) {
 
-	exists, err := ur.Client.ItemBatch.
+	exists, err := ur.client.ItemBatch.
 		Query().
 		Where(
 			itembatch.ItemNumber(itemNumber),
@@ -50,8 +46,8 @@ func (ur *itemBatchDBEntImplem) Exists(ctx context.Context, itemNumber string) (
 
 // Create
 // creates a new itembatch
-func (ur *itemBatchDBEntImplem) Create(ctx context.Context, itemBatch domain.ItemBatch) (domain.ItemBatch, error) {
-	utc, err := ur.Client.ItemBatch.
+func (ur *databaseEntImplemItemBatch) Create(ctx context.Context, itemBatch domain.ItemBatch) (domain.ItemBatch, error) {
+	utc, err := ur.client.ItemBatch.
 		Create().
 		SetItemNumber(itemBatch.ItemNumber).
 		SetDescription(itemBatch.Description).
@@ -66,8 +62,8 @@ func (ur *itemBatchDBEntImplem) Create(ctx context.Context, itemBatch domain.Ite
 
 // Update
 // updates the given itembatch
-func (ur *itemBatchDBEntImplem) Update(ctx context.Context, ib domain.ItemBatch) error {
-	_, err := ur.Client.ItemBatch.
+func (ur *databaseEntImplemItemBatch) Update(ctx context.Context, ib domain.ItemBatch) error {
+	_, err := ur.client.ItemBatch.
 		Update().
 		Where(
 			itembatch.And(
@@ -87,8 +83,8 @@ func (ur *itemBatchDBEntImplem) Update(ctx context.Context, ib domain.ItemBatch)
 
 // GetByCompanyUUID
 // returns the itembatches belonging to a given company
-func (ur *itemBatchDBEntImplem) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) (itembatches []domain.ItemBatch, err error) {
-	u, err := ur.Client.ItemBatch.
+func (ur *databaseEntImplemItemBatch) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) (itembatches []domain.ItemBatch, err error) {
+	u, err := ur.client.ItemBatch.
 		Query().
 		Where(itembatch.CompanyUUID(companyUUID)).
 		All(ctx)
@@ -106,8 +102,8 @@ func (ur *itemBatchDBEntImplem) GetByCompanyUUID(ctx context.Context, companyUUI
 }
 
 // returns the itembatch with the given UUID
-func (ur *itemBatchDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.ItemBatch, error) {
-	u, err := ur.Client.ItemBatch.
+func (ur *databaseEntImplemItemBatch) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.ItemBatch, error) {
+	u, err := ur.client.ItemBatch.
 		Query().
 		Where(itembatch.ID(uuid)).
 		First(ctx)
@@ -118,7 +114,7 @@ func (ur *itemBatchDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (
 	return ur.databaseToEntity(u), nil
 }
 
-func (ur *itemBatchDBEntImplem) databaseToEntity(ib *ent.ItemBatch) domain.ItemBatch {
+func (ur *databaseEntImplemItemBatch) databaseToEntity(ib *ent.ItemBatch) domain.ItemBatch {
 	return domain.ItemBatch{
 		UUID:        ib.ID,
 		ItemNumber:  ib.ItemNumber,

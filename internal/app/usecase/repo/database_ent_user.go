@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
@@ -12,29 +11,26 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
 )
 
-// Pattern to verify userDBEntImplem conforms to the required interfaces
+// Pattern to verify databaseEntImplemUser conforms to the required interfaces
 var (
-	_assertUserImplem                  = &userDBEntImplem{}
-	_                 usecase.UserRepo = _assertUserImplem
+	_assertDatabaseEntImplemUser                  = &databaseEntImplemUser{}
+	_                            usecase.UserRepo = _assertDatabaseEntImplemUser
 )
 
-// NewUserRepo -.
-func NewUserRepo(i *do.Injector) (usecase.UserRepo, error) {
-	implem := &userDBEntImplem{
-		do.MustInvoke[*DatabaseConnection](i).Client(),
+func (implem *DatabaseEnt) RepoUser() usecase.UserRepo {
+	return &databaseEntImplemUser{
+		client: implem.client,
 	}
-
-	return implem, nil
 }
 
-type userDBEntImplem struct {
-	*ent.Client
+type databaseEntImplemUser struct {
+	client *ent.Client
 }
 
 // Get
 // returns all users
-func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
-	us, err := ur.Client.User.
+func (ur *databaseEntImplemUser) Get(ctx context.Context) ([]domain.User, error) {
+	us, err := ur.client.User.
 		Query().
 		All(ctx)
 	if err != nil {
@@ -44,7 +40,7 @@ func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 	users := make([]domain.User, len(us))
 
 	for i := 0; i < len(us); i++ {
-		users[i] = ur.databaseUserToEntityUser(us[i])
+		users[i] = ur.databaseToDomain(us[i])
 	}
 
 	return users, nil
@@ -52,8 +48,8 @@ func (ur *userDBEntImplem) Get(ctx context.Context) ([]domain.User, error) {
 
 // GetByUUID
 // returns the user with the give UUID
-func (ur *userDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
-	u, err := ur.Client.User.
+func (ur *databaseEntImplemUser) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
+	u, err := ur.client.User.
 		Query().
 		Where(user.ID(uuid)).
 		First(ctx)
@@ -61,13 +57,13 @@ func (ur *userDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domai
 		return domain.User{}, err
 	}
 
-	return ur.databaseUserToEntityUser(u), nil
+	return ur.databaseToDomain(u), nil
 }
 
 // GetByEmail
 // returns the user with the given email
-func (ur *userDBEntImplem) GetByEmail(ctx context.Context, email string) (domain.User, error) {
-	u, err := ur.Client.User.
+func (ur *databaseEntImplemUser) GetByEmail(ctx context.Context, email string) (domain.User, error) {
+	u, err := ur.client.User.
 		Query().
 		Where(user.Email(email)).
 		First(ctx)
@@ -75,13 +71,13 @@ func (ur *userDBEntImplem) GetByEmail(ctx context.Context, email string) (domain
 		return domain.User{}, err
 	}
 
-	return ur.databaseUserToEntityUser(u), nil
+	return ur.databaseToDomain(u), nil
 }
 
 // Exists
 // returns if a user with the given email exists
-func (ur *userDBEntImplem) Exists(ctx context.Context, u string) (bool, error) {
-	exists, err := ur.Client.User.
+func (ur *databaseEntImplemUser) Exists(ctx context.Context, u string) (bool, error) {
+	exists, err := ur.client.User.
 		Query().
 		Where(user.Email(u)).
 		Exist(ctx)
@@ -94,8 +90,8 @@ func (ur *userDBEntImplem) Exists(ctx context.Context, u string) (bool, error) {
 
 // Create
 // creates a new user
-func (ur *userDBEntImplem) Create(ctx context.Context, usr domain.User) (domain.User, error) {
-	u, err := ur.Client.User.
+func (ur *databaseEntImplemUser) Create(ctx context.Context, usr domain.User) (domain.User, error) {
+	u, err := ur.client.User.
 		Create().
 		SetEmail(usr.Email).
 		SetPasswordHash(usr.PasswordHash).
@@ -110,13 +106,13 @@ func (ur *userDBEntImplem) Create(ctx context.Context, usr domain.User) (domain.
 		return domain.User{}, err
 	}
 
-	return ur.databaseUserToEntityUser(u), nil
+	return ur.databaseToDomain(u), nil
 }
 
 // Update
 // updates the given user
-func (ur *userDBEntImplem) Update(ctx context.Context, u domain.User) error {
-	_, err := ur.Client.User.
+func (ur *databaseEntImplemUser) Update(ctx context.Context, u domain.User) error {
+	_, err := ur.client.User.
 		Update().
 		SetEmail(u.Email).
 		SetPasswordHash(u.PasswordHash).
@@ -134,7 +130,7 @@ func (ur *userDBEntImplem) Update(ctx context.Context, u domain.User) error {
 	return nil
 }
 
-func (ur *userDBEntImplem) databaseUserToEntityUser(u *ent.User) domain.User {
+func (ur *databaseEntImplemUser) databaseToDomain(u *ent.User) domain.User {
 	return domain.User{
 		UUID:                 u.ID,
 		CreatedAt:            u.CreatedAt,
