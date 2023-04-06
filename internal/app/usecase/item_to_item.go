@@ -54,13 +54,22 @@ func (u ItemToItem) CreateAll(ctx context.Context, userUUID uuid.UUID, parentUUI
 	var created []domain.ItemToItem
 
 	for _, childUUID := range children {
-		child, err := u.itemToItemRepo.Create(ctx, parentUUID, childUUID)
+		exists, err := u.itemToItemRepo.Exists(ctx, parentUUID, childUUID)
 
 		if err != nil {
-			return nil, err
+			return created, err
 		}
 
-		created = append(created, child)
+		if !exists {
+
+			child, err := u.itemToItemRepo.Create(ctx, parentUUID, childUUID)
+
+			if err != nil {
+				return created, err
+			}
+
+			created = append(created, child)
+		}
 	}
 
 	return created, nil

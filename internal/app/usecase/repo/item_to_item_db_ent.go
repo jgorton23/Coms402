@@ -61,6 +61,23 @@ func (ur itemToItemDBEntImplem) Delete(ctx context.Context, parentUUID uuid.UUID
 	return deleted, nil
 }
 
+func (ur itemToItemDBEntImplem) Exists(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (bool, error) {
+	exists, err := ur.Client.ItemBatchToItemBatch.
+		Query().
+		Where(
+			itembatchtoitembatch.And(
+				itembatchtoitembatch.ParentUUID(parentUUID),
+				itembatchtoitembatch.ChildUUID(childUUID),
+			),
+		).
+		Exist(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
 func (ur *itemToItemDBEntImplem) databaseToEntity(iti *ent.ItemBatchToItemBatch) domain.ItemToItem {
 	return domain.ItemToItem{
 		UUID:       iti.ID,
