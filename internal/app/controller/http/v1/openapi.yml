@@ -362,15 +362,20 @@ paths:
             schema:
               type: object
               required:
-                - parent
-                - children
+                - parentUUID
+                - childrenUUIDs
               properties:
-                parent:
-                  $ref: "#/components/schemas/ItemBatch"
-                children:
+                parentUUID: 
+                  type: string
+                childrenUUIDs:
                   type: array
                   items:
-                    $ref: "#/components/schemas/ItemBatch"
+                    type: object
+                    required:
+                     - UUID
+                    properties:
+                      UUID:
+                        type: string
       responses:
         "201":
           description: ItemToItem created

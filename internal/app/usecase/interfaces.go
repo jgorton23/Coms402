@@ -116,6 +116,6 @@ type (
 	}
 
 	ItemToItemRepo interface {
-		Create(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) error
+		Create(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (domain.ItemToItem, error)
 	}
 )

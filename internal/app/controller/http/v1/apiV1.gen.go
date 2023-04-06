@@ -168,8 +168,10 @@ type GetItemBatchByParams struct {
 
 // AddSubItemsJSONBody defines parameters for AddSubItems.
 type AddSubItemsJSONBody struct {
-	Children []ItemBatch `json:"children"`
-	Parent   ItemBatch   `json:"parent"`
+	ChildrenUUIDs []struct {
+		UUID string `json:"UUID"`
+	} `json:"childrenUUIDs"`
+	ParentUUID string `json:"parentUUID"`
 }
 
 // GetRolesByParams defines parameters for GetRolesBy.

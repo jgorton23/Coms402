@@ -167,16 +167,31 @@ func (v1 httpV1Implem) AddSubItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	companyUUID, err := uuid.Parse(requestBody.Parent.CompanyUuid)
+	parentUUID, err := uuid.Parse(requestBody.ParentUUID)
 
 	if err != nil {
-		respondWithError(w, r, fmt.Sprintf("unable to parse company UUID: %v", err), http.StatusBadRequest)
+		respondWithError(w, r, fmt.Sprintf("unable to parse parent UUID: %v", err), http.StatusBadRequest)
 		return
 	}
 
-	err = v1.itemToItemUseCase.Create(r.Context(), domain.ItemToItem{}, domainUser.UUID, companyUUID)
-	if err != nil {
+	var children []uuid.UUID
 
+	for _, c := range requestBody.ChildrenUUIDs {
+		child, err := uuid.Parse(c.UUID)
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("unable to parse child UUID: %v", err), http.StatusBadRequest)
+			return
+		}
+		children = append(children, child)
 	}
+
+	addedChildren, err := v1.itemToItemUseCase.CreateAll(r.Context(), domain.ItemToItem{}, domainUser.UUID, parentUUID, children)
+
+	if err != nil {
+		respondWithError(w, r, fmt.Sprintf("unable to add all child itemBatches: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	respondWithJson(w, r, http.StatusCreated, addedChildren)
 
 }
