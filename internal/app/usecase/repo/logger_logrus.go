@@ -3,37 +3,78 @@ package repo
 import (
 	"os"
 
-	"github.com/samber/do"
 	"github.com/sirupsen/logrus"
 
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
 
 // Pattern to verify loggerLogrusImplem conforms to the required interfaces
 var (
-	_assertLoggerRepoImplem                    = &loggerLogrusImplem{}
-	_                       usecase.LoggerRepo = _assertLoggerRepoImplem
+	_assertLoggerLogrusImplem                    = &loggerLogrusImplem{}
+	_                         usecase.LoggerRepo = _assertLoggerLogrusImplem
 )
 
-func NewLoggerRepo(i *do.Injector) (usecase.LoggerRepo, error) {
-	config := do.MustInvoke[*domain.Config](i)
+// LoggerLogrusBuilder creates a new loggerLogrusBuilder
+func LoggerLogrusBuilder() *loggerLogrusBuilder {
+	return &loggerLogrusBuilder{
+		logger: &loggerLogrusImplem{},
+		opts: struct {
+			format string
+			color  bool
+			level  string
+		}{
+			format: "json",
+			color:  false,
+			level:  "info",
+		}}
+}
 
+type loggerLogrusBuilder struct {
+	logger *loggerLogrusImplem
+	opts   struct {
+		format string
+		color  bool
+		level  string
+	}
+}
+
+// WithFormat allows the logging formatter to be specified
+// The default formatter is json
+func (builder *loggerLogrusBuilder) WithFormat(format string) *loggerLogrusBuilder {
+	builder.opts.format = format
+	return builder
+}
+
+// WithColor enables colored logging
+// Color is disabled by default
+func (builder *loggerLogrusBuilder) WithColor(color bool) *loggerLogrusBuilder {
+	builder.opts.color = color
+	return builder
+}
+
+// WithLoggerLogrusLevel sets the logging level
+// The default log level is "info"
+func (builder *loggerLogrusBuilder) WithLevel(level string) *loggerLogrusBuilder {
+	builder.opts.level = level
+	return builder
+}
+
+// New creates a new usecase.LoggerRepo using logrus based on the builder options
+func (builder *loggerLogrusBuilder) New() (usecase.LoggerRepo, error) {
 	l := logrus.New()
-
 	l.SetOutput(os.Stdout)
 
-	switch config.Format {
-	case "json":
-		l.SetFormatter(&logrus.JSONFormatter{})
+	switch builder.opts.format {
 	case "logfmt":
 		l.SetFormatter(&logrus.TextFormatter{
-			DisableColors:             config.NoColor,
+			DisableColors:             builder.opts.color,
 			EnvironmentOverrideColors: true,
 		})
+	case "json":
+		l.SetFormatter(&logrus.JSONFormatter{})
 	}
 
-	level, err := logrus.ParseLevel(config.Level)
+	level, err := logrus.ParseLevel(builder.opts.level)
 
 	if err != nil {
 		return nil, err

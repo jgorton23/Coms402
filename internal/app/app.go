@@ -20,27 +20,79 @@ import (
 func Run(conf *domain.Config, ctx context.Context) {
 	injector := do.New()
 
+	// TODO remove
 	do.ProvideValue(injector, conf)
-	do.Provide(injector, repo.NewLoggerRepo)
-	do.Provide(injector, repo.NewDatabaseConnection)
-	do.Provide(injector, repo.NewUserRepo)
-	do.Provide(injector, repo.NewAuthorizationPolicyRepo)
 
-	do.Provide(injector, repo.NewAuthorizationEnforcer)
-	auth := do.MustInvoke[usecase.IAuthorizationEnforcerRepo](injector)
-	auth.AddPolicyRolePathMethod("*", "/metrics", "*")
-	auth.AddPolicyRolePathMethod("*", "/healthz", "*")
-	auth.AddPolicyRolePathMethod("*", "/docs", "*")
-	auth.AddPolicyRolePathMethod("*", "/docs/*", "*")
-	auth.AddPolicyRolePathMethod("*", "/api/auth/*", "*")
-	auth.AddPolicyRolePathMethod("user", "/api/v1/*", "*")
+	// Setup Logger
+	do.Provide(injector, func(i *do.Injector) (usecase.LoggerRepo, error) {
+		return repo.LoggerLogrusBuilder().
+			WithColor(!conf.LOG.NoColor).
+			WithFormat(conf.LOG.Format).
+			WithLevel(conf.LOG.Level).
+			New()
+	})
 
-	do.Provide(injector, repo.NewSCSRepo)
-	do.Provide(injector, repo.NewSCSSessionRepo)
-	do.Provide(injector, repo.NewUserToCompanyRepo)
-	do.Provide(injector, repo.NewCompanyRepo)
-	do.Provide(injector, repo.NewItemBatchRepo)
-	do.Provide(injector, repo.NewCertificationRepo)
+	do.Provide(injector, func(i *do.Injector) (*repo.DatabaseEnt, error) {
+		return repo.DatabaseEntBuilder().
+			WithMaxOpenConns(conf.PG.PoolMax).
+			WithPostgres(conf.PG.URL)
+	})
+
+	do.Provide(injector, func(i *do.Injector) (*repo.DatabaseEntImplemAuthorizationPolicy, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return db.RepoAuthorizationPolicy(), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (usecase.UserRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return db.RepoUser(), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (usecase.UserToCompanyRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return db.RepoRoles(), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (usecase.ItemBatchRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return db.RepoItemBatch(), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (usecase.CompanyRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return db.RepoCompany(), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (usecase.CertificationRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return db.RepoCertification(), nil
+	})
+
+	do.Provide(injector, func(i *do.Injector) (usecase.SessionStateRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		return repo.SessionSCSBuilder().
+			WithStore(db.RepoSessions()).
+			NewSCSSessionRepo()
+	})
+
+	do.Provide(injector, func(i *do.Injector) (usecase.IAuthorizationEnforcerRepo, error) {
+		db := do.MustInvoke[*repo.DatabaseEnt](i)
+		auth, err := repo.AuthorizationEnforcerBuilder().
+			WithAdapter(db.RepoAuthorizationPolicy()).
+			New()
+
+		if err != nil {
+			return nil, err
+		}
+		auth.AddPolicyRolePathMethod("*", "/metrics", "*")
+		auth.AddPolicyRolePathMethod("*", "/healthz", "*")
+		auth.AddPolicyRolePathMethod("*", "/docs", "*")
+		auth.AddPolicyRolePathMethod("*", "/docs/*", "*")
+		auth.AddPolicyRolePathMethod("*", "/api/auth/*", "*")
+		auth.AddPolicyRolePathMethod("user", "/api/v1/*", "*")
+
+		return auth, nil
+	})
 
 	do.Provide(injector, usecase.NewLogger)
 	do.Provide(injector, usecase.NewAuthBossLogger)

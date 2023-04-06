@@ -1,8 +1,6 @@
 package repo
 
 import (
-	"github.com/samber/do"
-
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 )
 
@@ -12,7 +10,17 @@ var (
 	_                           usecase.LoggerRepo = _assertLoggerNoopRepoImplem
 )
 
-func NewLoggerNoopRepo(i *do.Injector) (usecase.LoggerRepo, error) {
+// LoggerNoopBuilder a logger that does nothing
+func LoggerNoopBuilder() *loggerNoopBuilder {
+	return &loggerNoopBuilder{}
+}
+
+type loggerNoopBuilder struct {
+	// logger *loggerNoopImplem
+}
+
+// New creates a new usecase.LoggerRepo that does nothing
+func (builder *loggerNoopBuilder) New() (usecase.LoggerRepo, error) {
 	return &loggerNoopImplem{}, nil
 }
 

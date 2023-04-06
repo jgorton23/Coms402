@@ -19,7 +19,9 @@ func usecaseUserTestSetup(t *testing.T, fun func(i *do.Injector) (usecase.UserRe
 
 	// The usecase requires the logging interface to be fulfilled but
 	// during unit tests we do not want any logs, so we are using a noop logger
-	do.Provide(injector, repo.NewLoggerNoopRepo)
+	do.Provide(injector, func(i *do.Injector) (usecase.LoggerRepo, error) {
+		return repo.LoggerNoopBuilder().New()
+	})
 	do.Provide(injector, usecase.NewLogger)
 	do.Provide(injector, fun)
 	do.Provide(injector, usecase.NewUser)
