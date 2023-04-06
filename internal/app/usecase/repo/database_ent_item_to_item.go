@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
@@ -14,25 +13,23 @@ import (
 
 // Pattern to verify certificationDBEntImplem conforms to the required interfaces
 var (
-	_assertItemToItemImplem                        = &itemToItemDBEntImplem{}
+	_assertItemToItemImplem                        = &databaseEntImplemItemToItem{}
 	_                       usecase.ItemToItemRepo = _assertItemToItemImplem
 )
 
 // NewCompanyRepo -.
-func NewItemToItemRepo(i *do.Injector) (usecase.ItemToItemRepo, error) {
-	implem := &itemToItemDBEntImplem{
-		do.MustInvoke[*DatabaseConnection](i).Client(),
+func (implem *DatabaseEnt) RepoItemToItem() usecase.ItemToItemRepo {
+	return &databaseEntImplemItemToItem{
+		client: implem.client,
 	}
-
-	return implem, nil
 }
 
-type itemToItemDBEntImplem struct {
-	*ent.Client
+type databaseEntImplemItemToItem struct {
+	client *ent.Client
 }
 
-func (ur itemToItemDBEntImplem) Create(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (domain.ItemToItem, error) {
-	utc, err := ur.Client.ItemBatchToItemBatch.
+func (ur databaseEntImplemItemToItem) Create(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (domain.ItemToItem, error) {
+	utc, err := ur.client.ItemBatchToItemBatch.
 		Create().
 		SetChildUUID(childUUID).
 		SetParentUUID(parentUUID).
@@ -44,8 +41,8 @@ func (ur itemToItemDBEntImplem) Create(ctx context.Context, parentUUID uuid.UUID
 	return ur.databaseToEntity(utc), nil
 }
 
-func (ur itemToItemDBEntImplem) Delete(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (int, error) {
-	deleted, err := ur.Client.ItemBatchToItemBatch.
+func (ur databaseEntImplemItemToItem) Delete(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (int, error) {
+	deleted, err := ur.client.ItemBatchToItemBatch.
 		Delete().
 		Where(
 			itembatchtoitembatch.And(
@@ -61,8 +58,8 @@ func (ur itemToItemDBEntImplem) Delete(ctx context.Context, parentUUID uuid.UUID
 	return deleted, nil
 }
 
-func (ur itemToItemDBEntImplem) Exists(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (bool, error) {
-	exists, err := ur.Client.ItemBatchToItemBatch.
+func (ur databaseEntImplemItemToItem) Exists(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (bool, error) {
+	exists, err := ur.client.ItemBatchToItemBatch.
 		Query().
 		Where(
 			itembatchtoitembatch.And(
@@ -78,8 +75,8 @@ func (ur itemToItemDBEntImplem) Exists(ctx context.Context, parentUUID uuid.UUID
 	return exists, nil
 }
 
-func (ur itemToItemDBEntImplem) FindByParentUUID(ctx context.Context, parentUUID uuid.UUID) ([]domain.ItemToItem, error) {
-	u, err := ur.Client.ItemBatchToItemBatch.
+func (ur databaseEntImplemItemToItem) FindByParentUUID(ctx context.Context, parentUUID uuid.UUID) ([]domain.ItemToItem, error) {
+	u, err := ur.client.ItemBatchToItemBatch.
 		Query().
 		Where(
 			itembatchtoitembatch.ParentUUID(parentUUID),
@@ -97,7 +94,7 @@ func (ur itemToItemDBEntImplem) FindByParentUUID(ctx context.Context, parentUUID
 	return itemToItems, nil
 }
 
-func (ur *itemToItemDBEntImplem) databaseToEntity(iti *ent.ItemBatchToItemBatch) domain.ItemToItem {
+func (ur *databaseEntImplemItemToItem) databaseToEntity(iti *ent.ItemBatchToItemBatch) domain.ItemToItem {
 	return domain.ItemToItem{
 		UUID:       iti.ID,
 		ParentUUID: iti.ParentUUID,
