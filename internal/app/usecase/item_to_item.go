@@ -106,3 +106,30 @@ func (u ItemToItem) DeleteAll(ctx context.Context, userUUID uuid.UUID, parentUUI
 
 	return deleted, nil
 }
+
+func (u ItemToItem) FindByParentUUID(ctx context.Context, userUUID uuid.UUID, parentUUID uuid.UUID) ([]domain.ItemToItem, error) {
+
+	parent, err := u.itemBatchRepo.GetByUUID(ctx, parentUUID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	allowed, err := u.roles.AllowedToEditData(ctx, userUUID, parent.CompanyUUID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !allowed {
+		return nil, ErrUnauthorized
+	}
+
+	itemToItems, err := u.itemToItemRepo.FindByParentUUID(ctx, parentUUID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return itemToItems, nil
+}

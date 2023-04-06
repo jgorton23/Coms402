@@ -29,7 +29,7 @@ func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, pa
 		return
 	}
 
-	if params.CompanyUUID != nil && params.ItemBatchUUID == nil {
+	if params.CompanyUUID != nil && params.ItemBatchUUID == nil && params.ParentItemUUID == nil {
 
 		itemBatches, err := v1.itemBatchUseCase.GetByCompanyUUID(r.Context(), companyUUID, domainUser.UUID)
 
@@ -49,6 +49,23 @@ func (v1 httpV1Implem) GetItemBatchBy(w http.ResponseWriter, r *http.Request, pa
 		}
 
 		itemBatches, err := v1.itemBatchUseCase.GetByUUID(r.Context(), companyUUID, domainUser.UUID, itemBatchUUID)
+
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		respondWithJson(w, r, http.StatusFound, itemBatches)
+		return
+	} else if params.CompanyUUID != nil && params.ParentItemUUID != nil {
+		parentItemUUID, err := uuid.Parse(*params.ParentItemUUID)
+
+		if err != nil {
+			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		itemBatches, err := v1.itemBatchUseCase.GetByParentUUID(r.Context(), companyUUID, domainUser.UUID, parentItemUUID)
 
 		if err != nil {
 			respondWithError(w, r, fmt.Sprintf("error: %v", err), http.StatusBadRequest)

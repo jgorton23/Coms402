@@ -78,6 +78,25 @@ func (ur itemToItemDBEntImplem) Exists(ctx context.Context, parentUUID uuid.UUID
 	return exists, nil
 }
 
+func (ur itemToItemDBEntImplem) FindByParentUUID(ctx context.Context, parentUUID uuid.UUID) ([]domain.ItemToItem, error) {
+	u, err := ur.Client.ItemBatchToItemBatch.
+		Query().
+		Where(
+			itembatchtoitembatch.ParentUUID(parentUUID),
+		).All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	itemToItems := make([]domain.ItemToItem, 0)
+
+	for _, v := range u {
+		itemToItems = append(itemToItems, ur.databaseToEntity(v))
+	}
+
+	return itemToItems, nil
+}
+
 func (ur *itemToItemDBEntImplem) databaseToEntity(iti *ent.ItemBatchToItemBatch) domain.ItemToItem {
 	return domain.ItemToItem{
 		UUID:       iti.ID,

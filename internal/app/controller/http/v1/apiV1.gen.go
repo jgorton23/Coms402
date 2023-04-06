@@ -164,6 +164,9 @@ type GetItemBatchByParams struct {
 
 	// CompanyUUID uuid of company for which to get
 	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
+
+	// ParentItemUUID uuid of the parent item for which to get
+	ParentItemUUID *string `form:"parentItemUUID,omitempty" json:"parentItemUUID,omitempty"`
 }
 
 // DeleteSubItemsJSONBody defines parameters for DeleteSubItems.
@@ -438,6 +441,14 @@ func (siw *ServerInterfaceWrapper) GetItemBatchBy(w http.ResponseWriter, r *http
 	err = runtime.BindQueryParameter("form", true, false, "companyUUID", r.URL.Query(), &params.CompanyUUID)
 	if err != nil {
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "companyUUID", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "parentItemUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "parentItemUUID", r.URL.Query(), &params.ParentItemUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "parentItemUUID", Err: err})
 		return
 	}
 

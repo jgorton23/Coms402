@@ -119,5 +119,6 @@ type (
 		Create(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (domain.ItemToItem, error)
 		Delete(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (int, error)
 		Exists(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (bool, error)
+		FindByParentUUID(ctx context.Context, parentUUID uuid.UUID) ([]domain.ItemToItem, error)
 	}
 )
