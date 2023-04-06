@@ -166,6 +166,14 @@ type GetItemBatchByParams struct {
 	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
 }
 
+// DeleteSubItemsJSONBody defines parameters for DeleteSubItems.
+type DeleteSubItemsJSONBody struct {
+	ChildrenUUIDs []struct {
+		UUID string `json:"UUID"`
+	} `json:"childrenUUIDs"`
+	ParentUUID string `json:"parentUUID"`
+}
+
 // AddSubItemsJSONBody defines parameters for AddSubItems.
 type AddSubItemsJSONBody struct {
 	ChildrenUUIDs []struct {
@@ -219,6 +227,9 @@ type AddItemBatchJSONRequestBody = NewItemBatch
 // UpdateItemBatchJSONRequestBody defines body for UpdateItemBatch for application/json ContentType.
 type UpdateItemBatchJSONRequestBody = ItemBatch
 
+// DeleteSubItemsJSONRequestBody defines body for DeleteSubItems for application/json ContentType.
+type DeleteSubItemsJSONRequestBody DeleteSubItemsJSONBody
+
 // AddSubItemsJSONRequestBody defines body for AddSubItems for application/json ContentType.
 type AddSubItemsJSONRequestBody AddSubItemsJSONBody
 
@@ -254,6 +265,9 @@ type ServerInterface interface {
 	// Update an existing item batch
 	// (PUT /itembatch)
 	UpdateItemBatch(w http.ResponseWriter, r *http.Request)
+	// Delete children from the given parent item
+	// (DELETE /itembatch/children)
+	DeleteSubItems(w http.ResponseWriter, r *http.Request)
 	// Create subcomponent mapping
 	// (POST /itembatch/children)
 	AddSubItems(w http.ResponseWriter, r *http.Request)
@@ -459,6 +473,21 @@ func (siw *ServerInterfaceWrapper) UpdateItemBatch(w http.ResponseWriter, r *htt
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateItemBatch(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteSubItems operation middleware
+func (siw *ServerInterfaceWrapper) DeleteSubItems(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteSubItems(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -759,6 +788,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/itembatch", wrapper.UpdateItemBatch)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/itembatch/children", wrapper.DeleteSubItems)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/itembatch/children", wrapper.AddSubItems)

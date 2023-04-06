@@ -9,6 +9,7 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
 )
 
 // Pattern to verify certificationDBEntImplem conforms to the required interfaces
@@ -41,6 +42,23 @@ func (ur itemToItemDBEntImplem) Create(ctx context.Context, parentUUID uuid.UUID
 	}
 
 	return ur.databaseToEntity(utc), nil
+}
+
+func (ur itemToItemDBEntImplem) Delete(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (int, error) {
+	deleted, err := ur.Client.ItemBatchToItemBatch.
+		Delete().
+		Where(
+			itembatchtoitembatch.And(
+				itembatchtoitembatch.ParentUUID(parentUUID),
+				itembatchtoitembatch.ChildUUID(childUUID),
+			),
+		).Exec(ctx)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return deleted, nil
 }
 
 func (ur *itemToItemDBEntImplem) databaseToEntity(iti *ent.ItemBatchToItemBatch) domain.ItemToItem {

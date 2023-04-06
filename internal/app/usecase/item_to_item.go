@@ -33,7 +33,7 @@ type ItemToItem struct {
 	logger         *Logger
 }
 
-func (u ItemToItem) CreateAll(ctx context.Context, iti domain.ItemToItem, userUUID uuid.UUID, parentUUID uuid.UUID, children []uuid.UUID) ([]domain.ItemToItem, error) {
+func (u ItemToItem) CreateAll(ctx context.Context, userUUID uuid.UUID, parentUUID uuid.UUID, children []uuid.UUID) ([]domain.ItemToItem, error) {
 
 	parent, err := u.itemBatchRepo.GetByUUID(ctx, parentUUID)
 
@@ -64,4 +64,36 @@ func (u ItemToItem) CreateAll(ctx context.Context, iti domain.ItemToItem, userUU
 	}
 
 	return created, nil
+}
+
+func (u ItemToItem) DeleteAll(ctx context.Context, userUUID uuid.UUID, parentUUID uuid.UUID, children []uuid.UUID) (int, error) {
+	parent, err := u.itemBatchRepo.GetByUUID(ctx, parentUUID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	allowed, err := u.roles.AllowedToEditData(ctx, userUUID, parent.CompanyUUID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if !allowed {
+		return 0, ErrUnauthorized
+	}
+
+	deleted := 0
+
+	for _, childUUID := range children {
+		numDeleted, err := u.itemToItemRepo.Delete(ctx, parentUUID, childUUID)
+
+		deleted += numDeleted
+
+		if err != nil {
+			return deleted, err
+		}
+	}
+
+	return deleted, nil
 }
