@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/samber/do"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/domain"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/usecase"
@@ -12,30 +11,27 @@ import (
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
 )
 
-// Pattern to verify certificationDBEntImplem conforms to the required interfaces
+// Pattern to verify databaseEntImplemCertification  conforms to the required interfaces
 var (
-	_assertCertificationImplem                           = &certificationDBEntImplem{}
-	_                          usecase.CertificationRepo = _assertCertificationImplem
+	_assertDatabaseEntImplemCertification                           = &databaseEntImplemCertification{}
+	_                                     usecase.CertificationRepo = _assertDatabaseEntImplemCertification
 )
 
-// NewCompanyRepo -.
-func NewCertificationRepo(i *do.Injector) (usecase.CertificationRepo, error) {
-	implem := &certificationDBEntImplem{
-		do.MustInvoke[*DatabaseConnection](i).Client(),
+func (implem *DatabaseEnt) RepoCertification() usecase.CertificationRepo {
+	return &databaseEntImplemCertification{
+		client: implem.client,
 	}
-
-	return implem, nil
 }
 
-type certificationDBEntImplem struct {
-	*ent.Client
+type databaseEntImplemCertification struct {
+	client *ent.Client
 }
 
 // Exists
 // returns true if the cert exists
-func (ur *certificationDBEntImplem) Exists(ctx context.Context, primaryAttribute string) (bool, error) {
+func (ur *databaseEntImplemCertification) Exists(ctx context.Context, primaryAttribute string) (bool, error) {
 
-	exists, err := ur.Client.Certification.
+	exists, err := ur.client.Certification.
 		Query().
 		Where(
 			certification.PrimaryAttribute(primaryAttribute),
@@ -50,8 +46,8 @@ func (ur *certificationDBEntImplem) Exists(ctx context.Context, primaryAttribute
 
 // Create
 // Creates a new cert
-func (ur *certificationDBEntImplem) Create(ctx context.Context, c domain.Certification) (domain.Certification, error) {
-	utc, err := ur.Client.Certification.
+func (ur *databaseEntImplemCertification) Create(ctx context.Context, c domain.Certification) (domain.Certification, error) {
+	utc, err := ur.client.Certification.
 		Create().
 		SetPrimaryAttribute(c.PrimaryAttribute).
 		SetImageUUID(c.ImageUUID).
@@ -68,8 +64,8 @@ func (ur *certificationDBEntImplem) Create(ctx context.Context, c domain.Certifi
 
 // Update
 // Update a given cert
-func (ur *certificationDBEntImplem) Update(ctx context.Context, c domain.Certification) error {
-	_, err := ur.Client.Certification.
+func (ur *databaseEntImplemCertification) Update(ctx context.Context, c domain.Certification) error {
+	_, err := ur.client.Certification.
 		Update().
 		Where(
 			certification.And(
@@ -91,8 +87,8 @@ func (ur *certificationDBEntImplem) Update(ctx context.Context, c domain.Certifi
 
 // GetByCompanyUUID
 // returns certs with the given companyUUID
-func (ur *certificationDBEntImplem) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) (certificates []domain.Certification, err error) {
-	u, err := ur.Client.Certification.
+func (ur *databaseEntImplemCertification) GetByCompanyUUID(ctx context.Context, companyUUID uuid.UUID) (certificates []domain.Certification, err error) {
+	u, err := ur.client.Certification.
 		Query().
 		Where(certification.CompanyUUID(companyUUID)).
 		All(ctx)
@@ -111,8 +107,8 @@ func (ur *certificationDBEntImplem) GetByCompanyUUID(ctx context.Context, compan
 
 // GetByUUID
 // returns the cert with the given UUID
-func (ur *certificationDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.Certification, error) {
-	u, err := ur.Client.Certification.
+func (ur *databaseEntImplemCertification) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.Certification, error) {
+	u, err := ur.client.Certification.
 		Query().
 		Where(certification.ID(uuid)).
 		First(ctx)
@@ -124,7 +120,7 @@ func (ur *certificationDBEntImplem) GetByUUID(ctx context.Context, uuid uuid.UUI
 }
 
 // databaseToEntity
-func (ur *certificationDBEntImplem) databaseToEntity(ib *ent.Certification) domain.Certification {
+func (ur *databaseEntImplemCertification) databaseToEntity(ib *ent.Certification) domain.Certification {
 	return domain.Certification{
 		UUID:             ib.ID,
 		PrimaryAttribute: ib.PrimaryAttribute,
