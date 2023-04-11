@@ -3,6 +3,7 @@ package usecase
 
 import (
 	"context"
+	"io"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -120,5 +121,10 @@ type (
 		Delete(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (int, error)
 		Exists(ctx context.Context, parentUUID uuid.UUID, childUUID uuid.UUID) (bool, error)
 		FindByParentUUID(ctx context.Context, parentUUID uuid.UUID) ([]domain.ItemToItem, error)
+	}
+
+	CertificationPDFRepo interface {
+		Create(ctx context.Context, reader io.Reader, objectSize int) (uuid.UUID, error)
+		Get(ctx context.Context, uuid uuid.UUID) (io.Reader, error)
 	}
 )

@@ -32,6 +32,12 @@ type Certification struct {
 	Uuid string `json:"uuid"`
 }
 
+// CertificationPDF defines model for CertificationPDF.
+type CertificationPDF struct {
+	// Uuid uuid of the image
+	Uuid string `json:"uuid"`
+}
+
 // Company defines model for Company.
 type Company struct {
 	// Name Name of the company
@@ -157,6 +163,12 @@ type GetCertificationByParams struct {
 	CompanyUUID *string `form:"companyUUID,omitempty" json:"companyUUID,omitempty"`
 }
 
+// GetCertificationPDFByParams defines parameters for GetCertificationPDFBy.
+type GetCertificationPDFByParams struct {
+	// CertificationPDFUUID UUID of the certification pdf
+	CertificationPDFUUID *string `form:"certificationPDFUUID,omitempty" json:"certificationPDFUUID,omitempty"`
+}
+
 // GetItemBatchByParams defines parameters for GetItemBatchBy.
 type GetItemBatchByParams struct {
 	// ItemBatchUUID UUID of the item batch
@@ -250,6 +262,12 @@ type ServerInterface interface {
 	// Update an existing item batch
 	// (PUT /certification)
 	UpdateCertification(w http.ResponseWriter, r *http.Request)
+	// Find certificationPDF by *
+	// (GET /certification/pdf)
+	GetCertificationPDFBy(w http.ResponseWriter, r *http.Request, params GetCertificationPDFByParams)
+	// Create a new certification pdf
+	// (POST /certification/pdf)
+	AddCertificationPDF(w http.ResponseWriter, r *http.Request)
 	// Create a new Company
 	// (POST /company)
 	AddCompany(w http.ResponseWriter, r *http.Request)
@@ -354,6 +372,49 @@ func (siw *ServerInterfaceWrapper) UpdateCertification(w http.ResponseWriter, r 
 
 	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateCertification(w, r)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetCertificationPDFBy operation middleware
+func (siw *ServerInterfaceWrapper) GetCertificationPDFBy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetCertificationPDFByParams
+
+	// ------------- Optional query parameter "certificationPDFUUID" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "certificationPDFUUID", r.URL.Query(), &params.CertificationPDFUUID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "certificationPDFUUID", Err: err})
+		return
+	}
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCertificationPDFBy(w, r, params)
+	})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// AddCertificationPDF operation middleware
+func (siw *ServerInterfaceWrapper) AddCertificationPDF(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddCertificationPDF(w, r)
 	})
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -781,6 +842,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/certification", wrapper.UpdateCertification)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/certification/pdf", wrapper.GetCertificationPDFBy)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/certification/pdf", wrapper.AddCertificationPDF)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/company", wrapper.AddCompany)

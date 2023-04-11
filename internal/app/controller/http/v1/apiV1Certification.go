@@ -83,7 +83,7 @@ func (v1 httpV1Implem) AddCertification(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	cid, err := uuid.Parse(*&requestBody.CompanyUUID)
+	cid, err := uuid.Parse(requestBody.CompanyUUID)
 
 	if err != nil {
 		respondWithError(w, r, fmt.Sprintf("error parsing uuid: %v", err), http.StatusBadRequest)
