@@ -8,58 +8,86 @@ import (
 	"fmt"
 	"log"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplatehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/companyhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatchhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/migrate"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/session"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompanyhistory"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/enthistory"
 )
 
-// Client is the httpclient that holds all ent builders.
+// Client is the client that holds all ent builders.
 type Client struct {
 	config
-	// Schema is the httpclient for creating, migrating and dropping schema.
+	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Attribute is the httpclient for interacting with the Attribute builders.
+	// Attribute is the client for interacting with the Attribute builders.
 	Attribute *AttributeClient
-	// AttributeType is the httpclient for interacting with the AttributeType builders.
+	// AttributeHistory is the client for interacting with the AttributeHistory builders.
+	AttributeHistory *AttributeHistoryClient
+	// AttributeType is the client for interacting with the AttributeType builders.
 	AttributeType *AttributeTypeClient
-	// AttributeTypesToTemplates is the httpclient for interacting with the AttributeTypesToTemplates builders.
-	AttributeTypesToTemplates *AttributeTypesToTemplatesClient
-	// AuthorizationPolicy is the httpclient for interacting with the AuthorizationPolicy builders.
+	// AttributeTypeHistory is the client for interacting with the AttributeTypeHistory builders.
+	AttributeTypeHistory *AttributeTypeHistoryClient
+	// AuthorizationPolicy is the client for interacting with the AuthorizationPolicy builders.
 	AuthorizationPolicy *AuthorizationPolicyClient
-	// Certification is the httpclient for interacting with the Certification builders.
+	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
-	// CertificationTemplate is the httpclient for interacting with the CertificationTemplate builders.
+	// CertificationHistory is the client for interacting with the CertificationHistory builders.
+	CertificationHistory *CertificationHistoryClient
+	// CertificationTemplate is the client for interacting with the CertificationTemplate builders.
 	CertificationTemplate *CertificationTemplateClient
-	// Company is the httpclient for interacting with the Company builders.
+	// CertificationTemplateHistory is the client for interacting with the CertificationTemplateHistory builders.
+	CertificationTemplateHistory *CertificationTemplateHistoryClient
+	// Company is the client for interacting with the Company builders.
 	Company *CompanyClient
-	// ItemBatch is the httpclient for interacting with the ItemBatch builders.
+	// CompanyHistory is the client for interacting with the CompanyHistory builders.
+	CompanyHistory *CompanyHistoryClient
+	// ItemBatch is the client for interacting with the ItemBatch builders.
 	ItemBatch *ItemBatchClient
-	// ItemBatchToItemBatch is the httpclient for interacting with the ItemBatchToItemBatch builders.
+	// ItemBatchHistory is the client for interacting with the ItemBatchHistory builders.
+	ItemBatchHistory *ItemBatchHistoryClient
+	// ItemBatchToItemBatch is the client for interacting with the ItemBatchToItemBatch builders.
 	ItemBatchToItemBatch *ItemBatchToItemBatchClient
-	// Session is the httpclient for interacting with the Session builders.
+	// ItemBatchToItemBatchHistory is the client for interacting with the ItemBatchToItemBatchHistory builders.
+	ItemBatchToItemBatchHistory *ItemBatchToItemBatchHistoryClient
+	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
-	// User is the httpclient for interacting with the User builders.
+	// User is the client for interacting with the User builders.
 	User *UserClient
-	// UsersToCompany is the httpclient for interacting with the UsersToCompany builders.
+	// UserHistory is the client for interacting with the UserHistory builders.
+	UserHistory *UserHistoryClient
+	// UsersToCompany is the client for interacting with the UsersToCompany builders.
 	UsersToCompany *UsersToCompanyClient
+	// UsersToCompanyHistory is the client for interacting with the UsersToCompanyHistory builders.
+	UsersToCompanyHistory *UsersToCompanyHistoryClient
+	// historyActivated determines if the history hooks have already been activated
+	historyActivated bool
 }
 
-// NewClient creates a new httpclient configured with the given options.
+// NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
 	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
@@ -71,22 +99,113 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Attribute = NewAttributeClient(c.config)
+	c.AttributeHistory = NewAttributeHistoryClient(c.config)
 	c.AttributeType = NewAttributeTypeClient(c.config)
-	c.AttributeTypesToTemplates = NewAttributeTypesToTemplatesClient(c.config)
+	c.AttributeTypeHistory = NewAttributeTypeHistoryClient(c.config)
 	c.AuthorizationPolicy = NewAuthorizationPolicyClient(c.config)
 	c.Certification = NewCertificationClient(c.config)
+	c.CertificationHistory = NewCertificationHistoryClient(c.config)
 	c.CertificationTemplate = NewCertificationTemplateClient(c.config)
+	c.CertificationTemplateHistory = NewCertificationTemplateHistoryClient(c.config)
 	c.Company = NewCompanyClient(c.config)
+	c.CompanyHistory = NewCompanyHistoryClient(c.config)
 	c.ItemBatch = NewItemBatchClient(c.config)
+	c.ItemBatchHistory = NewItemBatchHistoryClient(c.config)
 	c.ItemBatchToItemBatch = NewItemBatchToItemBatchClient(c.config)
+	c.ItemBatchToItemBatchHistory = NewItemBatchToItemBatchHistoryClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserHistory = NewUserHistoryClient(c.config)
 	c.UsersToCompany = NewUsersToCompanyClient(c.config)
+	c.UsersToCompanyHistory = NewUsersToCompanyHistoryClient(c.config)
+}
+
+// withHistory adds the history hooks to the appropriate schemas - generated by enthistory
+func (c *Client) WithHistory() {
+	if !c.historyActivated {
+		for _, hook := range enthistory.HistoryHooks[*AttributeMutation]() {
+			c.Attribute.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*AttributeTypeMutation]() {
+			c.AttributeType.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*CertificationMutation]() {
+			c.Certification.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*CertificationTemplateMutation]() {
+			c.CertificationTemplate.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*CompanyMutation]() {
+			c.Company.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*ItemBatchMutation]() {
+			c.ItemBatch.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*ItemBatchToItemBatchMutation]() {
+			c.ItemBatchToItemBatch.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*UserMutation]() {
+			c.User.Use(hook)
+		}
+		for _, hook := range enthistory.HistoryHooks[*UsersToCompanyMutation]() {
+			c.UsersToCompany.Use(hook)
+		}
+		c.historyActivated = true
+	}
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
-// the data source name, and returns a new httpclient attached to it.
-// Optional parameters can be added for configuring the httpclient.
+// the data source name, and returns a new client attached to it.
+// Optional parameters can be added for configuring the client.
 func Open(driverName, dataSourceName string, options ...Option) (*Client, error) {
 	switch driverName {
 	case dialect.MySQL, dialect.Postgres, dialect.SQLite:
@@ -100,7 +219,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional httpclient. The provided context
+// Tx returns a new transactional client. The provided context
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
@@ -113,24 +232,32 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                       ctx,
-		config:                    cfg,
-		Attribute:                 NewAttributeClient(cfg),
-		AttributeType:             NewAttributeTypeClient(cfg),
-		AttributeTypesToTemplates: NewAttributeTypesToTemplatesClient(cfg),
-		AuthorizationPolicy:       NewAuthorizationPolicyClient(cfg),
-		Certification:             NewCertificationClient(cfg),
-		CertificationTemplate:     NewCertificationTemplateClient(cfg),
-		Company:                   NewCompanyClient(cfg),
-		ItemBatch:                 NewItemBatchClient(cfg),
-		ItemBatchToItemBatch:      NewItemBatchToItemBatchClient(cfg),
-		Session:                   NewSessionClient(cfg),
-		User:                      NewUserClient(cfg),
-		UsersToCompany:            NewUsersToCompanyClient(cfg),
+		ctx:                          ctx,
+		config:                       cfg,
+		Attribute:                    NewAttributeClient(cfg),
+		AttributeHistory:             NewAttributeHistoryClient(cfg),
+		AttributeType:                NewAttributeTypeClient(cfg),
+		AttributeTypeHistory:         NewAttributeTypeHistoryClient(cfg),
+		AuthorizationPolicy:          NewAuthorizationPolicyClient(cfg),
+		Certification:                NewCertificationClient(cfg),
+		CertificationHistory:         NewCertificationHistoryClient(cfg),
+		CertificationTemplate:        NewCertificationTemplateClient(cfg),
+		CertificationTemplateHistory: NewCertificationTemplateHistoryClient(cfg),
+		Company:                      NewCompanyClient(cfg),
+		CompanyHistory:               NewCompanyHistoryClient(cfg),
+		ItemBatch:                    NewItemBatchClient(cfg),
+		ItemBatchHistory:             NewItemBatchHistoryClient(cfg),
+		ItemBatchToItemBatch:         NewItemBatchToItemBatchClient(cfg),
+		ItemBatchToItemBatchHistory:  NewItemBatchToItemBatchHistoryClient(cfg),
+		Session:                      NewSessionClient(cfg),
+		User:                         NewUserClient(cfg),
+		UserHistory:                  NewUserHistoryClient(cfg),
+		UsersToCompany:               NewUsersToCompanyClient(cfg),
+		UsersToCompanyHistory:        NewUsersToCompanyHistoryClient(cfg),
 	}, nil
 }
 
-// BeginTx returns a transactional httpclient with specified options.
+// BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, errors.New("ent: cannot start a transaction within a transaction")
@@ -144,26 +271,34 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                       ctx,
-		config:                    cfg,
-		Attribute:                 NewAttributeClient(cfg),
-		AttributeType:             NewAttributeTypeClient(cfg),
-		AttributeTypesToTemplates: NewAttributeTypesToTemplatesClient(cfg),
-		AuthorizationPolicy:       NewAuthorizationPolicyClient(cfg),
-		Certification:             NewCertificationClient(cfg),
-		CertificationTemplate:     NewCertificationTemplateClient(cfg),
-		Company:                   NewCompanyClient(cfg),
-		ItemBatch:                 NewItemBatchClient(cfg),
-		ItemBatchToItemBatch:      NewItemBatchToItemBatchClient(cfg),
-		Session:                   NewSessionClient(cfg),
-		User:                      NewUserClient(cfg),
-		UsersToCompany:            NewUsersToCompanyClient(cfg),
+		ctx:                          ctx,
+		config:                       cfg,
+		Attribute:                    NewAttributeClient(cfg),
+		AttributeHistory:             NewAttributeHistoryClient(cfg),
+		AttributeType:                NewAttributeTypeClient(cfg),
+		AttributeTypeHistory:         NewAttributeTypeHistoryClient(cfg),
+		AuthorizationPolicy:          NewAuthorizationPolicyClient(cfg),
+		Certification:                NewCertificationClient(cfg),
+		CertificationHistory:         NewCertificationHistoryClient(cfg),
+		CertificationTemplate:        NewCertificationTemplateClient(cfg),
+		CertificationTemplateHistory: NewCertificationTemplateHistoryClient(cfg),
+		Company:                      NewCompanyClient(cfg),
+		CompanyHistory:               NewCompanyHistoryClient(cfg),
+		ItemBatch:                    NewItemBatchClient(cfg),
+		ItemBatchHistory:             NewItemBatchHistoryClient(cfg),
+		ItemBatchToItemBatch:         NewItemBatchToItemBatchClient(cfg),
+		ItemBatchToItemBatchHistory:  NewItemBatchToItemBatchHistoryClient(cfg),
+		Session:                      NewSessionClient(cfg),
+		User:                         NewUserClient(cfg),
+		UserHistory:                  NewUserHistoryClient(cfg),
+		UsersToCompany:               NewUsersToCompanyClient(cfg),
+		UsersToCompanyHistory:        NewUsersToCompanyHistoryClient(cfg),
 	}, nil
 }
 
-// Debug returns a new debug-httpclient. It's used to get verbose logging on specific operations.
+// Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
-//	httpclient.Debug().
+//	client.Debug().
 //		Attribute.
 //		Query().
 //		Count(ctx)
@@ -184,37 +319,33 @@ func (c *Client) Close() error {
 }
 
 // Use adds the mutation hooks to all the entity clients.
-// In order to add hooks to a specific httpclient, call: `httpclient.Node.Use(...)`.
+// In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Attribute.Use(hooks...)
-	c.AttributeType.Use(hooks...)
-	c.AttributeTypesToTemplates.Use(hooks...)
-	c.AuthorizationPolicy.Use(hooks...)
-	c.Certification.Use(hooks...)
-	c.CertificationTemplate.Use(hooks...)
-	c.Company.Use(hooks...)
-	c.ItemBatch.Use(hooks...)
-	c.ItemBatchToItemBatch.Use(hooks...)
-	c.Session.Use(hooks...)
-	c.User.Use(hooks...)
-	c.UsersToCompany.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Attribute, c.AttributeHistory, c.AttributeType, c.AttributeTypeHistory,
+		c.AuthorizationPolicy, c.Certification, c.CertificationHistory,
+		c.CertificationTemplate, c.CertificationTemplateHistory, c.Company,
+		c.CompanyHistory, c.ItemBatch, c.ItemBatchHistory, c.ItemBatchToItemBatch,
+		c.ItemBatchToItemBatchHistory, c.Session, c.User, c.UserHistory,
+		c.UsersToCompany, c.UsersToCompanyHistory,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
-// In order to add interceptors to a specific httpclient, call: `httpclient.Node.Intercept(...)`.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Attribute.Intercept(interceptors...)
-	c.AttributeType.Intercept(interceptors...)
-	c.AttributeTypesToTemplates.Intercept(interceptors...)
-	c.AuthorizationPolicy.Intercept(interceptors...)
-	c.Certification.Intercept(interceptors...)
-	c.CertificationTemplate.Intercept(interceptors...)
-	c.Company.Intercept(interceptors...)
-	c.ItemBatch.Intercept(interceptors...)
-	c.ItemBatchToItemBatch.Intercept(interceptors...)
-	c.Session.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
-	c.UsersToCompany.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Attribute, c.AttributeHistory, c.AttributeType, c.AttributeTypeHistory,
+		c.AuthorizationPolicy, c.Certification, c.CertificationHistory,
+		c.CertificationTemplate, c.CertificationTemplateHistory, c.Company,
+		c.CompanyHistory, c.ItemBatch, c.ItemBatchHistory, c.ItemBatchToItemBatch,
+		c.ItemBatchToItemBatchHistory, c.Session, c.User, c.UserHistory,
+		c.UsersToCompany, c.UsersToCompanyHistory,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -222,39 +353,55 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AttributeMutation:
 		return c.Attribute.mutate(ctx, m)
+	case *AttributeHistoryMutation:
+		return c.AttributeHistory.mutate(ctx, m)
 	case *AttributeTypeMutation:
 		return c.AttributeType.mutate(ctx, m)
-	case *AttributeTypesToTemplatesMutation:
-		return c.AttributeTypesToTemplates.mutate(ctx, m)
+	case *AttributeTypeHistoryMutation:
+		return c.AttributeTypeHistory.mutate(ctx, m)
 	case *AuthorizationPolicyMutation:
 		return c.AuthorizationPolicy.mutate(ctx, m)
 	case *CertificationMutation:
 		return c.Certification.mutate(ctx, m)
+	case *CertificationHistoryMutation:
+		return c.CertificationHistory.mutate(ctx, m)
 	case *CertificationTemplateMutation:
 		return c.CertificationTemplate.mutate(ctx, m)
+	case *CertificationTemplateHistoryMutation:
+		return c.CertificationTemplateHistory.mutate(ctx, m)
 	case *CompanyMutation:
 		return c.Company.mutate(ctx, m)
+	case *CompanyHistoryMutation:
+		return c.CompanyHistory.mutate(ctx, m)
 	case *ItemBatchMutation:
 		return c.ItemBatch.mutate(ctx, m)
+	case *ItemBatchHistoryMutation:
+		return c.ItemBatchHistory.mutate(ctx, m)
 	case *ItemBatchToItemBatchMutation:
 		return c.ItemBatchToItemBatch.mutate(ctx, m)
+	case *ItemBatchToItemBatchHistoryMutation:
+		return c.ItemBatchToItemBatchHistory.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *UserHistoryMutation:
+		return c.UserHistory.mutate(ctx, m)
 	case *UsersToCompanyMutation:
 		return c.UsersToCompany.mutate(ctx, m)
+	case *UsersToCompanyHistoryMutation:
+		return c.UsersToCompanyHistory.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
 }
 
-// AttributeClient is a httpclient for the Attribute schema.
+// AttributeClient is a client for the Attribute schema.
 type AttributeClient struct {
 	config
 }
 
-// NewAttributeClient returns a httpclient for the Attribute from the given config.
+// NewAttributeClient returns a client for the Attribute from the given config.
 func NewAttributeClient(c config) *AttributeClient {
 	return &AttributeClient{config: c}
 }
@@ -374,12 +521,12 @@ func (c *AttributeClient) QueryAttributeType(a *Attribute) *AttributeTypeQuery {
 	return query
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *AttributeClient) Hooks() []Hook {
 	return c.hooks.Attribute
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *AttributeClient) Interceptors() []Interceptor {
 	return c.inters.Attribute
 }
@@ -399,12 +546,130 @@ func (c *AttributeClient) mutate(ctx context.Context, m *AttributeMutation) (Val
 	}
 }
 
-// AttributeTypeClient is a httpclient for the AttributeType schema.
+// AttributeHistoryClient is a client for the AttributeHistory schema.
+type AttributeHistoryClient struct {
+	config
+}
+
+// NewAttributeHistoryClient returns a client for the AttributeHistory from the given config.
+func NewAttributeHistoryClient(c config) *AttributeHistoryClient {
+	return &AttributeHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `attributehistory.Hooks(f(g(h())))`.
+func (c *AttributeHistoryClient) Use(hooks ...Hook) {
+	c.hooks.AttributeHistory = append(c.hooks.AttributeHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `attributehistory.Intercept(f(g(h())))`.
+func (c *AttributeHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AttributeHistory = append(c.inters.AttributeHistory, interceptors...)
+}
+
+// Create returns a builder for creating a AttributeHistory entity.
+func (c *AttributeHistoryClient) Create() *AttributeHistoryCreate {
+	mutation := newAttributeHistoryMutation(c.config, OpCreate)
+	return &AttributeHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AttributeHistory entities.
+func (c *AttributeHistoryClient) CreateBulk(builders ...*AttributeHistoryCreate) *AttributeHistoryCreateBulk {
+	return &AttributeHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AttributeHistory.
+func (c *AttributeHistoryClient) Update() *AttributeHistoryUpdate {
+	mutation := newAttributeHistoryMutation(c.config, OpUpdate)
+	return &AttributeHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AttributeHistoryClient) UpdateOne(ah *AttributeHistory) *AttributeHistoryUpdateOne {
+	mutation := newAttributeHistoryMutation(c.config, OpUpdateOne, withAttributeHistory(ah))
+	return &AttributeHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AttributeHistoryClient) UpdateOneID(id uuid.UUID) *AttributeHistoryUpdateOne {
+	mutation := newAttributeHistoryMutation(c.config, OpUpdateOne, withAttributeHistoryID(id))
+	return &AttributeHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AttributeHistory.
+func (c *AttributeHistoryClient) Delete() *AttributeHistoryDelete {
+	mutation := newAttributeHistoryMutation(c.config, OpDelete)
+	return &AttributeHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AttributeHistoryClient) DeleteOne(ah *AttributeHistory) *AttributeHistoryDeleteOne {
+	return c.DeleteOneID(ah.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AttributeHistoryClient) DeleteOneID(id uuid.UUID) *AttributeHistoryDeleteOne {
+	builder := c.Delete().Where(attributehistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AttributeHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for AttributeHistory.
+func (c *AttributeHistoryClient) Query() *AttributeHistoryQuery {
+	return &AttributeHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAttributeHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AttributeHistory entity by its id.
+func (c *AttributeHistoryClient) Get(ctx context.Context, id uuid.UUID) (*AttributeHistory, error) {
+	return c.Query().Where(attributehistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AttributeHistoryClient) GetX(ctx context.Context, id uuid.UUID) *AttributeHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AttributeHistoryClient) Hooks() []Hook {
+	return c.hooks.AttributeHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *AttributeHistoryClient) Interceptors() []Interceptor {
+	return c.inters.AttributeHistory
+}
+
+func (c *AttributeHistoryClient) mutate(ctx context.Context, m *AttributeHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AttributeHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AttributeHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AttributeHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AttributeHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AttributeHistory mutation op: %q", m.Op())
+	}
+}
+
+// AttributeTypeClient is a client for the AttributeType schema.
 type AttributeTypeClient struct {
 	config
 }
 
-// NewAttributeTypeClient returns a httpclient for the AttributeType from the given config.
+// NewAttributeTypeClient returns a client for the AttributeType from the given config.
 func NewAttributeTypeClient(c config) *AttributeTypeClient {
 	return &AttributeTypeClient{config: c}
 }
@@ -508,12 +773,12 @@ func (c *AttributeTypeClient) QueryCompany(at *AttributeType) *CompanyQuery {
 	return query
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *AttributeTypeClient) Hooks() []Hook {
 	return c.hooks.AttributeType
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *AttributeTypeClient) Interceptors() []Interceptor {
 	return c.inters.AttributeType
 }
@@ -533,92 +798,92 @@ func (c *AttributeTypeClient) mutate(ctx context.Context, m *AttributeTypeMutati
 	}
 }
 
-// AttributeTypesToTemplatesClient is a httpclient for the AttributeTypesToTemplates schema.
-type AttributeTypesToTemplatesClient struct {
+// AttributeTypeHistoryClient is a client for the AttributeTypeHistory schema.
+type AttributeTypeHistoryClient struct {
 	config
 }
 
-// NewAttributeTypesToTemplatesClient returns a httpclient for the AttributeTypesToTemplates from the given config.
-func NewAttributeTypesToTemplatesClient(c config) *AttributeTypesToTemplatesClient {
-	return &AttributeTypesToTemplatesClient{config: c}
+// NewAttributeTypeHistoryClient returns a client for the AttributeTypeHistory from the given config.
+func NewAttributeTypeHistoryClient(c config) *AttributeTypeHistoryClient {
+	return &AttributeTypeHistoryClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `attributetypestotemplates.Hooks(f(g(h())))`.
-func (c *AttributeTypesToTemplatesClient) Use(hooks ...Hook) {
-	c.hooks.AttributeTypesToTemplates = append(c.hooks.AttributeTypesToTemplates, hooks...)
+// A call to `Use(f, g, h)` equals to `attributetypehistory.Hooks(f(g(h())))`.
+func (c *AttributeTypeHistoryClient) Use(hooks ...Hook) {
+	c.hooks.AttributeTypeHistory = append(c.hooks.AttributeTypeHistory, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `attributetypestotemplates.Intercept(f(g(h())))`.
-func (c *AttributeTypesToTemplatesClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AttributeTypesToTemplates = append(c.inters.AttributeTypesToTemplates, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `attributetypehistory.Intercept(f(g(h())))`.
+func (c *AttributeTypeHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AttributeTypeHistory = append(c.inters.AttributeTypeHistory, interceptors...)
 }
 
-// Create returns a builder for creating a AttributeTypesToTemplates entity.
-func (c *AttributeTypesToTemplatesClient) Create() *AttributeTypesToTemplatesCreate {
-	mutation := newAttributeTypesToTemplatesMutation(c.config, OpCreate)
-	return &AttributeTypesToTemplatesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a AttributeTypeHistory entity.
+func (c *AttributeTypeHistoryClient) Create() *AttributeTypeHistoryCreate {
+	mutation := newAttributeTypeHistoryMutation(c.config, OpCreate)
+	return &AttributeTypeHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of AttributeTypesToTemplates entities.
-func (c *AttributeTypesToTemplatesClient) CreateBulk(builders ...*AttributeTypesToTemplatesCreate) *AttributeTypesToTemplatesCreateBulk {
-	return &AttributeTypesToTemplatesCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of AttributeTypeHistory entities.
+func (c *AttributeTypeHistoryClient) CreateBulk(builders ...*AttributeTypeHistoryCreate) *AttributeTypeHistoryCreateBulk {
+	return &AttributeTypeHistoryCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for AttributeTypesToTemplates.
-func (c *AttributeTypesToTemplatesClient) Update() *AttributeTypesToTemplatesUpdate {
-	mutation := newAttributeTypesToTemplatesMutation(c.config, OpUpdate)
-	return &AttributeTypesToTemplatesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for AttributeTypeHistory.
+func (c *AttributeTypeHistoryClient) Update() *AttributeTypeHistoryUpdate {
+	mutation := newAttributeTypeHistoryMutation(c.config, OpUpdate)
+	return &AttributeTypeHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AttributeTypesToTemplatesClient) UpdateOne(attt *AttributeTypesToTemplates) *AttributeTypesToTemplatesUpdateOne {
-	mutation := newAttributeTypesToTemplatesMutation(c.config, OpUpdateOne, withAttributeTypesToTemplates(attt))
-	return &AttributeTypesToTemplatesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AttributeTypeHistoryClient) UpdateOne(ath *AttributeTypeHistory) *AttributeTypeHistoryUpdateOne {
+	mutation := newAttributeTypeHistoryMutation(c.config, OpUpdateOne, withAttributeTypeHistory(ath))
+	return &AttributeTypeHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AttributeTypesToTemplatesClient) UpdateOneID(id uuid.UUID) *AttributeTypesToTemplatesUpdateOne {
-	mutation := newAttributeTypesToTemplatesMutation(c.config, OpUpdateOne, withAttributeTypesToTemplatesID(id))
-	return &AttributeTypesToTemplatesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AttributeTypeHistoryClient) UpdateOneID(id uuid.UUID) *AttributeTypeHistoryUpdateOne {
+	mutation := newAttributeTypeHistoryMutation(c.config, OpUpdateOne, withAttributeTypeHistoryID(id))
+	return &AttributeTypeHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for AttributeTypesToTemplates.
-func (c *AttributeTypesToTemplatesClient) Delete() *AttributeTypesToTemplatesDelete {
-	mutation := newAttributeTypesToTemplatesMutation(c.config, OpDelete)
-	return &AttributeTypesToTemplatesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for AttributeTypeHistory.
+func (c *AttributeTypeHistoryClient) Delete() *AttributeTypeHistoryDelete {
+	mutation := newAttributeTypeHistoryMutation(c.config, OpDelete)
+	return &AttributeTypeHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *AttributeTypesToTemplatesClient) DeleteOne(attt *AttributeTypesToTemplates) *AttributeTypesToTemplatesDeleteOne {
-	return c.DeleteOneID(attt.ID)
+func (c *AttributeTypeHistoryClient) DeleteOne(ath *AttributeTypeHistory) *AttributeTypeHistoryDeleteOne {
+	return c.DeleteOneID(ath.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AttributeTypesToTemplatesClient) DeleteOneID(id uuid.UUID) *AttributeTypesToTemplatesDeleteOne {
-	builder := c.Delete().Where(attributetypestotemplates.ID(id))
+func (c *AttributeTypeHistoryClient) DeleteOneID(id uuid.UUID) *AttributeTypeHistoryDeleteOne {
+	builder := c.Delete().Where(attributetypehistory.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &AttributeTypesToTemplatesDeleteOne{builder}
+	return &AttributeTypeHistoryDeleteOne{builder}
 }
 
-// Query returns a query builder for AttributeTypesToTemplates.
-func (c *AttributeTypesToTemplatesClient) Query() *AttributeTypesToTemplatesQuery {
-	return &AttributeTypesToTemplatesQuery{
+// Query returns a query builder for AttributeTypeHistory.
+func (c *AttributeTypeHistoryClient) Query() *AttributeTypeHistoryQuery {
+	return &AttributeTypeHistoryQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeAttributeTypesToTemplates},
+		ctx:    &QueryContext{Type: TypeAttributeTypeHistory},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a AttributeTypesToTemplates entity by its id.
-func (c *AttributeTypesToTemplatesClient) Get(ctx context.Context, id uuid.UUID) (*AttributeTypesToTemplates, error) {
-	return c.Query().Where(attributetypestotemplates.ID(id)).Only(ctx)
+// Get returns a AttributeTypeHistory entity by its id.
+func (c *AttributeTypeHistoryClient) Get(ctx context.Context, id uuid.UUID) (*AttributeTypeHistory, error) {
+	return c.Query().Where(attributetypehistory.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AttributeTypesToTemplatesClient) GetX(ctx context.Context, id uuid.UUID) *AttributeTypesToTemplates {
+func (c *AttributeTypeHistoryClient) GetX(ctx context.Context, id uuid.UUID) *AttributeTypeHistory {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -626,69 +891,37 @@ func (c *AttributeTypesToTemplatesClient) GetX(ctx context.Context, id uuid.UUID
 	return obj
 }
 
-// QueryAttribute queries the attribute edge of a AttributeTypesToTemplates.
-func (c *AttributeTypesToTemplatesClient) QueryAttribute(attt *AttributeTypesToTemplates) *AttributeTypeQuery {
-	query := (&AttributeTypeClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := attt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(attributetypestotemplates.Table, attributetypestotemplates.FieldID, id),
-			sqlgraph.To(attributetype.Table, attributetype.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, attributetypestotemplates.AttributeTable, attributetypestotemplates.AttributeColumn),
-		)
-		fromV = sqlgraph.Neighbors(attt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
+// Hooks returns the client hooks.
+func (c *AttributeTypeHistoryClient) Hooks() []Hook {
+	return c.hooks.AttributeTypeHistory
 }
 
-// QueryTemplate queries the template edge of a AttributeTypesToTemplates.
-func (c *AttributeTypesToTemplatesClient) QueryTemplate(attt *AttributeTypesToTemplates) *CertificationTemplateQuery {
-	query := (&CertificationTemplateClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := attt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(attributetypestotemplates.Table, attributetypestotemplates.FieldID, id),
-			sqlgraph.To(certificationtemplate.Table, certificationtemplate.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, attributetypestotemplates.TemplateTable, attributetypestotemplates.TemplateColumn),
-		)
-		fromV = sqlgraph.Neighbors(attt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
+// Interceptors returns the client interceptors.
+func (c *AttributeTypeHistoryClient) Interceptors() []Interceptor {
+	return c.inters.AttributeTypeHistory
 }
 
-// Hooks returns the httpclient hooks.
-func (c *AttributeTypesToTemplatesClient) Hooks() []Hook {
-	return c.hooks.AttributeTypesToTemplates
-}
-
-// Interceptors returns the httpclient interceptors.
-func (c *AttributeTypesToTemplatesClient) Interceptors() []Interceptor {
-	return c.inters.AttributeTypesToTemplates
-}
-
-func (c *AttributeTypesToTemplatesClient) mutate(ctx context.Context, m *AttributeTypesToTemplatesMutation) (Value, error) {
+func (c *AttributeTypeHistoryClient) mutate(ctx context.Context, m *AttributeTypeHistoryMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&AttributeTypesToTemplatesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AttributeTypeHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&AttributeTypesToTemplatesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AttributeTypeHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&AttributeTypesToTemplatesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&AttributeTypeHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&AttributeTypesToTemplatesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&AttributeTypeHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown AttributeTypesToTemplates mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown AttributeTypeHistory mutation op: %q", m.Op())
 	}
 }
 
-// AuthorizationPolicyClient is a httpclient for the AuthorizationPolicy schema.
+// AuthorizationPolicyClient is a client for the AuthorizationPolicy schema.
 type AuthorizationPolicyClient struct {
 	config
 }
 
-// NewAuthorizationPolicyClient returns a httpclient for the AuthorizationPolicy from the given config.
+// NewAuthorizationPolicyClient returns a client for the AuthorizationPolicy from the given config.
 func NewAuthorizationPolicyClient(c config) *AuthorizationPolicyClient {
 	return &AuthorizationPolicyClient{config: c}
 }
@@ -776,12 +1009,12 @@ func (c *AuthorizationPolicyClient) GetX(ctx context.Context, id int) *Authoriza
 	return obj
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *AuthorizationPolicyClient) Hooks() []Hook {
 	return c.hooks.AuthorizationPolicy
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *AuthorizationPolicyClient) Interceptors() []Interceptor {
 	return c.inters.AuthorizationPolicy
 }
@@ -801,12 +1034,12 @@ func (c *AuthorizationPolicyClient) mutate(ctx context.Context, m *Authorization
 	}
 }
 
-// CertificationClient is a httpclient for the Certification schema.
+// CertificationClient is a client for the Certification schema.
 type CertificationClient struct {
 	config
 }
 
-// NewCertificationClient returns a httpclient for the Certification from the given config.
+// NewCertificationClient returns a client for the Certification from the given config.
 func NewCertificationClient(c config) *CertificationClient {
 	return &CertificationClient{config: c}
 }
@@ -926,12 +1159,12 @@ func (c *CertificationClient) QueryItemBatch(ce *Certification) *ItemBatchQuery 
 	return query
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *CertificationClient) Hooks() []Hook {
 	return c.hooks.Certification
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *CertificationClient) Interceptors() []Interceptor {
 	return c.inters.Certification
 }
@@ -951,12 +1184,130 @@ func (c *CertificationClient) mutate(ctx context.Context, m *CertificationMutati
 	}
 }
 
-// CertificationTemplateClient is a httpclient for the CertificationTemplate schema.
+// CertificationHistoryClient is a client for the CertificationHistory schema.
+type CertificationHistoryClient struct {
+	config
+}
+
+// NewCertificationHistoryClient returns a client for the CertificationHistory from the given config.
+func NewCertificationHistoryClient(c config) *CertificationHistoryClient {
+	return &CertificationHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certificationhistory.Hooks(f(g(h())))`.
+func (c *CertificationHistoryClient) Use(hooks ...Hook) {
+	c.hooks.CertificationHistory = append(c.hooks.CertificationHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `certificationhistory.Intercept(f(g(h())))`.
+func (c *CertificationHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CertificationHistory = append(c.inters.CertificationHistory, interceptors...)
+}
+
+// Create returns a builder for creating a CertificationHistory entity.
+func (c *CertificationHistoryClient) Create() *CertificationHistoryCreate {
+	mutation := newCertificationHistoryMutation(c.config, OpCreate)
+	return &CertificationHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CertificationHistory entities.
+func (c *CertificationHistoryClient) CreateBulk(builders ...*CertificationHistoryCreate) *CertificationHistoryCreateBulk {
+	return &CertificationHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CertificationHistory.
+func (c *CertificationHistoryClient) Update() *CertificationHistoryUpdate {
+	mutation := newCertificationHistoryMutation(c.config, OpUpdate)
+	return &CertificationHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertificationHistoryClient) UpdateOne(ch *CertificationHistory) *CertificationHistoryUpdateOne {
+	mutation := newCertificationHistoryMutation(c.config, OpUpdateOne, withCertificationHistory(ch))
+	return &CertificationHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertificationHistoryClient) UpdateOneID(id uuid.UUID) *CertificationHistoryUpdateOne {
+	mutation := newCertificationHistoryMutation(c.config, OpUpdateOne, withCertificationHistoryID(id))
+	return &CertificationHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CertificationHistory.
+func (c *CertificationHistoryClient) Delete() *CertificationHistoryDelete {
+	mutation := newCertificationHistoryMutation(c.config, OpDelete)
+	return &CertificationHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertificationHistoryClient) DeleteOne(ch *CertificationHistory) *CertificationHistoryDeleteOne {
+	return c.DeleteOneID(ch.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertificationHistoryClient) DeleteOneID(id uuid.UUID) *CertificationHistoryDeleteOne {
+	builder := c.Delete().Where(certificationhistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertificationHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for CertificationHistory.
+func (c *CertificationHistoryClient) Query() *CertificationHistoryQuery {
+	return &CertificationHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCertificationHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CertificationHistory entity by its id.
+func (c *CertificationHistoryClient) Get(ctx context.Context, id uuid.UUID) (*CertificationHistory, error) {
+	return c.Query().Where(certificationhistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertificationHistoryClient) GetX(ctx context.Context, id uuid.UUID) *CertificationHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CertificationHistoryClient) Hooks() []Hook {
+	return c.hooks.CertificationHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *CertificationHistoryClient) Interceptors() []Interceptor {
+	return c.inters.CertificationHistory
+}
+
+func (c *CertificationHistoryClient) mutate(ctx context.Context, m *CertificationHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CertificationHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CertificationHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CertificationHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CertificationHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CertificationHistory mutation op: %q", m.Op())
+	}
+}
+
+// CertificationTemplateClient is a client for the CertificationTemplate schema.
 type CertificationTemplateClient struct {
 	config
 }
 
-// NewCertificationTemplateClient returns a httpclient for the CertificationTemplate from the given config.
+// NewCertificationTemplateClient returns a client for the CertificationTemplate from the given config.
 func NewCertificationTemplateClient(c config) *CertificationTemplateClient {
 	return &CertificationTemplateClient{config: c}
 }
@@ -1060,12 +1411,12 @@ func (c *CertificationTemplateClient) QueryCompany(ct *CertificationTemplate) *C
 	return query
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *CertificationTemplateClient) Hooks() []Hook {
 	return c.hooks.CertificationTemplate
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *CertificationTemplateClient) Interceptors() []Interceptor {
 	return c.inters.CertificationTemplate
 }
@@ -1085,12 +1436,130 @@ func (c *CertificationTemplateClient) mutate(ctx context.Context, m *Certificati
 	}
 }
 
-// CompanyClient is a httpclient for the Company schema.
+// CertificationTemplateHistoryClient is a client for the CertificationTemplateHistory schema.
+type CertificationTemplateHistoryClient struct {
+	config
+}
+
+// NewCertificationTemplateHistoryClient returns a client for the CertificationTemplateHistory from the given config.
+func NewCertificationTemplateHistoryClient(c config) *CertificationTemplateHistoryClient {
+	return &CertificationTemplateHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `certificationtemplatehistory.Hooks(f(g(h())))`.
+func (c *CertificationTemplateHistoryClient) Use(hooks ...Hook) {
+	c.hooks.CertificationTemplateHistory = append(c.hooks.CertificationTemplateHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `certificationtemplatehistory.Intercept(f(g(h())))`.
+func (c *CertificationTemplateHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CertificationTemplateHistory = append(c.inters.CertificationTemplateHistory, interceptors...)
+}
+
+// Create returns a builder for creating a CertificationTemplateHistory entity.
+func (c *CertificationTemplateHistoryClient) Create() *CertificationTemplateHistoryCreate {
+	mutation := newCertificationTemplateHistoryMutation(c.config, OpCreate)
+	return &CertificationTemplateHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CertificationTemplateHistory entities.
+func (c *CertificationTemplateHistoryClient) CreateBulk(builders ...*CertificationTemplateHistoryCreate) *CertificationTemplateHistoryCreateBulk {
+	return &CertificationTemplateHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CertificationTemplateHistory.
+func (c *CertificationTemplateHistoryClient) Update() *CertificationTemplateHistoryUpdate {
+	mutation := newCertificationTemplateHistoryMutation(c.config, OpUpdate)
+	return &CertificationTemplateHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CertificationTemplateHistoryClient) UpdateOne(cth *CertificationTemplateHistory) *CertificationTemplateHistoryUpdateOne {
+	mutation := newCertificationTemplateHistoryMutation(c.config, OpUpdateOne, withCertificationTemplateHistory(cth))
+	return &CertificationTemplateHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CertificationTemplateHistoryClient) UpdateOneID(id uuid.UUID) *CertificationTemplateHistoryUpdateOne {
+	mutation := newCertificationTemplateHistoryMutation(c.config, OpUpdateOne, withCertificationTemplateHistoryID(id))
+	return &CertificationTemplateHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CertificationTemplateHistory.
+func (c *CertificationTemplateHistoryClient) Delete() *CertificationTemplateHistoryDelete {
+	mutation := newCertificationTemplateHistoryMutation(c.config, OpDelete)
+	return &CertificationTemplateHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CertificationTemplateHistoryClient) DeleteOne(cth *CertificationTemplateHistory) *CertificationTemplateHistoryDeleteOne {
+	return c.DeleteOneID(cth.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CertificationTemplateHistoryClient) DeleteOneID(id uuid.UUID) *CertificationTemplateHistoryDeleteOne {
+	builder := c.Delete().Where(certificationtemplatehistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CertificationTemplateHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for CertificationTemplateHistory.
+func (c *CertificationTemplateHistoryClient) Query() *CertificationTemplateHistoryQuery {
+	return &CertificationTemplateHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCertificationTemplateHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CertificationTemplateHistory entity by its id.
+func (c *CertificationTemplateHistoryClient) Get(ctx context.Context, id uuid.UUID) (*CertificationTemplateHistory, error) {
+	return c.Query().Where(certificationtemplatehistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CertificationTemplateHistoryClient) GetX(ctx context.Context, id uuid.UUID) *CertificationTemplateHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CertificationTemplateHistoryClient) Hooks() []Hook {
+	return c.hooks.CertificationTemplateHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *CertificationTemplateHistoryClient) Interceptors() []Interceptor {
+	return c.inters.CertificationTemplateHistory
+}
+
+func (c *CertificationTemplateHistoryClient) mutate(ctx context.Context, m *CertificationTemplateHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CertificationTemplateHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CertificationTemplateHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CertificationTemplateHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CertificationTemplateHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CertificationTemplateHistory mutation op: %q", m.Op())
+	}
+}
+
+// CompanyClient is a client for the Company schema.
 type CompanyClient struct {
 	config
 }
 
-// NewCompanyClient returns a httpclient for the Company from the given config.
+// NewCompanyClient returns a client for the Company from the given config.
 func NewCompanyClient(c config) *CompanyClient {
 	return &CompanyClient{config: c}
 }
@@ -1178,12 +1647,12 @@ func (c *CompanyClient) GetX(ctx context.Context, id uuid.UUID) *Company {
 	return obj
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *CompanyClient) Hooks() []Hook {
 	return c.hooks.Company
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *CompanyClient) Interceptors() []Interceptor {
 	return c.inters.Company
 }
@@ -1203,12 +1672,130 @@ func (c *CompanyClient) mutate(ctx context.Context, m *CompanyMutation) (Value, 
 	}
 }
 
-// ItemBatchClient is a httpclient for the ItemBatch schema.
+// CompanyHistoryClient is a client for the CompanyHistory schema.
+type CompanyHistoryClient struct {
+	config
+}
+
+// NewCompanyHistoryClient returns a client for the CompanyHistory from the given config.
+func NewCompanyHistoryClient(c config) *CompanyHistoryClient {
+	return &CompanyHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `companyhistory.Hooks(f(g(h())))`.
+func (c *CompanyHistoryClient) Use(hooks ...Hook) {
+	c.hooks.CompanyHistory = append(c.hooks.CompanyHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `companyhistory.Intercept(f(g(h())))`.
+func (c *CompanyHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CompanyHistory = append(c.inters.CompanyHistory, interceptors...)
+}
+
+// Create returns a builder for creating a CompanyHistory entity.
+func (c *CompanyHistoryClient) Create() *CompanyHistoryCreate {
+	mutation := newCompanyHistoryMutation(c.config, OpCreate)
+	return &CompanyHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CompanyHistory entities.
+func (c *CompanyHistoryClient) CreateBulk(builders ...*CompanyHistoryCreate) *CompanyHistoryCreateBulk {
+	return &CompanyHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CompanyHistory.
+func (c *CompanyHistoryClient) Update() *CompanyHistoryUpdate {
+	mutation := newCompanyHistoryMutation(c.config, OpUpdate)
+	return &CompanyHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CompanyHistoryClient) UpdateOne(ch *CompanyHistory) *CompanyHistoryUpdateOne {
+	mutation := newCompanyHistoryMutation(c.config, OpUpdateOne, withCompanyHistory(ch))
+	return &CompanyHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CompanyHistoryClient) UpdateOneID(id uuid.UUID) *CompanyHistoryUpdateOne {
+	mutation := newCompanyHistoryMutation(c.config, OpUpdateOne, withCompanyHistoryID(id))
+	return &CompanyHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CompanyHistory.
+func (c *CompanyHistoryClient) Delete() *CompanyHistoryDelete {
+	mutation := newCompanyHistoryMutation(c.config, OpDelete)
+	return &CompanyHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CompanyHistoryClient) DeleteOne(ch *CompanyHistory) *CompanyHistoryDeleteOne {
+	return c.DeleteOneID(ch.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CompanyHistoryClient) DeleteOneID(id uuid.UUID) *CompanyHistoryDeleteOne {
+	builder := c.Delete().Where(companyhistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CompanyHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for CompanyHistory.
+func (c *CompanyHistoryClient) Query() *CompanyHistoryQuery {
+	return &CompanyHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCompanyHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CompanyHistory entity by its id.
+func (c *CompanyHistoryClient) Get(ctx context.Context, id uuid.UUID) (*CompanyHistory, error) {
+	return c.Query().Where(companyhistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CompanyHistoryClient) GetX(ctx context.Context, id uuid.UUID) *CompanyHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CompanyHistoryClient) Hooks() []Hook {
+	return c.hooks.CompanyHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *CompanyHistoryClient) Interceptors() []Interceptor {
+	return c.inters.CompanyHistory
+}
+
+func (c *CompanyHistoryClient) mutate(ctx context.Context, m *CompanyHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CompanyHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CompanyHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CompanyHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CompanyHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CompanyHistory mutation op: %q", m.Op())
+	}
+}
+
+// ItemBatchClient is a client for the ItemBatch schema.
 type ItemBatchClient struct {
 	config
 }
 
-// NewItemBatchClient returns a httpclient for the ItemBatch from the given config.
+// NewItemBatchClient returns a client for the ItemBatch from the given config.
 func NewItemBatchClient(c config) *ItemBatchClient {
 	return &ItemBatchClient{config: c}
 }
@@ -1312,12 +1899,12 @@ func (c *ItemBatchClient) QueryCompany(ib *ItemBatch) *CompanyQuery {
 	return query
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *ItemBatchClient) Hooks() []Hook {
 	return c.hooks.ItemBatch
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *ItemBatchClient) Interceptors() []Interceptor {
 	return c.inters.ItemBatch
 }
@@ -1337,12 +1924,130 @@ func (c *ItemBatchClient) mutate(ctx context.Context, m *ItemBatchMutation) (Val
 	}
 }
 
-// ItemBatchToItemBatchClient is a httpclient for the ItemBatchToItemBatch schema.
+// ItemBatchHistoryClient is a client for the ItemBatchHistory schema.
+type ItemBatchHistoryClient struct {
+	config
+}
+
+// NewItemBatchHistoryClient returns a client for the ItemBatchHistory from the given config.
+func NewItemBatchHistoryClient(c config) *ItemBatchHistoryClient {
+	return &ItemBatchHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `itembatchhistory.Hooks(f(g(h())))`.
+func (c *ItemBatchHistoryClient) Use(hooks ...Hook) {
+	c.hooks.ItemBatchHistory = append(c.hooks.ItemBatchHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `itembatchhistory.Intercept(f(g(h())))`.
+func (c *ItemBatchHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ItemBatchHistory = append(c.inters.ItemBatchHistory, interceptors...)
+}
+
+// Create returns a builder for creating a ItemBatchHistory entity.
+func (c *ItemBatchHistoryClient) Create() *ItemBatchHistoryCreate {
+	mutation := newItemBatchHistoryMutation(c.config, OpCreate)
+	return &ItemBatchHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ItemBatchHistory entities.
+func (c *ItemBatchHistoryClient) CreateBulk(builders ...*ItemBatchHistoryCreate) *ItemBatchHistoryCreateBulk {
+	return &ItemBatchHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ItemBatchHistory.
+func (c *ItemBatchHistoryClient) Update() *ItemBatchHistoryUpdate {
+	mutation := newItemBatchHistoryMutation(c.config, OpUpdate)
+	return &ItemBatchHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemBatchHistoryClient) UpdateOne(ibh *ItemBatchHistory) *ItemBatchHistoryUpdateOne {
+	mutation := newItemBatchHistoryMutation(c.config, OpUpdateOne, withItemBatchHistory(ibh))
+	return &ItemBatchHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemBatchHistoryClient) UpdateOneID(id uuid.UUID) *ItemBatchHistoryUpdateOne {
+	mutation := newItemBatchHistoryMutation(c.config, OpUpdateOne, withItemBatchHistoryID(id))
+	return &ItemBatchHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ItemBatchHistory.
+func (c *ItemBatchHistoryClient) Delete() *ItemBatchHistoryDelete {
+	mutation := newItemBatchHistoryMutation(c.config, OpDelete)
+	return &ItemBatchHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ItemBatchHistoryClient) DeleteOne(ibh *ItemBatchHistory) *ItemBatchHistoryDeleteOne {
+	return c.DeleteOneID(ibh.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ItemBatchHistoryClient) DeleteOneID(id uuid.UUID) *ItemBatchHistoryDeleteOne {
+	builder := c.Delete().Where(itembatchhistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ItemBatchHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for ItemBatchHistory.
+func (c *ItemBatchHistoryClient) Query() *ItemBatchHistoryQuery {
+	return &ItemBatchHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeItemBatchHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ItemBatchHistory entity by its id.
+func (c *ItemBatchHistoryClient) Get(ctx context.Context, id uuid.UUID) (*ItemBatchHistory, error) {
+	return c.Query().Where(itembatchhistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemBatchHistoryClient) GetX(ctx context.Context, id uuid.UUID) *ItemBatchHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ItemBatchHistoryClient) Hooks() []Hook {
+	return c.hooks.ItemBatchHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *ItemBatchHistoryClient) Interceptors() []Interceptor {
+	return c.inters.ItemBatchHistory
+}
+
+func (c *ItemBatchHistoryClient) mutate(ctx context.Context, m *ItemBatchHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ItemBatchHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ItemBatchHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ItemBatchHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ItemBatchHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ItemBatchHistory mutation op: %q", m.Op())
+	}
+}
+
+// ItemBatchToItemBatchClient is a client for the ItemBatchToItemBatch schema.
 type ItemBatchToItemBatchClient struct {
 	config
 }
 
-// NewItemBatchToItemBatchClient returns a httpclient for the ItemBatchToItemBatch from the given config.
+// NewItemBatchToItemBatchClient returns a client for the ItemBatchToItemBatch from the given config.
 func NewItemBatchToItemBatchClient(c config) *ItemBatchToItemBatchClient {
 	return &ItemBatchToItemBatchClient{config: c}
 }
@@ -1462,12 +2167,12 @@ func (c *ItemBatchToItemBatchClient) QueryChild(ibtib *ItemBatchToItemBatch) *It
 	return query
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *ItemBatchToItemBatchClient) Hooks() []Hook {
 	return c.hooks.ItemBatchToItemBatch
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *ItemBatchToItemBatchClient) Interceptors() []Interceptor {
 	return c.inters.ItemBatchToItemBatch
 }
@@ -1487,12 +2192,130 @@ func (c *ItemBatchToItemBatchClient) mutate(ctx context.Context, m *ItemBatchToI
 	}
 }
 
-// SessionClient is a httpclient for the Session schema.
+// ItemBatchToItemBatchHistoryClient is a client for the ItemBatchToItemBatchHistory schema.
+type ItemBatchToItemBatchHistoryClient struct {
+	config
+}
+
+// NewItemBatchToItemBatchHistoryClient returns a client for the ItemBatchToItemBatchHistory from the given config.
+func NewItemBatchToItemBatchHistoryClient(c config) *ItemBatchToItemBatchHistoryClient {
+	return &ItemBatchToItemBatchHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `itembatchtoitembatchhistory.Hooks(f(g(h())))`.
+func (c *ItemBatchToItemBatchHistoryClient) Use(hooks ...Hook) {
+	c.hooks.ItemBatchToItemBatchHistory = append(c.hooks.ItemBatchToItemBatchHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `itembatchtoitembatchhistory.Intercept(f(g(h())))`.
+func (c *ItemBatchToItemBatchHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ItemBatchToItemBatchHistory = append(c.inters.ItemBatchToItemBatchHistory, interceptors...)
+}
+
+// Create returns a builder for creating a ItemBatchToItemBatchHistory entity.
+func (c *ItemBatchToItemBatchHistoryClient) Create() *ItemBatchToItemBatchHistoryCreate {
+	mutation := newItemBatchToItemBatchHistoryMutation(c.config, OpCreate)
+	return &ItemBatchToItemBatchHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ItemBatchToItemBatchHistory entities.
+func (c *ItemBatchToItemBatchHistoryClient) CreateBulk(builders ...*ItemBatchToItemBatchHistoryCreate) *ItemBatchToItemBatchHistoryCreateBulk {
+	return &ItemBatchToItemBatchHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ItemBatchToItemBatchHistory.
+func (c *ItemBatchToItemBatchHistoryClient) Update() *ItemBatchToItemBatchHistoryUpdate {
+	mutation := newItemBatchToItemBatchHistoryMutation(c.config, OpUpdate)
+	return &ItemBatchToItemBatchHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ItemBatchToItemBatchHistoryClient) UpdateOne(ibtibh *ItemBatchToItemBatchHistory) *ItemBatchToItemBatchHistoryUpdateOne {
+	mutation := newItemBatchToItemBatchHistoryMutation(c.config, OpUpdateOne, withItemBatchToItemBatchHistory(ibtibh))
+	return &ItemBatchToItemBatchHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ItemBatchToItemBatchHistoryClient) UpdateOneID(id uuid.UUID) *ItemBatchToItemBatchHistoryUpdateOne {
+	mutation := newItemBatchToItemBatchHistoryMutation(c.config, OpUpdateOne, withItemBatchToItemBatchHistoryID(id))
+	return &ItemBatchToItemBatchHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ItemBatchToItemBatchHistory.
+func (c *ItemBatchToItemBatchHistoryClient) Delete() *ItemBatchToItemBatchHistoryDelete {
+	mutation := newItemBatchToItemBatchHistoryMutation(c.config, OpDelete)
+	return &ItemBatchToItemBatchHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ItemBatchToItemBatchHistoryClient) DeleteOne(ibtibh *ItemBatchToItemBatchHistory) *ItemBatchToItemBatchHistoryDeleteOne {
+	return c.DeleteOneID(ibtibh.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ItemBatchToItemBatchHistoryClient) DeleteOneID(id uuid.UUID) *ItemBatchToItemBatchHistoryDeleteOne {
+	builder := c.Delete().Where(itembatchtoitembatchhistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ItemBatchToItemBatchHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for ItemBatchToItemBatchHistory.
+func (c *ItemBatchToItemBatchHistoryClient) Query() *ItemBatchToItemBatchHistoryQuery {
+	return &ItemBatchToItemBatchHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeItemBatchToItemBatchHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ItemBatchToItemBatchHistory entity by its id.
+func (c *ItemBatchToItemBatchHistoryClient) Get(ctx context.Context, id uuid.UUID) (*ItemBatchToItemBatchHistory, error) {
+	return c.Query().Where(itembatchtoitembatchhistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ItemBatchToItemBatchHistoryClient) GetX(ctx context.Context, id uuid.UUID) *ItemBatchToItemBatchHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ItemBatchToItemBatchHistoryClient) Hooks() []Hook {
+	return c.hooks.ItemBatchToItemBatchHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *ItemBatchToItemBatchHistoryClient) Interceptors() []Interceptor {
+	return c.inters.ItemBatchToItemBatchHistory
+}
+
+func (c *ItemBatchToItemBatchHistoryClient) mutate(ctx context.Context, m *ItemBatchToItemBatchHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ItemBatchToItemBatchHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ItemBatchToItemBatchHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ItemBatchToItemBatchHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ItemBatchToItemBatchHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ItemBatchToItemBatchHistory mutation op: %q", m.Op())
+	}
+}
+
+// SessionClient is a client for the Session schema.
 type SessionClient struct {
 	config
 }
 
-// NewSessionClient returns a httpclient for the Session from the given config.
+// NewSessionClient returns a client for the Session from the given config.
 func NewSessionClient(c config) *SessionClient {
 	return &SessionClient{config: c}
 }
@@ -1580,12 +2403,12 @@ func (c *SessionClient) GetX(ctx context.Context, id int) *Session {
 	return obj
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *SessionClient) Hooks() []Hook {
 	return c.hooks.Session
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *SessionClient) Interceptors() []Interceptor {
 	return c.inters.Session
 }
@@ -1605,12 +2428,12 @@ func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, 
 	}
 }
 
-// UserClient is a httpclient for the User schema.
+// UserClient is a client for the User schema.
 type UserClient struct {
 	config
 }
 
-// NewUserClient returns a httpclient for the User from the given config.
+// NewUserClient returns a client for the User from the given config.
 func NewUserClient(c config) *UserClient {
 	return &UserClient{config: c}
 }
@@ -1698,12 +2521,12 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	return obj
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *UserClient) Interceptors() []Interceptor {
 	return c.inters.User
 }
@@ -1723,12 +2546,130 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
-// UsersToCompanyClient is a httpclient for the UsersToCompany schema.
+// UserHistoryClient is a client for the UserHistory schema.
+type UserHistoryClient struct {
+	config
+}
+
+// NewUserHistoryClient returns a client for the UserHistory from the given config.
+func NewUserHistoryClient(c config) *UserHistoryClient {
+	return &UserHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userhistory.Hooks(f(g(h())))`.
+func (c *UserHistoryClient) Use(hooks ...Hook) {
+	c.hooks.UserHistory = append(c.hooks.UserHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userhistory.Intercept(f(g(h())))`.
+func (c *UserHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserHistory = append(c.inters.UserHistory, interceptors...)
+}
+
+// Create returns a builder for creating a UserHistory entity.
+func (c *UserHistoryClient) Create() *UserHistoryCreate {
+	mutation := newUserHistoryMutation(c.config, OpCreate)
+	return &UserHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserHistory entities.
+func (c *UserHistoryClient) CreateBulk(builders ...*UserHistoryCreate) *UserHistoryCreateBulk {
+	return &UserHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserHistory.
+func (c *UserHistoryClient) Update() *UserHistoryUpdate {
+	mutation := newUserHistoryMutation(c.config, OpUpdate)
+	return &UserHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserHistoryClient) UpdateOne(uh *UserHistory) *UserHistoryUpdateOne {
+	mutation := newUserHistoryMutation(c.config, OpUpdateOne, withUserHistory(uh))
+	return &UserHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserHistoryClient) UpdateOneID(id uuid.UUID) *UserHistoryUpdateOne {
+	mutation := newUserHistoryMutation(c.config, OpUpdateOne, withUserHistoryID(id))
+	return &UserHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserHistory.
+func (c *UserHistoryClient) Delete() *UserHistoryDelete {
+	mutation := newUserHistoryMutation(c.config, OpDelete)
+	return &UserHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserHistoryClient) DeleteOne(uh *UserHistory) *UserHistoryDeleteOne {
+	return c.DeleteOneID(uh.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserHistoryClient) DeleteOneID(id uuid.UUID) *UserHistoryDeleteOne {
+	builder := c.Delete().Where(userhistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for UserHistory.
+func (c *UserHistoryClient) Query() *UserHistoryQuery {
+	return &UserHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserHistory entity by its id.
+func (c *UserHistoryClient) Get(ctx context.Context, id uuid.UUID) (*UserHistory, error) {
+	return c.Query().Where(userhistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserHistoryClient) GetX(ctx context.Context, id uuid.UUID) *UserHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserHistoryClient) Hooks() []Hook {
+	return c.hooks.UserHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserHistoryClient) Interceptors() []Interceptor {
+	return c.inters.UserHistory
+}
+
+func (c *UserHistoryClient) mutate(ctx context.Context, m *UserHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UserHistory mutation op: %q", m.Op())
+	}
+}
+
+// UsersToCompanyClient is a client for the UsersToCompany schema.
 type UsersToCompanyClient struct {
 	config
 }
 
-// NewUsersToCompanyClient returns a httpclient for the UsersToCompany from the given config.
+// NewUsersToCompanyClient returns a client for the UsersToCompany from the given config.
 func NewUsersToCompanyClient(c config) *UsersToCompanyClient {
 	return &UsersToCompanyClient{config: c}
 }
@@ -1848,12 +2789,12 @@ func (c *UsersToCompanyClient) QueryCompany(utc *UsersToCompany) *CompanyQuery {
 	return query
 }
 
-// Hooks returns the httpclient hooks.
+// Hooks returns the client hooks.
 func (c *UsersToCompanyClient) Hooks() []Hook {
 	return c.hooks.UsersToCompany
 }
 
-// Interceptors returns the httpclient interceptors.
+// Interceptors returns the client interceptors.
 func (c *UsersToCompanyClient) Interceptors() []Interceptor {
 	return c.inters.UsersToCompany
 }
@@ -1872,3 +2813,140 @@ func (c *UsersToCompanyClient) mutate(ctx context.Context, m *UsersToCompanyMuta
 		return nil, fmt.Errorf("ent: unknown UsersToCompany mutation op: %q", m.Op())
 	}
 }
+
+// UsersToCompanyHistoryClient is a client for the UsersToCompanyHistory schema.
+type UsersToCompanyHistoryClient struct {
+	config
+}
+
+// NewUsersToCompanyHistoryClient returns a client for the UsersToCompanyHistory from the given config.
+func NewUsersToCompanyHistoryClient(c config) *UsersToCompanyHistoryClient {
+	return &UsersToCompanyHistoryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userstocompanyhistory.Hooks(f(g(h())))`.
+func (c *UsersToCompanyHistoryClient) Use(hooks ...Hook) {
+	c.hooks.UsersToCompanyHistory = append(c.hooks.UsersToCompanyHistory, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userstocompanyhistory.Intercept(f(g(h())))`.
+func (c *UsersToCompanyHistoryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UsersToCompanyHistory = append(c.inters.UsersToCompanyHistory, interceptors...)
+}
+
+// Create returns a builder for creating a UsersToCompanyHistory entity.
+func (c *UsersToCompanyHistoryClient) Create() *UsersToCompanyHistoryCreate {
+	mutation := newUsersToCompanyHistoryMutation(c.config, OpCreate)
+	return &UsersToCompanyHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UsersToCompanyHistory entities.
+func (c *UsersToCompanyHistoryClient) CreateBulk(builders ...*UsersToCompanyHistoryCreate) *UsersToCompanyHistoryCreateBulk {
+	return &UsersToCompanyHistoryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UsersToCompanyHistory.
+func (c *UsersToCompanyHistoryClient) Update() *UsersToCompanyHistoryUpdate {
+	mutation := newUsersToCompanyHistoryMutation(c.config, OpUpdate)
+	return &UsersToCompanyHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UsersToCompanyHistoryClient) UpdateOne(utch *UsersToCompanyHistory) *UsersToCompanyHistoryUpdateOne {
+	mutation := newUsersToCompanyHistoryMutation(c.config, OpUpdateOne, withUsersToCompanyHistory(utch))
+	return &UsersToCompanyHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UsersToCompanyHistoryClient) UpdateOneID(id uuid.UUID) *UsersToCompanyHistoryUpdateOne {
+	mutation := newUsersToCompanyHistoryMutation(c.config, OpUpdateOne, withUsersToCompanyHistoryID(id))
+	return &UsersToCompanyHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UsersToCompanyHistory.
+func (c *UsersToCompanyHistoryClient) Delete() *UsersToCompanyHistoryDelete {
+	mutation := newUsersToCompanyHistoryMutation(c.config, OpDelete)
+	return &UsersToCompanyHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UsersToCompanyHistoryClient) DeleteOne(utch *UsersToCompanyHistory) *UsersToCompanyHistoryDeleteOne {
+	return c.DeleteOneID(utch.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UsersToCompanyHistoryClient) DeleteOneID(id uuid.UUID) *UsersToCompanyHistoryDeleteOne {
+	builder := c.Delete().Where(userstocompanyhistory.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UsersToCompanyHistoryDeleteOne{builder}
+}
+
+// Query returns a query builder for UsersToCompanyHistory.
+func (c *UsersToCompanyHistoryClient) Query() *UsersToCompanyHistoryQuery {
+	return &UsersToCompanyHistoryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUsersToCompanyHistory},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UsersToCompanyHistory entity by its id.
+func (c *UsersToCompanyHistoryClient) Get(ctx context.Context, id uuid.UUID) (*UsersToCompanyHistory, error) {
+	return c.Query().Where(userstocompanyhistory.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UsersToCompanyHistoryClient) GetX(ctx context.Context, id uuid.UUID) *UsersToCompanyHistory {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UsersToCompanyHistoryClient) Hooks() []Hook {
+	return c.hooks.UsersToCompanyHistory
+}
+
+// Interceptors returns the client interceptors.
+func (c *UsersToCompanyHistoryClient) Interceptors() []Interceptor {
+	return c.inters.UsersToCompanyHistory
+}
+
+func (c *UsersToCompanyHistoryClient) mutate(ctx context.Context, m *UsersToCompanyHistoryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UsersToCompanyHistoryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UsersToCompanyHistoryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UsersToCompanyHistoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UsersToCompanyHistoryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UsersToCompanyHistory mutation op: %q", m.Op())
+	}
+}
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Attribute, AttributeHistory, AttributeType, AttributeTypeHistory,
+		AuthorizationPolicy, Certification, CertificationHistory,
+		CertificationTemplate, CertificationTemplateHistory, Company, CompanyHistory,
+		ItemBatch, ItemBatchHistory, ItemBatchToItemBatch, ItemBatchToItemBatchHistory,
+		Session, User, UserHistory, UsersToCompany, UsersToCompanyHistory []ent.Hook
+	}
+	inters struct {
+		Attribute, AttributeHistory, AttributeType, AttributeTypeHistory,
+		AuthorizationPolicy, Certification, CertificationHistory,
+		CertificationTemplate, CertificationTemplateHistory, Company, CompanyHistory,
+		ItemBatch, ItemBatchHistory, ItemBatchToItemBatch, ItemBatchToItemBatchHistory,
+		Session, User, UserHistory, UsersToCompany,
+		UsersToCompanyHistory []ent.Interceptor
+	}
+)

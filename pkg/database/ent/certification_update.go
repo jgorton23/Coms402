@@ -158,10 +158,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.CompanyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: company.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -174,10 +171,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.CompanyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: company.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -193,10 +187,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.ItemBatchColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -209,10 +200,7 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{certification.ItemBatchColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -397,10 +385,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.CompanyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: company.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -413,10 +398,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.CompanyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: company.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -432,10 +414,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.ItemBatchColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -448,10 +427,7 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			Columns: []string{certification.ItemBatchColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

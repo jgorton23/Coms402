@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -103,7 +104,8 @@ func (v1 httpV1Implem) AddCertification(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	itemBatch, err := v1.certificationUseCase.Create(r.Context(), domain.Certification{
+	ctx := context.WithValue(r.Context(), "userUUID", domainUser.UUID.String())
+	itemBatch, err := v1.certificationUseCase.Create(ctx, domain.Certification{
 		PrimaryAttribute: requestBody.PrimaryAttribute,
 		ImageUUID:        iid,
 		ItemBatchUUID:    ibid,
@@ -151,7 +153,7 @@ func (v1 httpV1Implem) UpdateCertification(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	ibid, err := uuid.Parse(*&requestBody.ItemBatchUUID)
+	ibid, err := uuid.Parse(requestBody.ItemBatchUUID)
 
 	if err != nil {
 		respondWithError(w, r, fmt.Sprintf("error parsing uuid: %v", err), http.StatusBadRequest)
@@ -172,7 +174,8 @@ func (v1 httpV1Implem) UpdateCertification(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = v1.certificationUseCase.Update(r.Context(), domain.Certification{
+	ctx := context.WithValue(r.Context(), "userUUID", domainUser.UUID.String())
+	err = v1.certificationUseCase.Update(ctx, domain.Certification{
 		UUID:             id,
 		PrimaryAttribute: requestBody.PrimaryAttribute,
 		ImageUUID:        iid,

@@ -9,33 +9,49 @@ import (
 	"entgo.io/ent/dialect"
 )
 
-// Tx is a transactional httpclient that is created by calling Client.Tx().
+// Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Attribute is the httpclient for interacting with the Attribute builders.
+	// Attribute is the client for interacting with the Attribute builders.
 	Attribute *AttributeClient
-	// AttributeType is the httpclient for interacting with the AttributeType builders.
+	// AttributeHistory is the client for interacting with the AttributeHistory builders.
+	AttributeHistory *AttributeHistoryClient
+	// AttributeType is the client for interacting with the AttributeType builders.
 	AttributeType *AttributeTypeClient
-	// AttributeTypesToTemplates is the httpclient for interacting with the AttributeTypesToTemplates builders.
-	AttributeTypesToTemplates *AttributeTypesToTemplatesClient
-	// AuthorizationPolicy is the httpclient for interacting with the AuthorizationPolicy builders.
+	// AttributeTypeHistory is the client for interacting with the AttributeTypeHistory builders.
+	AttributeTypeHistory *AttributeTypeHistoryClient
+	// AuthorizationPolicy is the client for interacting with the AuthorizationPolicy builders.
 	AuthorizationPolicy *AuthorizationPolicyClient
-	// Certification is the httpclient for interacting with the Certification builders.
+	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
-	// CertificationTemplate is the httpclient for interacting with the CertificationTemplate builders.
+	// CertificationHistory is the client for interacting with the CertificationHistory builders.
+	CertificationHistory *CertificationHistoryClient
+	// CertificationTemplate is the client for interacting with the CertificationTemplate builders.
 	CertificationTemplate *CertificationTemplateClient
-	// Company is the httpclient for interacting with the Company builders.
+	// CertificationTemplateHistory is the client for interacting with the CertificationTemplateHistory builders.
+	CertificationTemplateHistory *CertificationTemplateHistoryClient
+	// Company is the client for interacting with the Company builders.
 	Company *CompanyClient
-	// ItemBatch is the httpclient for interacting with the ItemBatch builders.
+	// CompanyHistory is the client for interacting with the CompanyHistory builders.
+	CompanyHistory *CompanyHistoryClient
+	// ItemBatch is the client for interacting with the ItemBatch builders.
 	ItemBatch *ItemBatchClient
-	// ItemBatchToItemBatch is the httpclient for interacting with the ItemBatchToItemBatch builders.
+	// ItemBatchHistory is the client for interacting with the ItemBatchHistory builders.
+	ItemBatchHistory *ItemBatchHistoryClient
+	// ItemBatchToItemBatch is the client for interacting with the ItemBatchToItemBatch builders.
 	ItemBatchToItemBatch *ItemBatchToItemBatchClient
-	// Session is the httpclient for interacting with the Session builders.
+	// ItemBatchToItemBatchHistory is the client for interacting with the ItemBatchToItemBatchHistory builders.
+	ItemBatchToItemBatchHistory *ItemBatchToItemBatchHistoryClient
+	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
-	// User is the httpclient for interacting with the User builders.
+	// User is the client for interacting with the User builders.
 	User *UserClient
-	// UsersToCompany is the httpclient for interacting with the UsersToCompany builders.
+	// UserHistory is the client for interacting with the UserHistory builders.
+	UserHistory *UserHistoryClient
+	// UsersToCompany is the client for interacting with the UsersToCompany builders.
 	UsersToCompany *UsersToCompanyClient
+	// UsersToCompanyHistory is the client for interacting with the UsersToCompanyHistory builders.
+	UsersToCompanyHistory *UsersToCompanyHistoryClient
 
 	// lazily loaded.
 	client     *Client
@@ -168,17 +184,25 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Attribute = NewAttributeClient(tx.config)
+	tx.AttributeHistory = NewAttributeHistoryClient(tx.config)
 	tx.AttributeType = NewAttributeTypeClient(tx.config)
-	tx.AttributeTypesToTemplates = NewAttributeTypesToTemplatesClient(tx.config)
+	tx.AttributeTypeHistory = NewAttributeTypeHistoryClient(tx.config)
 	tx.AuthorizationPolicy = NewAuthorizationPolicyClient(tx.config)
 	tx.Certification = NewCertificationClient(tx.config)
+	tx.CertificationHistory = NewCertificationHistoryClient(tx.config)
 	tx.CertificationTemplate = NewCertificationTemplateClient(tx.config)
+	tx.CertificationTemplateHistory = NewCertificationTemplateHistoryClient(tx.config)
 	tx.Company = NewCompanyClient(tx.config)
+	tx.CompanyHistory = NewCompanyHistoryClient(tx.config)
 	tx.ItemBatch = NewItemBatchClient(tx.config)
+	tx.ItemBatchHistory = NewItemBatchHistoryClient(tx.config)
 	tx.ItemBatchToItemBatch = NewItemBatchToItemBatchClient(tx.config)
+	tx.ItemBatchToItemBatchHistory = NewItemBatchToItemBatchHistoryClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserHistory = NewUserHistoryClient(tx.config)
 	tx.UsersToCompany = NewUsersToCompanyClient(tx.config)
+	tx.UsersToCompanyHistory = NewUsersToCompanyHistoryClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

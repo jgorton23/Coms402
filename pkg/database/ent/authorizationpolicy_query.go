@@ -268,7 +268,7 @@ func (apq *AuthorizationPolicyQuery) Clone() *AuthorizationPolicyQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	httpclient.AuthorizationPolicy.Query().
+//	client.AuthorizationPolicy.Query().
 //		GroupBy(authorizationpolicy.FieldPtype).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -290,7 +290,7 @@ func (apq *AuthorizationPolicyQuery) GroupBy(field string, fields ...string) *Au
 //		Ptype string `json:"Ptype,omitempty"`
 //	}
 //
-//	httpclient.AuthorizationPolicy.Query().
+//	client.AuthorizationPolicy.Query().
 //		Select(authorizationpolicy.FieldPtype).
 //		Scan(ctx, &v)
 func (apq *AuthorizationPolicyQuery) Select(fields ...string) *AuthorizationPolicySelect {

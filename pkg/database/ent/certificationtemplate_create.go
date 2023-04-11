@@ -162,10 +162,7 @@ func (ctc *CertificationTemplateCreate) createSpec() (*CertificationTemplate, *s
 			Columns: []string{certificationtemplate.CompanyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: company.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -180,7 +177,7 @@ func (ctc *CertificationTemplateCreate) createSpec() (*CertificationTemplate, *s
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.CertificationTemplate.Create().
+//	client.CertificationTemplate.Create().
 //		SetDescription(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -203,7 +200,7 @@ func (ctc *CertificationTemplateCreate) OnConflict(opts ...sql.ConflictOption) *
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.CertificationTemplate.Create().
+//	client.CertificationTemplate.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (ctc *CertificationTemplateCreate) OnConflictColumns(columns ...string) *CertificationTemplateUpsertOne {
@@ -253,7 +250,7 @@ func (u *CertificationTemplateUpsert) UpdateCompanyUUID() *CertificationTemplate
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	httpclient.CertificationTemplate.Create().
+//	client.CertificationTemplate.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -274,7 +271,7 @@ func (u *CertificationTemplateUpsertOne) UpdateNewValues() *CertificationTemplat
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.CertificationTemplate.Create().
+//	client.CertificationTemplate.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
 func (u *CertificationTemplateUpsertOne) Ignore() *CertificationTemplateUpsertOne {
@@ -449,7 +446,7 @@ func (ctcb *CertificationTemplateCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.CertificationTemplate.CreateBulk(builders...).
+//	client.CertificationTemplate.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -471,7 +468,7 @@ func (ctcb *CertificationTemplateCreateBulk) OnConflict(opts ...sql.ConflictOpti
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.CertificationTemplate.Create().
+//	client.CertificationTemplate.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (ctcb *CertificationTemplateCreateBulk) OnConflictColumns(columns ...string) *CertificationTemplateUpsertBulk {
@@ -490,7 +487,7 @@ type CertificationTemplateUpsertBulk struct {
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	httpclient.CertificationTemplate.Create().
+//	client.CertificationTemplate.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -513,7 +510,7 @@ func (u *CertificationTemplateUpsertBulk) UpdateNewValues() *CertificationTempla
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.CertificationTemplate.Create().
+//	client.CertificationTemplate.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 func (u *CertificationTemplateUpsertBulk) Ignore() *CertificationTemplateUpsertBulk {

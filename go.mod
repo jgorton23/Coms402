@@ -3,7 +3,7 @@ module git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/back
 go 1.18
 
 require (
-	entgo.io/ent v0.11.8
+	entgo.io/ent v0.11.10
 	github.com/alexedwards/scs/v2 v2.5.0
 	github.com/brianvoe/gofakeit/v6 v6.20.2
 	github.com/casbin/casbin/v2 v2.65.0
@@ -31,7 +31,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
+	ariga.io/atlas v0.9.2-0.20230303073438-03a4779a6338 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
@@ -79,6 +79,7 @@ require (
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/tools v0.6.1-0.20230222164832-25d2519c8696 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220617124728-180714bec0ad // indirect

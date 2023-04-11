@@ -175,10 +175,7 @@ func (ibc *ItemBatchCreate) createSpec() (*ItemBatch, *sqlgraph.CreateSpec) {
 			Columns: []string{itembatch.CompanyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: company.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -193,7 +190,7 @@ func (ibc *ItemBatchCreate) createSpec() (*ItemBatch, *sqlgraph.CreateSpec) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.ItemBatch.Create().
+//	client.ItemBatch.Create().
 //		SetItemNumber(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -216,7 +213,7 @@ func (ibc *ItemBatchCreate) OnConflict(opts ...sql.ConflictOption) *ItemBatchUps
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.ItemBatch.Create().
+//	client.ItemBatch.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (ibc *ItemBatchCreate) OnConflictColumns(columns ...string) *ItemBatchUpsertOne {
@@ -278,7 +275,7 @@ func (u *ItemBatchUpsert) UpdateCompanyUUID() *ItemBatchUpsert {
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	httpclient.ItemBatch.Create().
+//	client.ItemBatch.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -299,7 +296,7 @@ func (u *ItemBatchUpsertOne) UpdateNewValues() *ItemBatchUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.ItemBatch.Create().
+//	client.ItemBatch.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
 func (u *ItemBatchUpsertOne) Ignore() *ItemBatchUpsertOne {
@@ -488,7 +485,7 @@ func (ibcb *ItemBatchCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.ItemBatch.CreateBulk(builders...).
+//	client.ItemBatch.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -510,7 +507,7 @@ func (ibcb *ItemBatchCreateBulk) OnConflict(opts ...sql.ConflictOption) *ItemBat
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.ItemBatch.Create().
+//	client.ItemBatch.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (ibcb *ItemBatchCreateBulk) OnConflictColumns(columns ...string) *ItemBatchUpsertBulk {
@@ -529,7 +526,7 @@ type ItemBatchUpsertBulk struct {
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	httpclient.ItemBatch.Create().
+//	client.ItemBatch.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -552,7 +549,7 @@ func (u *ItemBatchUpsertBulk) UpdateNewValues() *ItemBatchUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.ItemBatch.Create().
+//	client.ItemBatch.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 func (u *ItemBatchUpsertBulk) Ignore() *ItemBatchUpsertBulk {

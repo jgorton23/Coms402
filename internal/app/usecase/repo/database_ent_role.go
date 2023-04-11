@@ -51,15 +51,7 @@ func (ur *databaseEntImplemRoles) Exists(ctx context.Context, userUUID uuid.UUID
 // returns the role of a given user in a given company
 func (ur *databaseEntImplemRoles) GetByUUIDS(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (domain.UserToCompany, error) {
 
-	utc, err := ur.client.UsersToCompany.
-		Query().
-		Where(
-			userstocompany.And(
-				userstocompany.CompanyUUID(companyUUID),
-				userstocompany.UserUUID(userUUID),
-			),
-		).
-		Only(ctx)
+	utc, err := ur.getByUUIDS(ctx, userUUID, companyUUID)
 
 	if err != nil {
 		return domain.UserToCompany{}, err
@@ -68,11 +60,25 @@ func (ur *databaseEntImplemRoles) GetByUUIDS(ctx context.Context, userUUID uuid.
 	return ur.databaseToEntity(utc), nil
 }
 
+func (ur *databaseEntImplemRoles) getByUUIDS(ctx context.Context, userUUID uuid.UUID, companyUUID uuid.UUID) (*ent.UsersToCompany, error) {
+
+	return ur.client.UsersToCompany.
+		Query().
+		Where(
+			userstocompany.And(
+				userstocompany.CompanyUUID(companyUUID),
+				userstocompany.UserUUID(userUUID),
+			),
+		).
+		Only(ctx)
+}
+
 // Create
 // creates a new role
 func (ur *databaseEntImplemRoles) Create(ctx context.Context, usr domain.UserToCompany) (domain.UserToCompany, error) {
 	utc, err := ur.client.UsersToCompany.
 		Create().
+		SetID(uuid.New()).
 		SetCompanyUUID(usr.CompanyUUID).
 		SetUserID(usr.UserUUID).
 		SetRoleType(string(usr.RoleType)).
@@ -88,7 +94,13 @@ func (ur *databaseEntImplemRoles) Create(ctx context.Context, usr domain.UserToC
 // Update
 // updates the given role
 func (ur *databaseEntImplemRoles) Update(ctx context.Context, role domain.UserToCompany) error {
-	_, err := ur.client.UsersToCompany.
+	found, err := ur.getByUUIDS(ctx, role.UserUUID, role.CompanyUUID)
+
+	if err != nil {
+		return err
+	}
+
+	found.
 		Update().
 		Where(userstocompany.And(
 			userstocompany.CompanyUUID(role.CompanyUUID),

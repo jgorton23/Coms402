@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -36,6 +37,24 @@ var (
 			},
 		},
 	}
+	// AttributeHistoryColumns holds the columns for the "attribute_history" table.
+	AttributeHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "key", Type: field.TypeString},
+		{Name: "value", Type: field.TypeString},
+		{Name: "cert_uuid", Type: field.TypeUUID},
+		{Name: "attribute_type_uuid", Type: field.TypeUUID},
+	}
+	// AttributeHistoryTable holds the schema information for the "attribute_history" table.
+	AttributeHistoryTable = &schema.Table{
+		Name:       "attribute_history",
+		Columns:    AttributeHistoryColumns,
+		PrimaryKey: []*schema.Column{AttributeHistoryColumns[0]},
+	}
 	// AttributeTypesColumns holds the columns for the "attribute_types" table.
 	AttributeTypesColumns = []*schema.Column{
 		{Name: "UUID", Type: field.TypeUUID},
@@ -56,31 +75,21 @@ var (
 			},
 		},
 	}
-	// AttributeTypesToTemplatesColumns holds the columns for the "attribute_types_to_templates" table.
-	AttributeTypesToTemplatesColumns = []*schema.Column{
+	// AttributeTypeHistoryColumns holds the columns for the "attribute_type_history" table.
+	AttributeTypeHistoryColumns = []*schema.Column{
 		{Name: "UUID", Type: field.TypeUUID},
-		{Name: "attribute_type_uuid", Type: field.TypeUUID},
-		{Name: "template_uuid", Type: field.TypeUUID},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "key", Type: field.TypeString},
+		{Name: "company_uuid", Type: field.TypeUUID},
 	}
-	// AttributeTypesToTemplatesTable holds the schema information for the "attribute_types_to_templates" table.
-	AttributeTypesToTemplatesTable = &schema.Table{
-		Name:       "attribute_types_to_templates",
-		Columns:    AttributeTypesToTemplatesColumns,
-		PrimaryKey: []*schema.Column{AttributeTypesToTemplatesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "attribute_types_to_templates_attribute_types_attribute",
-				Columns:    []*schema.Column{AttributeTypesToTemplatesColumns[1]},
-				RefColumns: []*schema.Column{AttributeTypesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "attribute_types_to_templates_certification_templates_template",
-				Columns:    []*schema.Column{AttributeTypesToTemplatesColumns[2]},
-				RefColumns: []*schema.Column{CertificationTemplatesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
+	// AttributeTypeHistoryTable holds the schema information for the "attribute_type_history" table.
+	AttributeTypeHistoryTable = &schema.Table{
+		Name:       "attribute_type_history",
+		Columns:    AttributeTypeHistoryColumns,
+		PrimaryKey: []*schema.Column{AttributeTypeHistoryColumns[0]},
 	}
 	// AuthorizationPoliciesColumns holds the columns for the "authorization_policies" table.
 	AuthorizationPoliciesColumns = []*schema.Column{
@@ -127,6 +136,24 @@ var (
 			},
 		},
 	}
+	// CertificationHistoryColumns holds the columns for the "certification_history" table.
+	CertificationHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "primary_attribute", Type: field.TypeString},
+		{Name: "company_uuid", Type: field.TypeUUID},
+		{Name: "item_batch_uuid", Type: field.TypeUUID},
+		{Name: "image_uuid", Type: field.TypeUUID},
+	}
+	// CertificationHistoryTable holds the schema information for the "certification_history" table.
+	CertificationHistoryTable = &schema.Table{
+		Name:       "certification_history",
+		Columns:    CertificationHistoryColumns,
+		PrimaryKey: []*schema.Column{CertificationHistoryColumns[0]},
+	}
 	// CertificationTemplatesColumns holds the columns for the "certification_templates" table.
 	CertificationTemplatesColumns = []*schema.Column{
 		{Name: "UUID", Type: field.TypeUUID},
@@ -147,6 +174,22 @@ var (
 			},
 		},
 	}
+	// CertificationTemplateHistoryColumns holds the columns for the "certification_template_history" table.
+	CertificationTemplateHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString},
+		{Name: "company_uuid", Type: field.TypeUUID},
+	}
+	// CertificationTemplateHistoryTable holds the schema information for the "certification_template_history" table.
+	CertificationTemplateHistoryTable = &schema.Table{
+		Name:       "certification_template_history",
+		Columns:    CertificationTemplateHistoryColumns,
+		PrimaryKey: []*schema.Column{CertificationTemplateHistoryColumns[0]},
+	}
 	// CompaniesColumns holds the columns for the "companies" table.
 	CompaniesColumns = []*schema.Column{
 		{Name: "UUID", Type: field.TypeUUID, Unique: true},
@@ -157,6 +200,21 @@ var (
 		Name:       "companies",
 		Columns:    CompaniesColumns,
 		PrimaryKey: []*schema.Column{CompaniesColumns[0]},
+	}
+	// CompanyHistoryColumns holds the columns for the "company_history" table.
+	CompanyHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID, Unique: true},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// CompanyHistoryTable holds the schema information for the "company_history" table.
+	CompanyHistoryTable = &schema.Table{
+		Name:       "company_history",
+		Columns:    CompanyHistoryColumns,
+		PrimaryKey: []*schema.Column{CompanyHistoryColumns[0]},
 	}
 	// ItemBatchesColumns holds the columns for the "item_batches" table.
 	ItemBatchesColumns = []*schema.Column{
@@ -178,6 +236,23 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+	}
+	// ItemBatchHistoryColumns holds the columns for the "item_batch_history" table.
+	ItemBatchHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "item_number", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "company_uuid", Type: field.TypeUUID},
+	}
+	// ItemBatchHistoryTable holds the schema information for the "item_batch_history" table.
+	ItemBatchHistoryTable = &schema.Table{
+		Name:       "item_batch_history",
+		Columns:    ItemBatchHistoryColumns,
+		PrimaryKey: []*schema.Column{ItemBatchHistoryColumns[0]},
 	}
 	// ItemBatchToItemBatchesColumns holds the columns for the "item_batch_to_item_batches" table.
 	ItemBatchToItemBatchesColumns = []*schema.Column{
@@ -204,6 +279,22 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+	}
+	// ItemBatchToItemBatchHistoryColumns holds the columns for the "item_batch_to_item_batch_history" table.
+	ItemBatchToItemBatchHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "child_uuid", Type: field.TypeUUID},
+		{Name: "parent_uuid", Type: field.TypeUUID},
+	}
+	// ItemBatchToItemBatchHistoryTable holds the schema information for the "item_batch_to_item_batch_history" table.
+	ItemBatchToItemBatchHistoryTable = &schema.Table{
+		Name:       "item_batch_to_item_batch_history",
+		Columns:    ItemBatchToItemBatchHistoryColumns,
+		PrimaryKey: []*schema.Column{ItemBatchToItemBatchHistoryColumns[0]},
 	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
@@ -236,6 +327,28 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UserHistoryColumns holds the columns for the "user_history" table.
+	UserHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "password_hash", Type: field.TypeString, Nullable: true},
+		{Name: "attempt_count", Type: field.TypeInt, Nullable: true},
+		{Name: "last_attempt", Type: field.TypeTime, Nullable: true},
+		{Name: "locked", Type: field.TypeTime, Nullable: true},
+		{Name: "role", Type: field.TypeString, Default: "user"},
+	}
+	// UserHistoryTable holds the schema information for the "user_history" table.
+	UserHistoryTable = &schema.Table{
+		Name:       "user_history",
+		Columns:    UserHistoryColumns,
+		PrimaryKey: []*schema.Column{UserHistoryColumns[0]},
+	}
 	// UsersToCompaniesColumns holds the columns for the "users_to_companies" table.
 	UsersToCompaniesColumns = []*schema.Column{
 		{Name: "UUID", Type: field.TypeUUID, Unique: true},
@@ -264,35 +377,86 @@ var (
 			},
 		},
 	}
+	// UsersToCompanyHistoryColumns holds the columns for the "users_to_company_history" table.
+	UsersToCompanyHistoryColumns = []*schema.Column{
+		{Name: "UUID", Type: field.TypeUUID, Unique: true},
+		{Name: "history_time", Type: field.TypeTime},
+		{Name: "ref", Type: field.TypeUUID, Nullable: true},
+		{Name: "operation", Type: field.TypeEnum, Enums: []string{"INSERT", "UPDATE", "DELETE"}},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
+		{Name: "company_uuid", Type: field.TypeUUID},
+		{Name: "user_uuid", Type: field.TypeUUID},
+		{Name: "role_type", Type: field.TypeString},
+		{Name: "approved", Type: field.TypeBool},
+	}
+	// UsersToCompanyHistoryTable holds the schema information for the "users_to_company_history" table.
+	UsersToCompanyHistoryTable = &schema.Table{
+		Name:       "users_to_company_history",
+		Columns:    UsersToCompanyHistoryColumns,
+		PrimaryKey: []*schema.Column{UsersToCompanyHistoryColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AttributesTable,
+		AttributeHistoryTable,
 		AttributeTypesTable,
-		AttributeTypesToTemplatesTable,
+		AttributeTypeHistoryTable,
 		AuthorizationPoliciesTable,
 		CertificationsTable,
+		CertificationHistoryTable,
 		CertificationTemplatesTable,
+		CertificationTemplateHistoryTable,
 		CompaniesTable,
+		CompanyHistoryTable,
 		ItemBatchesTable,
+		ItemBatchHistoryTable,
 		ItemBatchToItemBatchesTable,
+		ItemBatchToItemBatchHistoryTable,
 		SessionsTable,
 		UsersTable,
+		UserHistoryTable,
 		UsersToCompaniesTable,
+		UsersToCompanyHistoryTable,
 	}
 )
 
 func init() {
 	AttributesTable.ForeignKeys[0].RefTable = CertificationsTable
 	AttributesTable.ForeignKeys[1].RefTable = AttributeTypesTable
+	AttributeHistoryTable.Annotation = &entsql.Annotation{
+		Table: "attribute_history",
+	}
 	AttributeTypesTable.ForeignKeys[0].RefTable = CompaniesTable
-	AttributeTypesToTemplatesTable.ForeignKeys[0].RefTable = AttributeTypesTable
-	AttributeTypesToTemplatesTable.ForeignKeys[1].RefTable = CertificationTemplatesTable
+	AttributeTypeHistoryTable.Annotation = &entsql.Annotation{
+		Table: "attribute_type_history",
+	}
 	CertificationsTable.ForeignKeys[0].RefTable = CompaniesTable
 	CertificationsTable.ForeignKeys[1].RefTable = ItemBatchesTable
+	CertificationHistoryTable.Annotation = &entsql.Annotation{
+		Table: "certification_history",
+	}
 	CertificationTemplatesTable.ForeignKeys[0].RefTable = CompaniesTable
+	CertificationTemplateHistoryTable.Annotation = &entsql.Annotation{
+		Table: "certification_template_history",
+	}
+	CompanyHistoryTable.Annotation = &entsql.Annotation{
+		Table: "company_history",
+	}
 	ItemBatchesTable.ForeignKeys[0].RefTable = CompaniesTable
+	ItemBatchHistoryTable.Annotation = &entsql.Annotation{
+		Table: "item_batch_history",
+	}
 	ItemBatchToItemBatchesTable.ForeignKeys[0].RefTable = ItemBatchesTable
 	ItemBatchToItemBatchesTable.ForeignKeys[1].RefTable = ItemBatchesTable
+	ItemBatchToItemBatchHistoryTable.Annotation = &entsql.Annotation{
+		Table: "item_batch_to_item_batch_history",
+	}
+	UserHistoryTable.Annotation = &entsql.Annotation{
+		Table: "user_history",
+	}
 	UsersToCompaniesTable.ForeignKeys[0].RefTable = UsersTable
 	UsersToCompaniesTable.ForeignKeys[1].RefTable = CompaniesTable
+	UsersToCompanyHistoryTable.Annotation = &entsql.Annotation{
+		Table: "users_to_company_history",
+	}
 }

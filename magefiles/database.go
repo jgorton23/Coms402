@@ -57,7 +57,7 @@ func (Database) New(schema string) error {
 func (Database) Viz() error {
 	fmt.Println("View ER diagram")
 
-	ok, err := sh.Exec(nil, os.Stdout, os.Stdout, "go", "run", "-mod=mod", "ariga.io/entviz", "./pkg/database/models")
+	ok, err := sh.Exec(nil, os.Stdout, os.Stdout, "go", "run", "-mod=mod", "ariga.io/entviz", "./pkg/database/schema")
 
 	if !ok {
 		fmt.Println("Program failed to run")

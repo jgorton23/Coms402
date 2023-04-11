@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -30,7 +31,8 @@ func (v1 httpV1Implem) AddCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	company, err := v1.companyUseCase.Create(r.Context(), domain.Company{
+	ctx := context.WithValue(r.Context(), "userUUID", domainUser.UUID.String())
+	company, err := v1.companyUseCase.Create(ctx, domain.Company{
 		Name: requestBody.Name,
 	}, domainUser.UUID)
 
@@ -68,7 +70,8 @@ func (v1 httpV1Implem) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = v1.companyUseCase.Update(r.Context(), domain.Company{
+	ctx := context.WithValue(r.Context(), "userUUID", domainUser.UUID.String())
+	err = v1.companyUseCase.Update(ctx, domain.Company{
 		UUID: id,
 		Name: requestBody.Name,
 	}, domainUser.UUID)
@@ -152,7 +155,8 @@ func (v1 httpV1Implem) AddUserRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := v1.userToCompanyUseCase.Add(r.Context(), domain.UserToCompany{
+	ctx := context.WithValue(r.Context(), "userUUID", domainUser.UUID.String())
+	role, err := v1.userToCompanyUseCase.Add(ctx, domain.UserToCompany{
 		CompanyUUID: companyUUID,
 		UserUUID:    userUUID,
 		RoleType:    domain.Role(requestBody.RoleType),

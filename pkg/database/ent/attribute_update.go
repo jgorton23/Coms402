@@ -158,10 +158,7 @@ func (au *AttributeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attribute.CertificationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certification.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -174,10 +171,7 @@ func (au *AttributeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attribute.CertificationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certification.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -193,10 +187,7 @@ func (au *AttributeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attribute.AttributeTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: attributetype.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(attributetype.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -209,10 +200,7 @@ func (au *AttributeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{attribute.AttributeTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: attributetype.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(attributetype.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -397,10 +385,7 @@ func (auo *AttributeUpdateOne) sqlSave(ctx context.Context) (_node *Attribute, e
 			Columns: []string{attribute.CertificationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certification.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -413,10 +398,7 @@ func (auo *AttributeUpdateOne) sqlSave(ctx context.Context) (_node *Attribute, e
 			Columns: []string{attribute.CertificationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certification.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -432,10 +414,7 @@ func (auo *AttributeUpdateOne) sqlSave(ctx context.Context) (_node *Attribute, e
 			Columns: []string{attribute.AttributeTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: attributetype.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(attributetype.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -448,10 +427,7 @@ func (auo *AttributeUpdateOne) sqlSave(ctx context.Context) (_node *Attribute, e
 			Columns: []string{attribute.AttributeTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: attributetype.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(attributetype.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

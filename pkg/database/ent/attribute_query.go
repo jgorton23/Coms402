@@ -341,7 +341,7 @@ func (aq *AttributeQuery) WithAttributeType(opts ...func(*AttributeTypeQuery)) *
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	httpclient.Attribute.Query().
+//	client.Attribute.Query().
 //		GroupBy(attribute.FieldKey).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -363,7 +363,7 @@ func (aq *AttributeQuery) GroupBy(field string, fields ...string) *AttributeGrou
 //		Key string `json:"key,omitempty"`
 //	}
 //
-//	httpclient.Attribute.Query().
+//	client.Attribute.Query().
 //		Select(attribute.FieldKey).
 //		Scan(ctx, &v)
 func (aq *AttributeQuery) Select(fields ...string) *AttributeSelect {

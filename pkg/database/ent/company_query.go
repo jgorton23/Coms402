@@ -269,7 +269,7 @@ func (cq *CompanyQuery) Clone() *CompanyQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	httpclient.Company.Query().
+//	client.Company.Query().
 //		GroupBy(company.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -291,7 +291,7 @@ func (cq *CompanyQuery) GroupBy(field string, fields ...string) *CompanyGroupBy 
 //		Name string `json:"name,omitempty"`
 //	}
 //
-//	httpclient.Company.Query().
+//	client.Company.Query().
 //		Select(company.FieldName).
 //		Scan(ctx, &v)
 func (cq *CompanyQuery) Select(fields ...string) *CompanySelect {

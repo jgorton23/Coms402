@@ -37,7 +37,7 @@ type Schema struct {
 	drv dialect.Driver
 }
 
-// NewSchema creates a new schema httpclient.
+// NewSchema creates a new schema client.
 func NewSchema(drv dialect.Driver) *Schema { return &Schema{drv: drv} }
 
 // Create creates all schema resources.
@@ -56,7 +56,7 @@ func Create(ctx context.Context, s *Schema, tables []*schema.Table, opts ...sche
 
 // WriteTo writes the schema changes to w instead of running them against the database.
 //
-//	if err := httpclient.Schema.WriteTo(context.Background(), os.Stdout); err != nil {
+//	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {
 //		log.Fatal(err)
 //	}
 func (s *Schema) WriteTo(ctx context.Context, w io.Writer, opts ...schema.MigrateOption) error {

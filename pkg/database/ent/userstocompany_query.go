@@ -341,7 +341,7 @@ func (utcq *UsersToCompanyQuery) WithCompany(opts ...func(*CompanyQuery)) *Users
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	httpclient.UsersToCompany.Query().
+//	client.UsersToCompany.Query().
 //		GroupBy(userstocompany.FieldCompanyUUID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -363,7 +363,7 @@ func (utcq *UsersToCompanyQuery) GroupBy(field string, fields ...string) *UsersT
 //		CompanyUUID uuid.UUID `json:"companyUUID,omitempty"`
 //	}
 //
-//	httpclient.UsersToCompany.Query().
+//	client.UsersToCompany.Query().
 //		Select(userstocompany.FieldCompanyUUID).
 //		Scan(ctx, &v)
 func (utcq *UsersToCompanyQuery) Select(fields ...string) *UsersToCompanySelect {

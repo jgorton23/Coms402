@@ -269,7 +269,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	httpclient.User.Query().
+//	client.User.Query().
 //		GroupBy(user.FieldEmail).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -291,7 +291,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //		Email string `json:"email,omitempty"`
 //	}
 //
-//	httpclient.User.Query().
+//	client.User.Query().
 //		Select(user.FieldEmail).
 //		Scan(ctx, &v)
 func (uq *UserQuery) Select(fields ...string) *UserSelect {

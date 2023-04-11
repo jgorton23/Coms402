@@ -120,6 +120,7 @@ func (c Company) Update(ctx context.Context, dc domain.Company, userUUID uuid.UU
 	err = c.companyRepo.Update(ctx, dc)
 
 	if err != nil {
+		c.logger.Warn(fmt.Sprintf("Company update error %v", err.Error()))
 		return err
 	}
 

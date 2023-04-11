@@ -340,7 +340,7 @@ func (ibtibq *ItemBatchToItemBatchQuery) WithChild(opts ...func(*ItemBatchQuery)
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	httpclient.ItemBatchToItemBatch.Query().
+//	client.ItemBatchToItemBatch.Query().
 //		GroupBy(itembatchtoitembatch.FieldChildUUID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -362,7 +362,7 @@ func (ibtibq *ItemBatchToItemBatchQuery) GroupBy(field string, fields ...string)
 //		ChildUUID uuid.UUID `json:"childUUID,omitempty"`
 //	}
 //
-//	httpclient.ItemBatchToItemBatch.Query().
+//	client.ItemBatchToItemBatch.Query().
 //		Select(itembatchtoitembatch.FieldChildUUID).
 //		Scan(ctx, &v)
 func (ibtibq *ItemBatchToItemBatchQuery) Select(fields ...string) *ItemBatchToItemBatchSelect {
