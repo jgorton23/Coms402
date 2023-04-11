@@ -441,59 +441,62 @@ func (c *Client) Audit(ctx context.Context) ([][]string, error) {
 	records := [][]string{
 		{"Table", "Ref Id", "History Time", "Operation", "Changes", "Updated By"},
 	}
-	ahRecords, err := auditAttributeHistory(ctx, c.config)
-	if err != nil {
-		return nil, err
-	}
-	records = append(records, ahRecords...)
+	var record [][]string
+	var err error
 
-	athRecords, err := auditAttributeTypeHistory(ctx, c.config)
+	record, err = auditAttributeHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, athRecords...)
+	records = append(records, record...)
 
-	chRecords, err := auditCertificationHistory(ctx, c.config)
+	record, err = auditAttributeTypeHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, chRecords...)
+	records = append(records, record...)
 
-	cthRecords, err := auditCertificationTemplateHistory(ctx, c.config)
+	record, err = auditCertificationHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, cthRecords...)
+	records = append(records, record...)
 
-	companyhRecords, err := auditCompanyHistory(ctx, c.config)
+	record, err = auditCertificationTemplateHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, companyhRecords...)
+	records = append(records, record...)
 
-	ibhRecords, err := auditItemBatchHistory(ctx, c.config)
+	record, err = auditCompanyHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, ibhRecords...)
+	records = append(records, record...)
 
-	ibtibhRecords, err := auditItemBatchToItemBatchHistory(ctx, c.config)
+	record, err = auditItemBatchHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, ibtibhRecords...)
+	records = append(records, record...)
 
-	uhRecords, err := auditUserHistory(ctx, c.config)
+	record, err = auditItemBatchToItemBatchHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, uhRecords...)
+	records = append(records, record...)
 
-	utchRecords, err := auditUsersToCompanyHistory(ctx, c.config)
+	record, err = auditUserHistory(ctx, c.config)
 	if err != nil {
 		return nil, err
 	}
-	records = append(records, utchRecords...)
+	records = append(records, record...)
+
+	record, err = auditUsersToCompanyHistory(ctx, c.config)
+	if err != nil {
+		return nil, err
+	}
+	records = append(records, record...)
 
 	return records, nil
 }

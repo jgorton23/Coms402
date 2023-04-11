@@ -21,25 +21,27 @@ var (
 
 func NewHttpV1(i *do.Injector) (ServerInterface, error) {
 	httpV1 := &httpV1Implem{
-		logger:               do.MustInvoke[*usecase.Logger](i).WithSubsystem("controller http v1"),
-		companyUseCase:       do.MustInvoke[*usecase.Company](i),
-		userUseCase:          do.MustInvoke[*usecase.User](i),
-		userToCompanyUseCase: do.MustInvoke[*usecase.UserToCompany](i),
-		itemBatchUseCase:     do.MustInvoke[*usecase.ItemBatch](i),
-		certificationUseCase: do.MustInvoke[*usecase.Certification](i),
-		itemToItemUseCase:    do.MustInvoke[*usecase.ItemToItem](i),
+		logger:                  do.MustInvoke[*usecase.Logger](i).WithSubsystem("controller http v1"),
+		companyUseCase:          do.MustInvoke[*usecase.Company](i),
+		userUseCase:             do.MustInvoke[*usecase.User](i),
+		userToCompanyUseCase:    do.MustInvoke[*usecase.UserToCompany](i),
+		itemBatchUseCase:        do.MustInvoke[*usecase.ItemBatch](i),
+		certificationUseCase:    do.MustInvoke[*usecase.Certification](i),
+		certificationPDFUseCase: do.MustInvoke[*usecase.CertificationPDF](i),
+		itemToItemUseCase:       do.MustInvoke[*usecase.ItemToItem](i),
 	}
 
 	return httpV1, nil
 }
 
 type httpV1Implem struct {
-	companyUseCase       *usecase.Company
-	userUseCase          *usecase.User
-	itemBatchUseCase     *usecase.ItemBatch
-	userToCompanyUseCase *usecase.UserToCompany
-	certificationUseCase *usecase.Certification
-	itemToItemUseCase    *usecase.ItemToItem
+	companyUseCase          *usecase.Company
+	userUseCase             *usecase.User
+	itemBatchUseCase        *usecase.ItemBatch
+	userToCompanyUseCase    *usecase.UserToCompany
+	certificationUseCase    *usecase.Certification
+	certificationPDFUseCase *usecase.CertificationPDF
+	itemToItemUseCase       *usecase.ItemToItem
 
 	logger                *usecase.Logger
 	authbossAuthenticator *authboss.Authboss

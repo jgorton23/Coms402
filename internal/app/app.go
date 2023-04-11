@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/samber/do"
 
 	v1 "git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/internal/app/controller/http/v1"
@@ -99,6 +100,27 @@ func Run(conf *domain.Config, ctx context.Context) {
 		return auth, nil
 	})
 
+	do.Provide(injector, func(i *do.Injector) (usecase.CertificationPDFRepo, error) {
+		// If a local file directory is preferred over using an s3 object store
+		// 	repo, err := repo.ObjectStoreLocalBuilder().WithBasePath("./.temp").New()
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	return repo.PDFRepo(), nil
+
+		repo, err := repo.ObjectStoreMinioBuilder().
+			WithCreds(credentials.NewStaticV4("admin", "adminadmin", "")). //TODO pull from config
+			WithEndpoint("localhost:9000").
+			WithSSL(false).
+			New()
+
+		if err != nil {
+			return nil, err
+		}
+
+		return repo.PDFRepo(context.Background()), nil
+	})
+
 	do.Provide(injector, usecase.NewLogger)
 	do.Provide(injector, usecase.NewAuthBossLogger)
 	do.Provide(injector, usecase.NewAuthBossServer)
@@ -110,6 +132,7 @@ func Run(conf *domain.Config, ctx context.Context) {
 	do.Provide(injector, usecase.NewItemBatch)
 	do.Provide(injector, usecase.NewCertification)
 	do.Provide(injector, usecase.NewItemToItem)
+	do.Provide(injector, usecase.NewCertificationPDF)
 
 	// HTTP stuff
 	do.Provide(injector, v1.NewHttpAuthenticator)

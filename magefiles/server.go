@@ -15,8 +15,26 @@ type Server mg.Namespace
 
 // Start the Server
 func (Server) Run() error {
-	mg.Deps(Compose.UpPostgres)
+	mg.Deps(Compose.Up)
 	mg.Deps(Linter.Gci)
+
+	// fmt.Println("Setting up minio access")
+	// // Initialize minio client object.
+	// mdmClnt, err := madmin.New("localhost:9000", "YOUR-ACCESSKEYID", "YOUR-SECRETKEY", ssl)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+
+	// // Fetch service status.
+	// st, err := mdmClnt.ServerInfo()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// for _, peerInfo := range serversInfo {
+	// 	log.Printf("Node: %s, Info: %v\n", peerInfo.Addr, peerInfo.Data)
+	// }
 
 	fmt.Println("Running Server")
 
