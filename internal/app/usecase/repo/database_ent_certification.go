@@ -30,7 +30,6 @@ type databaseEntImplemCertification struct {
 // Exists
 // returns true if the cert exists
 func (ur *databaseEntImplemCertification) Exists(ctx context.Context, primaryAttribute string) (bool, error) {
-
 	exists, err := ur.client.Certification.
 		Query().
 		Where(
@@ -49,6 +48,7 @@ func (ur *databaseEntImplemCertification) Exists(ctx context.Context, primaryAtt
 func (ur *databaseEntImplemCertification) Create(ctx context.Context, c domain.Certification) (domain.Certification, error) {
 	utc, err := ur.client.Certification.
 		Create().
+		SetID(uuid.New()).
 		SetPrimaryAttribute(c.PrimaryAttribute).
 		SetImageUUID(c.ImageUUID).
 		SetCompanyUUID(c.CompanyUUID).
@@ -65,14 +65,14 @@ func (ur *databaseEntImplemCertification) Create(ctx context.Context, c domain.C
 // Update
 // Update a given cert
 func (ur *databaseEntImplemCertification) Update(ctx context.Context, c domain.Certification) error {
-	_, err := ur.client.Certification.
+	found, err := ur.getByUUID(ctx, c.UUID)
+
+	if err != nil {
+		return err
+	}
+
+	found.
 		Update().
-		Where(
-			certification.And(
-				certification.ID(c.UUID),
-				certification.PrimaryAttribute(c.PrimaryAttribute),
-			),
-		).
 		SetImageUUID(c.ImageUUID).
 		SetCompanyUUID(c.CompanyUUID).
 		SetItemBatchUUID(c.ItemBatchUUID).
@@ -108,15 +108,19 @@ func (ur *databaseEntImplemCertification) GetByCompanyUUID(ctx context.Context, 
 // GetByUUID
 // returns the cert with the given UUID
 func (ur *databaseEntImplemCertification) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.Certification, error) {
-	u, err := ur.client.Certification.
-		Query().
-		Where(certification.ID(uuid)).
-		First(ctx)
+	u, err := ur.getByUUID(ctx, uuid)
 	if err != nil {
 		return domain.Certification{}, err
 	}
 
 	return ur.databaseToEntity(u), nil
+}
+
+func (ur *databaseEntImplemCertification) getByUUID(ctx context.Context, uuid uuid.UUID) (*ent.Certification, error) {
+	return ur.client.Certification.
+		Query().
+		Where(certification.ID(uuid)).
+		First(ctx)
 }
 
 // databaseToEntity

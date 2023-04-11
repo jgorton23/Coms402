@@ -21,6 +21,18 @@ func (f AttributeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeMutation", m)
 }
 
+// The AttributeHistoryFunc type is an adapter to allow the use of ordinary
+// function as AttributeHistory mutator.
+type AttributeHistoryFunc func(context.Context, *ent.AttributeHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AttributeHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AttributeHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeHistoryMutation", m)
+}
+
 // The AttributeTypeFunc type is an adapter to allow the use of ordinary
 // function as AttributeType mutator.
 type AttributeTypeFunc func(context.Context, *ent.AttributeTypeMutation) (ent.Value, error)
@@ -33,16 +45,16 @@ func (f AttributeTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeTypeMutation", m)
 }
 
-// The AttributeTypesToTemplatesFunc type is an adapter to allow the use of ordinary
-// function as AttributeTypesToTemplates mutator.
-type AttributeTypesToTemplatesFunc func(context.Context, *ent.AttributeTypesToTemplatesMutation) (ent.Value, error)
+// The AttributeTypeHistoryFunc type is an adapter to allow the use of ordinary
+// function as AttributeTypeHistory mutator.
+type AttributeTypeHistoryFunc func(context.Context, *ent.AttributeTypeHistoryMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f AttributeTypesToTemplatesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.AttributeTypesToTemplatesMutation); ok {
+func (f AttributeTypeHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AttributeTypeHistoryMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeTypesToTemplatesMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AttributeTypeHistoryMutation", m)
 }
 
 // The AuthorizationPolicyFunc type is an adapter to allow the use of ordinary
@@ -69,6 +81,18 @@ func (f CertificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationMutation", m)
 }
 
+// The CertificationHistoryFunc type is an adapter to allow the use of ordinary
+// function as CertificationHistory mutator.
+type CertificationHistoryFunc func(context.Context, *ent.CertificationHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CertificationHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CertificationHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationHistoryMutation", m)
+}
+
 // The CertificationTemplateFunc type is an adapter to allow the use of ordinary
 // function as CertificationTemplate mutator.
 type CertificationTemplateFunc func(context.Context, *ent.CertificationTemplateMutation) (ent.Value, error)
@@ -79,6 +103,18 @@ func (f CertificationTemplateFunc) Mutate(ctx context.Context, m ent.Mutation) (
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationTemplateMutation", m)
+}
+
+// The CertificationTemplateHistoryFunc type is an adapter to allow the use of ordinary
+// function as CertificationTemplateHistory mutator.
+type CertificationTemplateHistoryFunc func(context.Context, *ent.CertificationTemplateHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CertificationTemplateHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CertificationTemplateHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationTemplateHistoryMutation", m)
 }
 
 // The CompanyFunc type is an adapter to allow the use of ordinary
@@ -93,6 +129,18 @@ func (f CompanyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CompanyMutation", m)
 }
 
+// The CompanyHistoryFunc type is an adapter to allow the use of ordinary
+// function as CompanyHistory mutator.
+type CompanyHistoryFunc func(context.Context, *ent.CompanyHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CompanyHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CompanyHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CompanyHistoryMutation", m)
+}
+
 // The ItemBatchFunc type is an adapter to allow the use of ordinary
 // function as ItemBatch mutator.
 type ItemBatchFunc func(context.Context, *ent.ItemBatchMutation) (ent.Value, error)
@@ -105,6 +153,18 @@ func (f ItemBatchFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemBatchMutation", m)
 }
 
+// The ItemBatchHistoryFunc type is an adapter to allow the use of ordinary
+// function as ItemBatchHistory mutator.
+type ItemBatchHistoryFunc func(context.Context, *ent.ItemBatchHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ItemBatchHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ItemBatchHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemBatchHistoryMutation", m)
+}
+
 // The ItemBatchToItemBatchFunc type is an adapter to allow the use of ordinary
 // function as ItemBatchToItemBatch mutator.
 type ItemBatchToItemBatchFunc func(context.Context, *ent.ItemBatchToItemBatchMutation) (ent.Value, error)
@@ -115,6 +175,18 @@ func (f ItemBatchToItemBatchFunc) Mutate(ctx context.Context, m ent.Mutation) (e
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemBatchToItemBatchMutation", m)
+}
+
+// The ItemBatchToItemBatchHistoryFunc type is an adapter to allow the use of ordinary
+// function as ItemBatchToItemBatchHistory mutator.
+type ItemBatchToItemBatchHistoryFunc func(context.Context, *ent.ItemBatchToItemBatchHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ItemBatchToItemBatchHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ItemBatchToItemBatchHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ItemBatchToItemBatchHistoryMutation", m)
 }
 
 // The SessionFunc type is an adapter to allow the use of ordinary
@@ -141,6 +213,18 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 }
 
+// The UserHistoryFunc type is an adapter to allow the use of ordinary
+// function as UserHistory mutator.
+type UserHistoryFunc func(context.Context, *ent.UserHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UserHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserHistoryMutation", m)
+}
+
 // The UsersToCompanyFunc type is an adapter to allow the use of ordinary
 // function as UsersToCompany mutator.
 type UsersToCompanyFunc func(context.Context, *ent.UsersToCompanyMutation) (ent.Value, error)
@@ -151,6 +235,18 @@ func (f UsersToCompanyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UsersToCompanyMutation", m)
+}
+
+// The UsersToCompanyHistoryFunc type is an adapter to allow the use of ordinary
+// function as UsersToCompanyHistory mutator.
+type UsersToCompanyHistoryFunc func(context.Context, *ent.UsersToCompanyHistoryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UsersToCompanyHistoryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UsersToCompanyHistoryMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UsersToCompanyHistoryMutation", m)
 }
 
 // Condition is a hook condition function.

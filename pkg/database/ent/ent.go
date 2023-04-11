@@ -13,17 +13,25 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplatehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/companyhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatchhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/session"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompanyhistory"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -45,24 +53,58 @@ type (
 	MutateFunc    = ent.MutateFunc
 )
 
+type clientCtxKey struct{}
+
+// FromContext returns a Client stored inside a context, or nil if there isn't one.
+func FromContext(ctx context.Context) *Client {
+	c, _ := ctx.Value(clientCtxKey{}).(*Client)
+	return c
+}
+
+// NewContext returns a new context with the given Client attached.
+func NewContext(parent context.Context, c *Client) context.Context {
+	return context.WithValue(parent, clientCtxKey{}, c)
+}
+
+type txCtxKey struct{}
+
+// TxFromContext returns a Tx stored inside a context, or nil if there isn't one.
+func TxFromContext(ctx context.Context) *Tx {
+	tx, _ := ctx.Value(txCtxKey{}).(*Tx)
+	return tx
+}
+
+// NewTxContext returns a new context with the given Tx attached.
+func NewTxContext(parent context.Context, tx *Tx) context.Context {
+	return context.WithValue(parent, txCtxKey{}, tx)
+}
+
 // OrderFunc applies an ordering on the sql selector.
 type OrderFunc func(*sql.Selector)
 
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		attribute.Table:                 attribute.ValidColumn,
-		attributetype.Table:             attributetype.ValidColumn,
-		attributetypestotemplates.Table: attributetypestotemplates.ValidColumn,
-		authorizationpolicy.Table:       authorizationpolicy.ValidColumn,
-		certification.Table:             certification.ValidColumn,
-		certificationtemplate.Table:     certificationtemplate.ValidColumn,
-		company.Table:                   company.ValidColumn,
-		itembatch.Table:                 itembatch.ValidColumn,
-		itembatchtoitembatch.Table:      itembatchtoitembatch.ValidColumn,
-		session.Table:                   session.ValidColumn,
-		user.Table:                      user.ValidColumn,
-		userstocompany.Table:            userstocompany.ValidColumn,
+		attribute.Table:                    attribute.ValidColumn,
+		attributehistory.Table:             attributehistory.ValidColumn,
+		attributetype.Table:                attributetype.ValidColumn,
+		attributetypehistory.Table:         attributetypehistory.ValidColumn,
+		authorizationpolicy.Table:          authorizationpolicy.ValidColumn,
+		certification.Table:                certification.ValidColumn,
+		certificationhistory.Table:         certificationhistory.ValidColumn,
+		certificationtemplate.Table:        certificationtemplate.ValidColumn,
+		certificationtemplatehistory.Table: certificationtemplatehistory.ValidColumn,
+		company.Table:                      company.ValidColumn,
+		companyhistory.Table:               companyhistory.ValidColumn,
+		itembatch.Table:                    itembatch.ValidColumn,
+		itembatchhistory.Table:             itembatchhistory.ValidColumn,
+		itembatchtoitembatch.Table:         itembatchtoitembatch.ValidColumn,
+		itembatchtoitembatchhistory.Table:  itembatchtoitembatchhistory.ValidColumn,
+		session.Table:                      session.ValidColumn,
+		user.Table:                         user.ValidColumn,
+		userhistory.Table:                  userhistory.ValidColumn,
+		userstocompany.Table:               userstocompany.ValidColumn,
+		userstocompanyhistory.Table:        userstocompanyhistory.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
@@ -502,7 +544,7 @@ func withHooks[V Value, M any, PM interface {
 		return exec(ctx)
 	}
 	var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-		mutationT, ok := m.(PM)
+		mutationT, ok := any(m).(PM)
 		if !ok {
 			return nil, fmt.Errorf("unexpected mutation type %T", m)
 		}

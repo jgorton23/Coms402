@@ -139,10 +139,7 @@ func (ibtibu *ItemBatchToItemBatchUpdate) sqlSave(ctx context.Context) (n int, e
 			Columns: []string{itembatchtoitembatch.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -155,10 +152,7 @@ func (ibtibu *ItemBatchToItemBatchUpdate) sqlSave(ctx context.Context) (n int, e
 			Columns: []string{itembatchtoitembatch.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -174,10 +168,7 @@ func (ibtibu *ItemBatchToItemBatchUpdate) sqlSave(ctx context.Context) (n int, e
 			Columns: []string{itembatchtoitembatch.ChildColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -190,10 +181,7 @@ func (ibtibu *ItemBatchToItemBatchUpdate) sqlSave(ctx context.Context) (n int, e
 			Columns: []string{itembatchtoitembatch.ChildColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -360,10 +348,7 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) sqlSave(ctx context.Context) (_nod
 			Columns: []string{itembatchtoitembatch.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -376,10 +361,7 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) sqlSave(ctx context.Context) (_nod
 			Columns: []string{itembatchtoitembatch.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -395,10 +377,7 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) sqlSave(ctx context.Context) (_nod
 			Columns: []string{itembatchtoitembatch.ChildColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -411,10 +390,7 @@ func (ibtibuo *ItemBatchToItemBatchUpdateOne) sqlSave(ctx context.Context) (_nod
 			Columns: []string{itembatchtoitembatch.ChildColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: itembatch.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(itembatch.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

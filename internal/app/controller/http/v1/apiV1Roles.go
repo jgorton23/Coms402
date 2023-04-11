@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -103,7 +104,8 @@ func (v1 httpV1Implem) ApproveRole(w http.ResponseWriter, r *http.Request, param
 		return
 	}
 
-	role, err := v1.userToCompanyUseCase.Approve(r.Context(), domain.UserToCompany{
+	ctx := context.WithValue(r.Context(), "userUUID", user.UUID.String())
+	role, err := v1.userToCompanyUseCase.Approve(ctx, domain.UserToCompany{
 		CompanyUUID: companyUUID,
 		UserUUID:    userUUID,
 	}, user.UUID)

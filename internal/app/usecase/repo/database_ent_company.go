@@ -28,15 +28,20 @@ type databaseEntImplemCompany struct {
 }
 
 func (ur *databaseEntImplemCompany) GetByUUID(ctx context.Context, companyUuid uuid.UUID) (domain.Company, error) {
-	u, err := ur.client.Company.
-		Query().
-		Where(company.ID(companyUuid)).
-		First(ctx)
+	domainCompany, err := ur.getByUUID(ctx, companyUuid)
+
 	if err != nil {
 		return domain.Company{}, err
 	}
 
-	return ur.databaseToEntity(u), nil
+	return ur.databaseToEntity(domainCompany), nil
+}
+
+func (ur *databaseEntImplemCompany) getByUUID(ctx context.Context, companyUuid uuid.UUID) (*ent.Company, error) {
+	return ur.client.Company.
+		Query().
+		Where(company.ID(companyUuid)).
+		First(ctx)
 }
 
 // ExistsNamed
@@ -72,6 +77,7 @@ func (ur *databaseEntImplemCompany) ExistsUUID(ctx context.Context, u uuid.UUID)
 func (ur *databaseEntImplemCompany) Create(ctx context.Context, usr domain.Company) (domain.Company, error) {
 	u, err := ur.client.Company.
 		Create().
+		SetID(uuid.New()).
 		SetName(usr.Name).
 		Save(ctx)
 	if err != nil {
@@ -84,16 +90,22 @@ func (ur *databaseEntImplemCompany) Create(ctx context.Context, usr domain.Compa
 // Update
 // updates the given company
 func (ur *databaseEntImplemCompany) Update(ctx context.Context, u domain.Company) error {
-	_, err := ur.client.Company.
-		Update().
-		Where(
-			company.ID(u.UUID),
-		).
+	com, err := ur.getByUUID(ctx, u.UUID)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = com.Update().
 		SetName(u.Name).
 		Save(ctx)
 	if err != nil {
 		return err
 	}
+
+	// history, _ := com.History().All(ctx)
+
+	// log.Default().Printf("History Length: %v", len(history))
 
 	return nil
 }

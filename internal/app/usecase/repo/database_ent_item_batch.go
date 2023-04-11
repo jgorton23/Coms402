@@ -49,6 +49,7 @@ func (ur *databaseEntImplemItemBatch) Exists(ctx context.Context, itemNumber str
 func (ur *databaseEntImplemItemBatch) Create(ctx context.Context, itemBatch domain.ItemBatch) (domain.ItemBatch, error) {
 	utc, err := ur.client.ItemBatch.
 		Create().
+		SetID(uuid.New()).
 		SetItemNumber(itemBatch.ItemNumber).
 		SetDescription(itemBatch.Description).
 		SetCompanyID(itemBatch.CompanyUUID).
@@ -63,14 +64,14 @@ func (ur *databaseEntImplemItemBatch) Create(ctx context.Context, itemBatch doma
 // Update
 // updates the given itembatch
 func (ur *databaseEntImplemItemBatch) Update(ctx context.Context, ib domain.ItemBatch) error {
-	_, err := ur.client.ItemBatch.
+	found, err := ur.getByUUID(ctx, ib.UUID)
+
+	if err != nil {
+		return err
+	}
+
+	found.
 		Update().
-		Where(
-			itembatch.And(
-				itembatch.ItemNumber(ib.ItemNumber),
-				itembatch.ID(ib.UUID),
-			),
-		).
 		SetDescription(ib.Description).
 		SetCompanyID(ib.CompanyUUID).
 		Save(ctx)
@@ -103,15 +104,20 @@ func (ur *databaseEntImplemItemBatch) GetByCompanyUUID(ctx context.Context, comp
 
 // returns the itembatch with the given UUID
 func (ur *databaseEntImplemItemBatch) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.ItemBatch, error) {
-	u, err := ur.client.ItemBatch.
-		Query().
-		Where(itembatch.ID(uuid)).
-		First(ctx)
+	u, err := ur.getByUUID(ctx, uuid)
 	if err != nil {
 		return domain.ItemBatch{}, err
 	}
 
 	return ur.databaseToEntity(u), nil
+}
+
+// returns the itembatch with the given UUID
+func (ur *databaseEntImplemItemBatch) getByUUID(ctx context.Context, uuid uuid.UUID) (*ent.ItemBatch, error) {
+	return ur.client.ItemBatch.
+		Query().
+		Where(itembatch.ID(uuid)).
+		First(ctx)
 }
 
 func (ur *databaseEntImplemItemBatch) databaseToEntity(ib *ent.ItemBatch) domain.ItemBatch {

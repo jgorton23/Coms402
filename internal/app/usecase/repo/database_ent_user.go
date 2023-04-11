@@ -49,15 +49,19 @@ func (ur *databaseEntImplemUser) Get(ctx context.Context) ([]domain.User, error)
 // GetByUUID
 // returns the user with the give UUID
 func (ur *databaseEntImplemUser) GetByUUID(ctx context.Context, uuid uuid.UUID) (domain.User, error) {
-	u, err := ur.client.User.
-		Query().
-		Where(user.ID(uuid)).
-		First(ctx)
+	u, err := ur.getByUUID(ctx, uuid)
 	if err != nil {
 		return domain.User{}, err
 	}
 
 	return ur.databaseToDomain(u), nil
+}
+
+func (ur *databaseEntImplemUser) getByUUID(ctx context.Context, uuid uuid.UUID) (*ent.User, error) {
+	return ur.client.User.
+		Query().
+		Where(user.ID(uuid)).
+		First(ctx)
 }
 
 // GetByEmail
@@ -93,6 +97,7 @@ func (ur *databaseEntImplemUser) Exists(ctx context.Context, u string) (bool, er
 func (ur *databaseEntImplemUser) Create(ctx context.Context, usr domain.User) (domain.User, error) {
 	u, err := ur.client.User.
 		Create().
+		SetID(uuid.New()).
 		SetEmail(usr.Email).
 		SetPasswordHash(usr.PasswordHash).
 		// SetConfirmSelector(u.ConfirmSelector).
@@ -112,7 +117,13 @@ func (ur *databaseEntImplemUser) Create(ctx context.Context, usr domain.User) (d
 // Update
 // updates the given user
 func (ur *databaseEntImplemUser) Update(ctx context.Context, u domain.User) error {
-	_, err := ur.client.User.
+	found, err := ur.getByUUID(ctx, u.UUID)
+
+	if err != nil {
+		return err
+	}
+
+	found.
 		Update().
 		SetEmail(u.Email).
 		SetPasswordHash(u.PasswordHash).

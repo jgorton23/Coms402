@@ -9,11 +9,14 @@ import (
 // Attribute is the predicate function for attribute builders.
 type Attribute func(*sql.Selector)
 
+// AttributeHistory is the predicate function for attributehistory builders.
+type AttributeHistory func(*sql.Selector)
+
 // AttributeType is the predicate function for attributetype builders.
 type AttributeType func(*sql.Selector)
 
-// AttributeTypesToTemplates is the predicate function for attributetypestotemplates builders.
-type AttributeTypesToTemplates func(*sql.Selector)
+// AttributeTypeHistory is the predicate function for attributetypehistory builders.
+type AttributeTypeHistory func(*sql.Selector)
 
 // AuthorizationPolicy is the predicate function for authorizationpolicy builders.
 type AuthorizationPolicy func(*sql.Selector)
@@ -21,17 +24,32 @@ type AuthorizationPolicy func(*sql.Selector)
 // Certification is the predicate function for certification builders.
 type Certification func(*sql.Selector)
 
+// CertificationHistory is the predicate function for certificationhistory builders.
+type CertificationHistory func(*sql.Selector)
+
 // CertificationTemplate is the predicate function for certificationtemplate builders.
 type CertificationTemplate func(*sql.Selector)
+
+// CertificationTemplateHistory is the predicate function for certificationtemplatehistory builders.
+type CertificationTemplateHistory func(*sql.Selector)
 
 // Company is the predicate function for company builders.
 type Company func(*sql.Selector)
 
+// CompanyHistory is the predicate function for companyhistory builders.
+type CompanyHistory func(*sql.Selector)
+
 // ItemBatch is the predicate function for itembatch builders.
 type ItemBatch func(*sql.Selector)
 
+// ItemBatchHistory is the predicate function for itembatchhistory builders.
+type ItemBatchHistory func(*sql.Selector)
+
 // ItemBatchToItemBatch is the predicate function for itembatchtoitembatch builders.
 type ItemBatchToItemBatch func(*sql.Selector)
+
+// ItemBatchToItemBatchHistory is the predicate function for itembatchtoitembatchhistory builders.
+type ItemBatchToItemBatchHistory func(*sql.Selector)
 
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
@@ -39,5 +57,11 @@ type Session func(*sql.Selector)
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 
+// UserHistory is the predicate function for userhistory builders.
+type UserHistory func(*sql.Selector)
+
 // UsersToCompany is the predicate function for userstocompany builders.
 type UsersToCompany func(*sql.Selector)
+
+// UsersToCompanyHistory is the predicate function for userstocompanyhistory builders.
+type UsersToCompanyHistory func(*sql.Selector)

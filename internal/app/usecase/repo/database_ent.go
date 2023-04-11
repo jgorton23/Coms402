@@ -46,7 +46,7 @@ func (builder *databaseEntBuilder) WithPostgres(dsn string) (*DatabaseEnt, error
 }
 
 func (builder *databaseEntBuilder) WithSqlite(dsn string) (*DatabaseEnt, error) {
-	return builder.dbSetup("sqlite", dsn)
+	return builder.dbSetup("sqlite3", dsn)
 }
 
 func (builder *databaseEntBuilder) dbSetup(dbType string, dsn string) (*DatabaseEnt, error) {
@@ -63,6 +63,8 @@ func (builder *databaseEntBuilder) dbSetup(dbType string, dsn string) (*Database
 		client: ent.NewClient(ent.Driver(drv)),
 		db:     db,
 	}
+
+	dbImplem.client.WithHistory()
 
 	if err := dbImplem.client.Schema.Create(context.Background()); err != nil {
 		return nil, fmt.Errorf("failed creating schema resources: %w", err)

@@ -199,10 +199,7 @@ func (utcc *UsersToCompanyCreate) createSpec() (*UsersToCompany, *sqlgraph.Creat
 			Columns: []string{userstocompany.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -219,10 +216,7 @@ func (utcc *UsersToCompanyCreate) createSpec() (*UsersToCompany, *sqlgraph.Creat
 			Columns: []string{userstocompany.CompanyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: company.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(company.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -237,7 +231,7 @@ func (utcc *UsersToCompanyCreate) createSpec() (*UsersToCompany, *sqlgraph.Creat
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.UsersToCompany.Create().
+//	client.UsersToCompany.Create().
 //		SetCompanyUUID(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -260,7 +254,7 @@ func (utcc *UsersToCompanyCreate) OnConflict(opts ...sql.ConflictOption) *UsersT
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.UsersToCompany.Create().
+//	client.UsersToCompany.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (utcc *UsersToCompanyCreate) OnConflictColumns(columns ...string) *UsersToCompanyUpsertOne {
@@ -334,7 +328,7 @@ func (u *UsersToCompanyUpsert) UpdateApproved() *UsersToCompanyUpsert {
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	httpclient.UsersToCompany.Create().
+//	client.UsersToCompany.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -355,7 +349,7 @@ func (u *UsersToCompanyUpsertOne) UpdateNewValues() *UsersToCompanyUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.UsersToCompany.Create().
+//	client.UsersToCompany.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
 func (u *UsersToCompanyUpsertOne) Ignore() *UsersToCompanyUpsertOne {
@@ -558,7 +552,7 @@ func (utccb *UsersToCompanyCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.UsersToCompany.CreateBulk(builders...).
+//	client.UsersToCompany.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -580,7 +574,7 @@ func (utccb *UsersToCompanyCreateBulk) OnConflict(opts ...sql.ConflictOption) *U
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.UsersToCompany.Create().
+//	client.UsersToCompany.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (utccb *UsersToCompanyCreateBulk) OnConflictColumns(columns ...string) *UsersToCompanyUpsertBulk {
@@ -599,7 +593,7 @@ type UsersToCompanyUpsertBulk struct {
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	httpclient.UsersToCompany.Create().
+//	client.UsersToCompany.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -622,7 +616,7 @@ func (u *UsersToCompanyUpsertBulk) UpdateNewValues() *UsersToCompanyUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.UsersToCompany.Create().
+//	client.UsersToCompany.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 func (u *UsersToCompanyUpsertBulk) Ignore() *UsersToCompanyUpsertBulk {

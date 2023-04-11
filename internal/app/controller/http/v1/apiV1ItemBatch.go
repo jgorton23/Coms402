@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -106,7 +107,8 @@ func (v1 httpV1Implem) AddItemBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	itemBatch, err := v1.itemBatchUseCase.Create(r.Context(), domain.ItemBatch{
+	ctx := context.WithValue(r.Context(), "userUUID", domainUser.UUID.String())
+	itemBatch, err := v1.itemBatchUseCase.Create(ctx, domain.ItemBatch{
 		ItemNumber:  requestBody.ItemNumber,
 		CompanyUUID: id,
 		Description: *requestBody.Description,
@@ -153,7 +155,8 @@ func (v1 httpV1Implem) UpdateItemBatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = v1.itemBatchUseCase.Update(r.Context(), domain.ItemBatch{
+	ctx := context.WithValue(r.Context(), "userUUID", domainUser.UUID.String())
+	err = v1.itemBatchUseCase.Update(ctx, domain.ItemBatch{
 		UUID:        id,
 		ItemNumber:  requestBody.ItemNumber,
 		CompanyUUID: cid,

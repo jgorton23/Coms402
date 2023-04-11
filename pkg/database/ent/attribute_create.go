@@ -199,10 +199,7 @@ func (ac *AttributeCreate) createSpec() (*Attribute, *sqlgraph.CreateSpec) {
 			Columns: []string{attribute.CertificationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: certification.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(certification.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -219,10 +216,7 @@ func (ac *AttributeCreate) createSpec() (*Attribute, *sqlgraph.CreateSpec) {
 			Columns: []string{attribute.AttributeTypeColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: attributetype.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(attributetype.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -237,7 +231,7 @@ func (ac *AttributeCreate) createSpec() (*Attribute, *sqlgraph.CreateSpec) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.Attribute.Create().
+//	client.Attribute.Create().
 //		SetKey(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -260,7 +254,7 @@ func (ac *AttributeCreate) OnConflict(opts ...sql.ConflictOption) *AttributeUpse
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.Attribute.Create().
+//	client.Attribute.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (ac *AttributeCreate) OnConflictColumns(columns ...string) *AttributeUpsertOne {
@@ -334,7 +328,7 @@ func (u *AttributeUpsert) UpdateAttributeTypeUUID() *AttributeUpsert {
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	httpclient.Attribute.Create().
+//	client.Attribute.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -355,7 +349,7 @@ func (u *AttributeUpsertOne) UpdateNewValues() *AttributeUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.Attribute.Create().
+//	client.Attribute.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
 func (u *AttributeUpsertOne) Ignore() *AttributeUpsertOne {
@@ -558,7 +552,7 @@ func (acb *AttributeCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	httpclient.Attribute.CreateBulk(builders...).
+//	client.Attribute.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -580,7 +574,7 @@ func (acb *AttributeCreateBulk) OnConflict(opts ...sql.ConflictOption) *Attribut
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	httpclient.Attribute.Create().
+//	client.Attribute.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
 func (acb *AttributeCreateBulk) OnConflictColumns(columns ...string) *AttributeUpsertBulk {
@@ -599,7 +593,7 @@ type AttributeUpsertBulk struct {
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	httpclient.Attribute.Create().
+//	client.Attribute.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
@@ -622,7 +616,7 @@ func (u *AttributeUpsertBulk) UpdateNewValues() *AttributeUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	httpclient.Attribute.Create().
+//	client.Attribute.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
 func (u *AttributeUpsertBulk) Ignore() *AttributeUpsertBulk {

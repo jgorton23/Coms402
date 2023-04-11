@@ -8,43 +8,65 @@ import (
 	"github.com/google/uuid"
 
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attribute"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetype"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypestotemplates"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/attributetypehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/authorizationpolicy"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certification"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplate"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/certificationtemplatehistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/company"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/companyhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatch"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/itembatchtoitembatchhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/session"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/user"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userhistory"
 	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompany"
-	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/models"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/ent/userstocompanyhistory"
+	"git.las.iastate.edu/SeniorDesignComS/2023spr/online-certificate-repo/backend/pkg/database/schema"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	attributeFields := models.Attribute{}.Fields()
+	attributeFields := schema.Attribute{}.Fields()
 	_ = attributeFields
 	// attributeDescID is the schema descriptor for id field.
 	attributeDescID := attributeFields[0].Descriptor()
 	// attribute.DefaultID holds the default value on creation for the id field.
 	attribute.DefaultID = attributeDescID.Default.(func() uuid.UUID)
-	attributetypeFields := models.AttributeType{}.Fields()
+	attributehistoryFields := schema.AttributeHistory{}.Fields()
+	_ = attributehistoryFields
+	// attributehistoryDescHistoryTime is the schema descriptor for history_time field.
+	attributehistoryDescHistoryTime := attributehistoryFields[0].Descriptor()
+	// attributehistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	attributehistory.DefaultHistoryTime = attributehistoryDescHistoryTime.Default.(func() time.Time)
+	// attributehistoryDescID is the schema descriptor for id field.
+	attributehistoryDescID := attributehistoryFields[4].Descriptor()
+	// attributehistory.DefaultID holds the default value on creation for the id field.
+	attributehistory.DefaultID = attributehistoryDescID.Default.(func() uuid.UUID)
+	attributetypeFields := schema.AttributeType{}.Fields()
 	_ = attributetypeFields
 	// attributetypeDescID is the schema descriptor for id field.
 	attributetypeDescID := attributetypeFields[0].Descriptor()
 	// attributetype.DefaultID holds the default value on creation for the id field.
 	attributetype.DefaultID = attributetypeDescID.Default.(func() uuid.UUID)
-	attributetypestotemplatesFields := models.AttributeTypesToTemplates{}.Fields()
-	_ = attributetypestotemplatesFields
-	// attributetypestotemplatesDescID is the schema descriptor for id field.
-	attributetypestotemplatesDescID := attributetypestotemplatesFields[0].Descriptor()
-	// attributetypestotemplates.DefaultID holds the default value on creation for the id field.
-	attributetypestotemplates.DefaultID = attributetypestotemplatesDescID.Default.(func() uuid.UUID)
-	authorizationpolicyFields := models.AuthorizationPolicy{}.Fields()
+	attributetypehistoryFields := schema.AttributeTypeHistory{}.Fields()
+	_ = attributetypehistoryFields
+	// attributetypehistoryDescHistoryTime is the schema descriptor for history_time field.
+	attributetypehistoryDescHistoryTime := attributetypehistoryFields[0].Descriptor()
+	// attributetypehistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	attributetypehistory.DefaultHistoryTime = attributetypehistoryDescHistoryTime.Default.(func() time.Time)
+	// attributetypehistoryDescID is the schema descriptor for id field.
+	attributetypehistoryDescID := attributetypehistoryFields[4].Descriptor()
+	// attributetypehistory.DefaultID holds the default value on creation for the id field.
+	attributetypehistory.DefaultID = attributetypehistoryDescID.Default.(func() uuid.UUID)
+	authorizationpolicyFields := schema.AuthorizationPolicy{}.Fields()
 	_ = authorizationpolicyFields
 	// authorizationpolicyDescPtype is the schema descriptor for Ptype field.
 	authorizationpolicyDescPtype := authorizationpolicyFields[0].Descriptor()
@@ -74,43 +96,93 @@ func init() {
 	authorizationpolicyDescV5 := authorizationpolicyFields[6].Descriptor()
 	// authorizationpolicy.DefaultV5 holds the default value on creation for the V5 field.
 	authorizationpolicy.DefaultV5 = authorizationpolicyDescV5.Default.(string)
-	certificationFields := models.Certification{}.Fields()
+	certificationFields := schema.Certification{}.Fields()
 	_ = certificationFields
 	// certificationDescID is the schema descriptor for id field.
 	certificationDescID := certificationFields[0].Descriptor()
 	// certification.DefaultID holds the default value on creation for the id field.
 	certification.DefaultID = certificationDescID.Default.(func() uuid.UUID)
-	certificationtemplateFields := models.CertificationTemplate{}.Fields()
+	certificationhistoryFields := schema.CertificationHistory{}.Fields()
+	_ = certificationhistoryFields
+	// certificationhistoryDescHistoryTime is the schema descriptor for history_time field.
+	certificationhistoryDescHistoryTime := certificationhistoryFields[0].Descriptor()
+	// certificationhistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	certificationhistory.DefaultHistoryTime = certificationhistoryDescHistoryTime.Default.(func() time.Time)
+	// certificationhistoryDescID is the schema descriptor for id field.
+	certificationhistoryDescID := certificationhistoryFields[4].Descriptor()
+	// certificationhistory.DefaultID holds the default value on creation for the id field.
+	certificationhistory.DefaultID = certificationhistoryDescID.Default.(func() uuid.UUID)
+	certificationtemplateFields := schema.CertificationTemplate{}.Fields()
 	_ = certificationtemplateFields
 	// certificationtemplateDescID is the schema descriptor for id field.
 	certificationtemplateDescID := certificationtemplateFields[0].Descriptor()
 	// certificationtemplate.DefaultID holds the default value on creation for the id field.
 	certificationtemplate.DefaultID = certificationtemplateDescID.Default.(func() uuid.UUID)
-	companyFields := models.Company{}.Fields()
+	certificationtemplatehistoryFields := schema.CertificationTemplateHistory{}.Fields()
+	_ = certificationtemplatehistoryFields
+	// certificationtemplatehistoryDescHistoryTime is the schema descriptor for history_time field.
+	certificationtemplatehistoryDescHistoryTime := certificationtemplatehistoryFields[0].Descriptor()
+	// certificationtemplatehistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	certificationtemplatehistory.DefaultHistoryTime = certificationtemplatehistoryDescHistoryTime.Default.(func() time.Time)
+	// certificationtemplatehistoryDescID is the schema descriptor for id field.
+	certificationtemplatehistoryDescID := certificationtemplatehistoryFields[4].Descriptor()
+	// certificationtemplatehistory.DefaultID holds the default value on creation for the id field.
+	certificationtemplatehistory.DefaultID = certificationtemplatehistoryDescID.Default.(func() uuid.UUID)
+	companyFields := schema.Company{}.Fields()
 	_ = companyFields
 	// companyDescID is the schema descriptor for id field.
 	companyDescID := companyFields[0].Descriptor()
 	// company.DefaultID holds the default value on creation for the id field.
 	company.DefaultID = companyDescID.Default.(func() uuid.UUID)
-	itembatchFields := models.ItemBatch{}.Fields()
+	companyhistoryFields := schema.CompanyHistory{}.Fields()
+	_ = companyhistoryFields
+	// companyhistoryDescHistoryTime is the schema descriptor for history_time field.
+	companyhistoryDescHistoryTime := companyhistoryFields[0].Descriptor()
+	// companyhistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	companyhistory.DefaultHistoryTime = companyhistoryDescHistoryTime.Default.(func() time.Time)
+	// companyhistoryDescID is the schema descriptor for id field.
+	companyhistoryDescID := companyhistoryFields[4].Descriptor()
+	// companyhistory.DefaultID holds the default value on creation for the id field.
+	companyhistory.DefaultID = companyhistoryDescID.Default.(func() uuid.UUID)
+	itembatchFields := schema.ItemBatch{}.Fields()
 	_ = itembatchFields
 	// itembatchDescID is the schema descriptor for id field.
 	itembatchDescID := itembatchFields[0].Descriptor()
 	// itembatch.DefaultID holds the default value on creation for the id field.
 	itembatch.DefaultID = itembatchDescID.Default.(func() uuid.UUID)
-	itembatchtoitembatchFields := models.ItemBatchToItemBatch{}.Fields()
+	itembatchhistoryFields := schema.ItemBatchHistory{}.Fields()
+	_ = itembatchhistoryFields
+	// itembatchhistoryDescHistoryTime is the schema descriptor for history_time field.
+	itembatchhistoryDescHistoryTime := itembatchhistoryFields[0].Descriptor()
+	// itembatchhistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	itembatchhistory.DefaultHistoryTime = itembatchhistoryDescHistoryTime.Default.(func() time.Time)
+	// itembatchhistoryDescID is the schema descriptor for id field.
+	itembatchhistoryDescID := itembatchhistoryFields[4].Descriptor()
+	// itembatchhistory.DefaultID holds the default value on creation for the id field.
+	itembatchhistory.DefaultID = itembatchhistoryDescID.Default.(func() uuid.UUID)
+	itembatchtoitembatchFields := schema.ItemBatchToItemBatch{}.Fields()
 	_ = itembatchtoitembatchFields
 	// itembatchtoitembatchDescID is the schema descriptor for id field.
 	itembatchtoitembatchDescID := itembatchtoitembatchFields[0].Descriptor()
 	// itembatchtoitembatch.DefaultID holds the default value on creation for the id field.
 	itembatchtoitembatch.DefaultID = itembatchtoitembatchDescID.Default.(func() uuid.UUID)
-	sessionFields := models.Session{}.Fields()
+	itembatchtoitembatchhistoryFields := schema.ItemBatchToItemBatchHistory{}.Fields()
+	_ = itembatchtoitembatchhistoryFields
+	// itembatchtoitembatchhistoryDescHistoryTime is the schema descriptor for history_time field.
+	itembatchtoitembatchhistoryDescHistoryTime := itembatchtoitembatchhistoryFields[0].Descriptor()
+	// itembatchtoitembatchhistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	itembatchtoitembatchhistory.DefaultHistoryTime = itembatchtoitembatchhistoryDescHistoryTime.Default.(func() time.Time)
+	// itembatchtoitembatchhistoryDescID is the schema descriptor for id field.
+	itembatchtoitembatchhistoryDescID := itembatchtoitembatchhistoryFields[4].Descriptor()
+	// itembatchtoitembatchhistory.DefaultID holds the default value on creation for the id field.
+	itembatchtoitembatchhistory.DefaultID = itembatchtoitembatchhistoryDescID.Default.(func() uuid.UUID)
+	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields
 	// sessionDescData is the schema descriptor for data field.
 	sessionDescData := sessionFields[1].Descriptor()
 	// session.DataValidator is a validator for the "data" field. It is called by the builders before save.
 	session.DataValidator = sessionDescData.Validators[0].(func([]byte) error)
-	userFields := models.User{}.Fields()
+	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
 	userDescCreatedAt := userFields[2].Descriptor()
@@ -128,10 +200,42 @@ func init() {
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
-	userstocompanyFields := models.UsersToCompany{}.Fields()
+	userhistoryFields := schema.UserHistory{}.Fields()
+	_ = userhistoryFields
+	// userhistoryDescHistoryTime is the schema descriptor for history_time field.
+	userhistoryDescHistoryTime := userhistoryFields[0].Descriptor()
+	// userhistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	userhistory.DefaultHistoryTime = userhistoryDescHistoryTime.Default.(func() time.Time)
+	// userhistoryDescCreatedAt is the schema descriptor for created_at field.
+	userhistoryDescCreatedAt := userhistoryFields[6].Descriptor()
+	// userhistory.DefaultCreatedAt holds the default value on creation for the created_at field.
+	userhistory.DefaultCreatedAt = userhistoryDescCreatedAt.Default.(func() time.Time)
+	// userhistoryDescUpdatedAt is the schema descriptor for updated_at field.
+	userhistoryDescUpdatedAt := userhistoryFields[7].Descriptor()
+	// userhistory.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	userhistory.DefaultUpdatedAt = userhistoryDescUpdatedAt.Default.(time.Time)
+	// userhistoryDescRole is the schema descriptor for role field.
+	userhistoryDescRole := userhistoryFields[12].Descriptor()
+	// userhistory.DefaultRole holds the default value on creation for the role field.
+	userhistory.DefaultRole = userhistoryDescRole.Default.(string)
+	// userhistoryDescID is the schema descriptor for id field.
+	userhistoryDescID := userhistoryFields[4].Descriptor()
+	// userhistory.DefaultID holds the default value on creation for the id field.
+	userhistory.DefaultID = userhistoryDescID.Default.(func() uuid.UUID)
+	userstocompanyFields := schema.UsersToCompany{}.Fields()
 	_ = userstocompanyFields
 	// userstocompanyDescID is the schema descriptor for id field.
 	userstocompanyDescID := userstocompanyFields[0].Descriptor()
 	// userstocompany.DefaultID holds the default value on creation for the id field.
 	userstocompany.DefaultID = userstocompanyDescID.Default.(func() uuid.UUID)
+	userstocompanyhistoryFields := schema.UsersToCompanyHistory{}.Fields()
+	_ = userstocompanyhistoryFields
+	// userstocompanyhistoryDescHistoryTime is the schema descriptor for history_time field.
+	userstocompanyhistoryDescHistoryTime := userstocompanyhistoryFields[0].Descriptor()
+	// userstocompanyhistory.DefaultHistoryTime holds the default value on creation for the history_time field.
+	userstocompanyhistory.DefaultHistoryTime = userstocompanyhistoryDescHistoryTime.Default.(func() time.Time)
+	// userstocompanyhistoryDescID is the schema descriptor for id field.
+	userstocompanyhistoryDescID := userstocompanyhistoryFields[4].Descriptor()
+	// userstocompanyhistory.DefaultID holds the default value on creation for the id field.
+	userstocompanyhistory.DefaultID = userstocompanyhistoryDescID.Default.(func() uuid.UUID)
 }
